@@ -15,14 +15,11 @@
     --dark: #0D0D12;
     --dark-2: #13131A;
     --dark-3: #1A1A24;
-    --panel: #111118;
     --lime: #C8FF00;
-    --lime-dim: #A8D800;
     --lime-glow: rgba(200,255,0,0.18);
     --white: #F4F4F0;
     --muted: #6B6B80;
     --muted-2: #3A3A50;
-    --red: #FF2D55;
     --blue: #00D4FF;
     --border: rgba(255,255,255,0.07);
     --border-lime: rgba(200,255,0,0.2);
@@ -36,27 +33,8 @@
     color: var(--white);
     overflow-x: hidden;
     line-height: 1.5;
-    cursor: none;
   }
 
-  /* CUSTOM CURSOR */
-  .cursor {
-    position: fixed; width: 10px; height: 10px;
-    background: var(--lime); border-radius: 50%;
-    pointer-events: none; z-index: 9999;
-    transform: translate(-50%,-50%);
-    transition: transform 0.1s, width 0.2s, height 0.2s, opacity 0.2s;
-    mix-blend-mode: difference;
-  }
-  .cursor-ring {
-    position: fixed; width: 36px; height: 36px;
-    border: 1.5px solid rgba(200,255,0,0.5);
-    border-radius: 50%; pointer-events: none; z-index: 9998;
-    transform: translate(-50%,-50%);
-    transition: transform 0.18s ease, width 0.25s, height 0.25s, border-color 0.2s;
-  }
-
-  /* NOISE OVERLAY */
   body::before {
     content: '';
     position: fixed; inset: 0; z-index: 1;
@@ -68,46 +46,90 @@
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 22px 5%;
-    background: rgba(5,5,7,0.8);
+    padding: 0 5%;
+    height: 64px;
+    background: rgba(5,5,7,0.92);
     backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border);
   }
   .nav-logo {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.6rem; letter-spacing: 0.06em;
-    color: var(--white);
-    display: flex; align-items: center; gap: 2px;
+    font-size: 1.4rem; letter-spacing: 0.06em; color: var(--white);
+    text-decoration: none; flex-shrink: 0;
   }
   .nav-logo .vx { color: var(--lime); }
+
   .nav-links {
-    display: flex; gap: 36px; list-style: none;
+    display: flex; gap: 28px; list-style: none;
   }
   .nav-links a {
-    font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
     text-transform: uppercase; color: var(--muted);
-    text-decoration: none; transition: color 0.2s;
+    text-decoration: none; transition: color 0.2s; padding: 4px 0;
   }
   .nav-links a:hover { color: var(--lime); }
+
+  .nav-right { display: flex; align-items: center; gap: 14px; }
+
   .nav-cta {
     background: var(--lime); color: var(--black);
     font-family: 'Manrope', sans-serif; font-weight: 800;
-    font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase;
-    padding: 10px 22px; border-radius: 4px;
-    text-decoration: none; border: none; cursor: none;
-    transition: transform 0.2s, box-shadow 0.2s;
+    font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 9px 18px; border-radius: 4px; border: none; cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s; white-space: nowrap;
+    min-height: 38px;
   }
-  .nav-cta:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 0 24px var(--lime-glow);
+  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 0 20px var(--lime-glow); }
+
+  /* Hamburger */
+  .hamburger {
+    display: none; flex-direction: column; gap: 5px;
+    background: none; border: none; cursor: pointer; padding: 8px;
+  }
+  .hamburger span {
+    display: block; width: 22px; height: 2px;
+    background: var(--white); border-radius: 2px;
+    transition: transform 0.3s, opacity 0.3s;
+  }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* Mobile menu */
+  .mobile-menu {
+    display: none;
+    position: fixed; top: 64px; left: 0; right: 0; bottom: 0;
+    background: rgba(5,5,7,0.98);
+    z-index: 99; flex-direction: column;
+    align-items: center; justify-content: center; gap: 0;
+    padding: 32px 24px;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
+  }
+  .mobile-menu.open { transform: translateX(0); }
+  .mobile-menu a {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.4rem, 10vw, 3.2rem); letter-spacing: 0.04em;
+    color: var(--white); text-decoration: none;
+    padding: 14px 0; border-bottom: 1px solid var(--border);
+    width: 100%; text-align: center; transition: color 0.2s;
+  }
+  .mobile-menu a:last-of-type { border-bottom: none; }
+  .mobile-menu a:hover, .mobile-menu a:active { color: var(--lime); }
+  .mob-cta {
+    margin-top: 32px;
+    background: var(--lime); color: var(--black);
+    font-family: 'Manrope', sans-serif; font-weight: 800;
+    font-size: 0.88rem; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 16px 40px; border-radius: 4px; border: none; cursor: pointer;
+    width: 100%; max-width: 300px; min-height: 52px;
   }
 
   /* ── HERO ── */
   .hero {
-    min-height: 100vh;
-    display: flex; align-items: center;
-    padding: 130px 5% 80px;
-    position: relative; overflow: hidden;
+    min-height: 100vh; display: flex; align-items: center;
+    padding: 110px 5% 72px; position: relative; overflow: hidden;
   }
   .hero-bg {
     position: absolute; inset: 0; z-index: 0;
@@ -126,635 +148,483 @@
   .hero-inner {
     position: relative; z-index: 2;
     max-width: 1200px; margin: 0 auto; width: 100%;
-    display: grid; grid-template-columns: 1fr 420px; gap: 80px; align-items: center;
+    display: grid; grid-template-columns: 1fr 390px; gap: 64px; align-items: center;
   }
   .hero-kicker {
-    display: inline-flex; align-items: center; gap: 10px;
-    margin-bottom: 32px;
+    display: inline-flex; align-items: center; gap: 10px; margin-bottom: 24px;
   }
-  .kicker-line {
-    width: 32px; height: 2px; background: var(--lime);
-  }
+  .kicker-line { width: 26px; height: 2px; background: var(--lime); flex-shrink: 0; }
   .kicker-text {
-    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.18em;
+    font-size: 0.66rem; font-weight: 700; letter-spacing: 0.16em;
     text-transform: uppercase; color: var(--lime);
   }
   .hero-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(4.5rem, 9vw, 9rem);
+    font-size: clamp(3.8rem, 8.5vw, 8rem);
     line-height: 0.92; letter-spacing: 0.01em;
-    color: var(--white); margin-bottom: 28px;
+    color: var(--white); margin-bottom: 22px;
   }
   .hero-title .lime { color: var(--lime); }
   .hero-title .outline {
-    -webkit-text-stroke: 1.5px rgba(255,255,255,0.25);
-    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(255,255,255,0.25); color: transparent;
   }
   .hero-sub {
-    font-size: 1rem; color: var(--muted); line-height: 1.75;
-    max-width: 480px; margin-bottom: 44px; font-weight: 400;
+    font-size: 0.96rem; color: var(--muted); line-height: 1.75;
+    max-width: 460px; margin-bottom: 38px;
   }
-  .hero-actions {
-    display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
-  }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
   .btn-lime {
     background: var(--lime); color: var(--black);
-    font-weight: 800; font-size: 0.85rem;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    padding: 15px 32px; border-radius: 4px;
-    text-decoration: none; border: none; cursor: none;
+    font-weight: 800; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 14px 28px; border-radius: 4px; text-decoration: none; border: none; cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 0 0 rgba(200,255,0,0);
+    min-height: 48px; display: inline-flex; align-items: center; justify-content: center;
   }
-  .btn-lime:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(200,255,0,0.3);
-  }
+  .btn-lime:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(200,255,0,0.3); }
   .btn-outline {
-    background: transparent; color: var(--white);
-    font-weight: 600; font-size: 0.85rem;
-    letter-spacing: 0.04em;
-    padding: 15px 28px; border-radius: 4px;
-    text-decoration: none; cursor: none;
-    border: 1px solid var(--border);
-    transition: border-color 0.2s, color 0.2s;
+    background: transparent; color: var(--white); font-weight: 600; font-size: 0.82rem;
+    letter-spacing: 0.04em; padding: 14px 22px; border-radius: 4px;
+    text-decoration: none; cursor: pointer; border: 1px solid var(--border);
+    transition: border-color 0.2s; min-height: 48px;
+    display: inline-flex; align-items: center; justify-content: center;
   }
-  .btn-outline:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+  .btn-outline:hover { border-color: rgba(255,255,255,0.3); }
 
-  /* Metric ticker */
+  /* Metrics card */
   .hero-metrics {
-    background: var(--dark-2); border-radius: 12px;
-    border: 1px solid var(--border);
-    padding: 28px; position: relative; overflow: hidden;
+    background: var(--dark-2); border-radius: 12px; border: 1px solid var(--border);
+    padding: 26px; position: relative; overflow: hidden;
   }
   .hero-metrics::before {
     content: '';
     position: absolute; top: 0; left: 0; right: 0; height: 2px;
     background: linear-gradient(90deg, var(--lime), var(--blue), var(--lime));
-    background-size: 200%;
-    animation: shimmer 3s linear infinite;
+    background-size: 200%; animation: shimmer 3s linear infinite;
   }
-  @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
   .metrics-label {
-    font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em;
-    text-transform: uppercase; color: var(--muted);
-    margin-bottom: 20px;
+    font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 18px;
     display: flex; align-items: center; gap: 8px;
   }
   .live-dot {
-    width: 6px; height: 6px; border-radius: 50%; background: var(--lime);
+    width: 6px; height: 6px; border-radius: 50%; background: var(--lime); flex-shrink: 0;
     animation: blink 1.2s ease-in-out infinite;
   }
-  @keyframes blink {
-    0%,100% { opacity: 1; } 50% { opacity: 0.3; }
-  }
-  .metric-row {
-    display: flex; flex-direction: column; gap: 18px;
-  }
-  .metric-item { display: flex; flex-direction: column; gap: 4px; }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .metric-row { display: flex; flex-direction: column; gap: 14px; }
+  .metric-item { display: flex; flex-direction: column; gap: 3px; }
   .metric-val {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2.8rem; letter-spacing: 0.02em;
-    line-height: 1; color: var(--white);
+    font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem;
+    letter-spacing: 0.02em; line-height: 1; color: var(--white);
   }
   .metric-val span { color: var(--lime); }
-  .metric-desc { font-size: 0.72rem; color: var(--muted); font-weight: 500; }
-  .metric-divider {
-    border: none; border-top: 1px solid var(--border); margin: 4px 0;
-  }
-  .metric-channels {
-    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;
-  }
+  .metric-desc { font-size: 0.68rem; color: var(--muted); font-weight: 500; }
+  .metric-divider { border: none; border-top: 1px solid var(--border); }
+  .metric-channels { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
   .channel-chip {
-    padding: 5px 12px; border-radius: 3px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em;
-    color: var(--muted);
-    text-transform: uppercase;
+    padding: 4px 9px; border-radius: 3px; background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border); font-size: 0.62rem; font-weight: 700;
+    letter-spacing: 0.06em; color: var(--muted); text-transform: uppercase;
   }
-  .channel-chip.active {
-    background: rgba(200,255,0,0.1);
-    border-color: var(--border-lime);
-    color: var(--lime);
-  }
+  .channel-chip.active { background: rgba(200,255,0,0.1); border-color: var(--border-lime); color: var(--lime); }
 
   /* ── MARQUEE ── */
   .marquee-wrap {
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    background: var(--dark-2);
-    padding: 16px 0; overflow: hidden;
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    background: var(--dark-2); padding: 13px 0; overflow: hidden;
   }
   .marquee-track {
-    display: flex; width: max-content;
-    animation: marquee 28s linear infinite;
+    display: flex; width: max-content; animation: marquee 28s linear infinite;
   }
-  .marquee-track:hover { animation-play-state: paused; }
-  @keyframes marquee {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
+  @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
   .marquee-item {
-    display: flex; align-items: center; gap: 16px;
-    padding: 0 32px; white-space: nowrap;
-    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em;
-    text-transform: uppercase; color: var(--muted);
+    display: flex; align-items: center; gap: 12px; padding: 0 24px;
+    white-space: nowrap; font-size: 0.68rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
   }
-  .marquee-dot { color: var(--lime); font-size: 1rem; }
+  .marquee-dot { color: var(--lime); }
 
-  /* ── SECTION HELPERS ── */
-  section { padding: 110px 5%; }
+  /* ── SECTIONS ── */
+  section { padding: 96px 5%; }
   .section-inner { max-width: 1100px; margin: 0 auto; }
-  .section-eyebrow {
-    display: inline-flex; align-items: center; gap: 10px;
-    margin-bottom: 20px;
-  }
-  .eyebrow-bar { width: 24px; height: 2px; background: var(--lime); }
+  .section-eyebrow { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .eyebrow-bar { width: 20px; height: 2px; background: var(--lime); flex-shrink: 0; }
   .eyebrow-text {
-    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em;
+    font-size: 0.64rem; font-weight: 700; letter-spacing: 0.18em;
     text-transform: uppercase; color: var(--lime);
   }
   .section-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(2.8rem, 5vw, 4.8rem);
-    line-height: 0.95; letter-spacing: 0.01em;
-    color: var(--white); margin-bottom: 18px;
+    font-size: clamp(2.5rem, 5vw, 4.2rem); line-height: 0.95;
+    letter-spacing: 0.01em; color: var(--white); margin-bottom: 14px;
   }
-  .section-sub {
-    font-size: 0.95rem; color: var(--muted); line-height: 1.75;
-    max-width: 500px; font-weight: 400;
-  }
+  .section-sub { font-size: 0.9rem; color: var(--muted); line-height: 1.75; max-width: 460px; }
 
   /* ── SERVICES ── */
   .services { background: var(--dark); }
   .services-grid {
     display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 1px; margin-top: 64px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    border-radius: 12px; overflow: hidden;
+    gap: 1px; margin-top: 56px; background: var(--border);
+    border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
   }
   .service-card {
-    background: var(--dark); padding: 40px 32px;
-    position: relative; overflow: hidden;
+    background: var(--dark); padding: 32px 26px; position: relative; overflow: hidden;
     transition: background 0.3s;
-    cursor: none;
   }
   .service-card::after {
-    content: '';
-    position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
-    background: var(--lime);
-    transform: scaleX(0); transform-origin: left;
-    transition: transform 0.35s ease;
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+    background: var(--lime); transform: scaleX(0); transform-origin: left; transition: transform 0.35s ease;
   }
   .service-card:hover { background: var(--dark-3); }
   .service-card:hover::after { transform: scaleX(1); }
-  .svc-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 0.9rem; letter-spacing: 0.1em;
-    color: rgba(200,255,0,0.3); margin-bottom: 24px;
-  }
-  .svc-icon {
-    font-size: 2rem; margin-bottom: 16px; display: block;
-  }
-  .svc-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.5rem; letter-spacing: 0.03em;
-    color: var(--white); margin-bottom: 12px;
-  }
-  .svc-desc {
-    font-size: 0.82rem; color: var(--muted); line-height: 1.7;
-  }
-  .svc-tags {
-    display: flex; gap: 6px; flex-wrap: wrap; margin-top: 20px;
-  }
+  .svc-num { font-family: 'Bebas Neue', sans-serif; font-size: 0.82rem; letter-spacing: 0.1em; color: rgba(200,255,0,0.3); margin-bottom: 18px; }
+  .svc-icon { font-size: 1.7rem; margin-bottom: 12px; display: block; }
+  .svc-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 0.03em; color: var(--white); margin-bottom: 9px; }
+  .svc-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.68; }
+  .svc-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 16px; }
   .svc-tag {
-    font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em;
-    text-transform: uppercase; color: var(--muted-2);
-    padding: 3px 8px; border-radius: 2px;
-    border: 1px solid var(--muted-2);
+    font-size: 0.58rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--muted-2); padding: 3px 7px; border-radius: 2px; border: 1px solid var(--muted-2);
   }
 
   /* ── RESULTS ── */
-  .results-grid {
-    display: grid; grid-template-columns: repeat(2, 1fr);
-    gap: 20px; margin-top: 64px;
-  }
+  .results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 56px; }
   .result-card {
-    background: var(--dark-2); border-radius: 12px; padding: 40px;
-    border: 1px solid var(--border);
-    position: relative; overflow: hidden;
-    transition: border-color 0.3s, transform 0.3s;
-    cursor: none;
+    background: var(--dark-2); border-radius: 12px; padding: 32px;
+    border: 1px solid var(--border); transition: border-color 0.3s, transform 0.3s;
   }
-  .result-card:hover {
-    border-color: var(--border-lime);
-    transform: translateY(-3px);
-  }
+  .result-card:hover { border-color: var(--border-lime); transform: translateY(-3px); }
   .result-card.big {
-    grid-column: span 2;
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 40px; align-items: center;
+    grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center;
   }
   .result-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(4rem, 7vw, 6rem);
-    letter-spacing: -0.02em; line-height: 1;
-    color: var(--lime); margin-bottom: 6px;
+    font-family: 'Bebas Neue', sans-serif; font-size: clamp(3.2rem, 6vw, 5rem);
+    letter-spacing: -0.02em; line-height: 1; color: var(--lime); margin-bottom: 6px;
   }
-  .result-label {
-    font-size: 1rem; font-weight: 700;
-    color: var(--white); margin-bottom: 10px;
-  }
-  .result-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.65; }
-  .result-visual {
-    display: flex; flex-direction: column; gap: 12px;
-  }
-  .rbar-wrap { }
-  .rbar-head {
-    display: flex; justify-content: space-between;
-    margin-bottom: 6px;
-    font-size: 0.72rem; color: var(--muted); font-weight: 600;
-  }
-  .rbar-track {
-    height: 6px; background: rgba(255,255,255,0.06);
-    border-radius: 100px; overflow: hidden;
-  }
-  .rbar-fill {
-    height: 100%; border-radius: 100px;
-    background: linear-gradient(90deg, var(--lime), #00FF88);
-    transition: width 1.5s ease;
-  }
+  .result-label { font-size: 0.9rem; font-weight: 700; color: var(--white); margin-bottom: 7px; }
+  .result-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.65; }
+  .result-visual { display: flex; flex-direction: column; gap: 12px; }
+  .rbar-head { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.68rem; color: var(--muted); font-weight: 600; }
+  .rbar-track { height: 5px; background: rgba(255,255,255,0.06); border-radius: 100px; overflow: hidden; }
+  .rbar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--lime), #00FF88); }
 
   /* ── PROCESS ── */
   .process { background: var(--dark); }
   .process-steps {
     display: grid; grid-template-columns: repeat(4, 1fr);
-    gap: 0; margin-top: 64px; position: relative;
+    gap: 0; margin-top: 56px; position: relative;
   }
   .process-steps::before {
-    content: '';
-    position: absolute; top: 32px; left: 10%; right: 10%; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--border-lime), transparent);
-    z-index: 0;
+    content: ''; position: absolute; top: 31px; left: 10%; right: 10%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-lime), transparent); z-index: 0;
   }
-  .ps-card {
-    padding: 0 20px; text-align: center;
-    position: relative; z-index: 1;
-  }
+  .ps-card { padding: 0 14px; text-align: center; position: relative; z-index: 1; }
   .ps-num-wrap {
-    width: 64px; height: 64px; border-radius: 50%;
+    width: 62px; height: 62px; border-radius: 50%;
     background: var(--dark-3); border: 1px solid var(--border);
     display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 28px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.4rem; letter-spacing: 0.04em;
-    color: var(--lime);
-    transition: background 0.3s, border-color 0.3s;
+    margin: 0 auto 22px; font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.25rem; color: var(--lime); transition: background 0.3s, border-color 0.3s;
   }
-  .ps-card:hover .ps-num-wrap {
-    background: rgba(200,255,0,0.1);
-    border-color: var(--border-lime);
-  }
-  .ps-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.2rem; letter-spacing: 0.04em;
-    color: var(--white); margin-bottom: 10px;
-  }
-  .ps-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.65; }
+  .ps-card:hover .ps-num-wrap { background: rgba(200,255,0,0.1); border-color: var(--border-lime); }
+  .ps-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 0.04em; color: var(--white); margin-bottom: 8px; }
+  .ps-desc { font-size: 0.74rem; color: var(--muted); line-height: 1.65; }
   .ps-tag {
-    display: inline-block; margin-top: 14px;
-    font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
-    text-transform: uppercase; color: var(--lime);
-    padding: 4px 10px; border-radius: 2px;
-    background: rgba(200,255,0,0.08);
-    border: 1px solid var(--border-lime);
+    display: inline-block; margin-top: 10px; font-size: 0.56rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--lime);
+    padding: 3px 9px; border-radius: 2px; background: rgba(200,255,0,0.08); border: 1px solid var(--border-lime);
   }
 
   /* ── GUARANTEES ── */
-  .g-grid {
-    display: grid; grid-template-columns: repeat(2, 1fr);
-    gap: 20px; margin-top: 64px;
-  }
+  .g-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 56px; }
   .g-card {
-    background: var(--dark-2); border-radius: 12px; padding: 36px;
-    border: 1px solid var(--border);
-    display: flex; gap: 22px; align-items: flex-start;
+    background: var(--dark-2); border-radius: 12px; padding: 30px;
+    border: 1px solid var(--border); display: flex; gap: 18px; align-items: flex-start;
     transition: border-color 0.3s;
-    cursor: none;
   }
   .g-card:hover { border-color: var(--border-lime); }
   .g-icon-wrap {
-    width: 48px; height: 48px; border-radius: 8px; flex-shrink: 0;
-    background: rgba(200,255,0,0.08);
-    border: 1px solid var(--border-lime);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.3rem;
+    width: 44px; height: 44px; border-radius: 8px; flex-shrink: 0;
+    background: rgba(200,255,0,0.08); border: 1px solid var(--border-lime);
+    display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
   }
-  .g-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.2rem; letter-spacing: 0.03em;
-    color: var(--white); margin-bottom: 8px;
-  }
-  .g-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.65; }
+  .g-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 0.03em; color: var(--white); margin-bottom: 7px; }
+  .g-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.65; }
 
   /* ── PRICING ── */
   .pricing { background: var(--dark); }
-  .pkg-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 20px; margin-top: 64px; align-items: start;
-  }
+  .pkg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 56px; align-items: start; }
   .pkg-card {
-    background: var(--dark-2); border-radius: 12px;
-    border: 1px solid var(--border);
-    padding: 36px 30px;
-    position: relative; overflow: hidden;
-    transition: transform 0.25s, border-color 0.25s;
-    cursor: none;
+    background: var(--dark-2); border-radius: 12px; border: 1px solid var(--border);
+    padding: 30px 26px; position: relative; transition: transform 0.25s, border-color 0.25s;
   }
-  .pkg-card:hover:not(.featured) {
-    transform: translateY(-4px);
-    border-color: rgba(255,255,255,0.14);
-  }
-  .pkg-card.featured {
-    background: var(--lime);
-    border-color: var(--lime);
-    transform: scale(1.03);
-  }
+  .pkg-card:hover:not(.featured) { transform: translateY(-4px); border-color: rgba(255,255,255,0.14); }
+  .pkg-card.featured { background: var(--lime); border-color: var(--lime); transform: scale(1.03); }
   .pkg-badge {
     position: absolute; top: -1px; left: 50%; transform: translateX(-50%);
     background: var(--black); color: var(--lime);
-    font-size: 0.6rem; font-weight: 800; letter-spacing: 0.12em;
-    text-transform: uppercase; padding: 5px 16px; border-radius: 0 0 6px 6px;
+    font-size: 0.56rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 0 0 5px 5px;
     border: 1px solid var(--border-lime); border-top: none;
   }
-  .pkg-tier {
-    font-size: 0.65rem; font-weight: 800; letter-spacing: 0.16em;
-    text-transform: uppercase; color: var(--lime); margin-bottom: 10px;
-  }
+  .pkg-tier { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--lime); margin-bottom: 7px; }
   .pkg-card.featured .pkg-tier { color: var(--black); }
-  .pkg-name {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2rem; letter-spacing: 0.02em;
-    color: var(--white); margin-bottom: 6px;
-  }
+  .pkg-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.02em; color: var(--white); margin-bottom: 5px; }
   .pkg-card.featured .pkg-name { color: var(--black); }
-  .pkg-sub {
-    font-size: 0.8rem; color: var(--muted); margin-bottom: 28px;
-    padding-bottom: 24px; border-bottom: 1px solid var(--border);
-  }
+  .pkg-sub { font-size: 0.76rem; color: var(--muted); margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
   .pkg-card.featured .pkg-sub { color: rgba(0,0,0,0.5); border-color: rgba(0,0,0,0.12); }
-  .pkg-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
-  .pkg-list li {
-    font-size: 0.82rem; color: var(--muted); font-weight: 500;
-    display: flex; gap: 10px; align-items: flex-start;
-  }
+  .pkg-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
+  .pkg-list li { font-size: 0.78rem; color: var(--muted); font-weight: 500; display: flex; gap: 9px; align-items: flex-start; }
   .pkg-card.featured .pkg-list li { color: rgba(0,0,0,0.65); }
-  .pkg-check { color: var(--lime); font-size: 0.9rem; flex-shrink: 0; }
+  .pkg-check { color: var(--lime); font-size: 0.85rem; flex-shrink: 0; }
   .pkg-card.featured .pkg-check { color: var(--black); }
   .pkg-btn {
-    display: block; text-align: center;
-    font-weight: 800; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase;
-    padding: 13px 24px; border-radius: 4px;
-    text-decoration: none; border: 1px solid var(--border);
-    color: var(--white); background: transparent;
-    cursor: none; transition: all 0.2s;
+    display: block; text-align: center; font-weight: 800; font-size: 0.76rem;
+    letter-spacing: 0.06em; text-transform: uppercase; padding: 13px 18px; border-radius: 4px;
+    text-decoration: none; border: 1px solid var(--border); color: var(--white);
+    background: transparent; cursor: pointer; transition: all 0.2s; min-height: 48px;
+    display: flex; align-items: center; justify-content: center;
   }
   .pkg-btn:hover { border-color: var(--lime); color: var(--lime); }
-  .pkg-card.featured .pkg-btn {
-    background: var(--black); color: var(--lime); border-color: var(--black);
-  }
-  .pkg-card.featured .pkg-btn:hover { background: var(--dark-3); }
+  .pkg-card.featured .pkg-btn { background: var(--black); color: var(--lime); border-color: var(--black); }
 
   /* ── CTA ── */
-  .cta-section {
-    position: relative; overflow: hidden;
-    padding: 120px 5%; text-align: center;
-  }
+  .cta-section { position: relative; overflow: hidden; padding: 108px 5%; text-align: center; }
   .cta-section::before {
-    content: '';
-    position: absolute; inset: 0;
+    content: ''; position: absolute; inset: 0;
     background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(200,255,0,0.08) 0%, transparent 70%);
   }
-  .cta-inner { max-width: 700px; margin: 0 auto; position: relative; z-index: 1; }
-  .cta-eyebrow {
-    display: inline-flex; align-items: center; gap: 10px;
-    margin-bottom: 24px;
-    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em;
-    text-transform: uppercase; color: var(--lime);
-  }
+  .cta-inner { max-width: 660px; margin: 0 auto; position: relative; z-index: 1; }
+  .cta-eyebrow { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--lime); }
   .cta-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(3.5rem, 7vw, 7rem);
-    line-height: 0.9; letter-spacing: 0.01em;
-    color: var(--white); margin-bottom: 24px;
+    font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem, 8vw, 6.5rem);
+    line-height: 0.9; letter-spacing: 0.01em; color: var(--white); margin-bottom: 20px;
   }
   .cta-title .lime { color: var(--lime); }
-  .cta-sub { font-size: 0.95rem; color: var(--muted); line-height: 1.75; margin-bottom: 44px; }
-  .cta-pills {
-    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 44px;
-  }
+  .cta-sub { font-size: 0.9rem; color: var(--muted); line-height: 1.75; margin-bottom: 36px; }
+  .cta-pills { display: flex; gap: 9px; justify-content: center; flex-wrap: wrap; margin-bottom: 36px; }
   .cta-pill {
-    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 7px 16px; border-radius: 3px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    color: var(--muted);
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 6px 13px; border-radius: 3px; background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border); color: var(--muted);
   }
-  .cta-pill.hot {
-    background: rgba(200,255,0,0.08);
-    border-color: var(--border-lime);
-    color: var(--lime);
-  }
+  .cta-pill.hot { background: rgba(200,255,0,0.08); border-color: var(--border-lime); color: var(--lime); }
   .cta-btn {
-    display: inline-block;
-    background: var(--lime); color: var(--black);
-    font-weight: 800; font-size: 0.9rem; letter-spacing: 0.08em; text-transform: uppercase;
-    padding: 18px 44px; border-radius: 4px;
-    text-decoration: none; border: none; cursor: none;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 0 0 rgba(200,255,0,0);
+    display: inline-block; background: var(--lime); color: var(--black);
+    font-weight: 800; font-size: 0.88rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 16px 40px; border-radius: 4px; text-decoration: none; border: none; cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s; min-height: 52px;
+    display: inline-flex; align-items: center; justify-content: center;
   }
-  .cta-btn:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 12px 40px rgba(200,255,0,0.3);
-  }
+  .cta-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 12px 36px rgba(200,255,0,0.3); }
 
   /* ── MODAL ── */
   .modal-overlay {
     position: fixed; inset: 0; z-index: 200;
-    background: rgba(5,5,7,0.85);
-    backdrop-filter: blur(8px);
-    display: flex; align-items: center; justify-content: center;
-    padding: 20px;
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.3s;
+    background: rgba(5,5,7,0.88); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
   }
   .modal-overlay.open { opacity: 1; pointer-events: all; }
   .modal {
-    background: var(--dark-2); border-radius: 16px;
-    width: 100%; max-width: 560px;
-    max-height: 90vh; overflow-y: auto;
-    padding: 48px 44px;
-    border: 1px solid var(--border);
-    position: relative;
+    background: var(--dark-2); border-radius: 16px; width: 100%; max-width: 520px;
+    max-height: 92vh; overflow-y: auto; padding: 42px 38px;
+    border: 1px solid var(--border); position: relative;
     transform: translateY(30px) scale(0.97);
     transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
-    box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 60px rgba(200,255,0,0.05);
+    box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+    -webkit-overflow-scrolling: touch;
   }
   .modal::before {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
     background: linear-gradient(90deg, var(--lime), #00D4FF, var(--lime));
-    background-size: 200%; border-radius: 16px 16px 0 0;
-    animation: shimmer 3s linear infinite;
+    background-size: 200%; border-radius: 16px 16px 0 0; animation: shimmer 3s linear infinite;
   }
   .modal-overlay.open .modal { transform: translateY(0) scale(1); }
   .modal-close {
-    position: absolute; top: 18px; right: 18px;
-    width: 32px; height: 32px; border-radius: 4px;
-    background: var(--dark-3); border: 1px solid var(--border);
-    cursor: none; display: flex; align-items: center; justify-content: center;
-    font-size: 0.9rem; color: var(--muted);
+    position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 4px;
+    background: var(--dark-3); border: 1px solid var(--border); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: var(--muted);
     transition: background 0.2s, color 0.2s;
   }
   .modal-close:hover { background: rgba(200,255,0,0.1); color: var(--lime); }
-  .modal-eyebrow {
-    font-size: 0.62rem; font-weight: 800; letter-spacing: 0.18em;
-    text-transform: uppercase; color: var(--lime); margin-bottom: 10px;
-  }
-  .modal-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2.2rem; letter-spacing: 0.02em;
-    color: var(--white); line-height: 1; margin-bottom: 6px;
-  }
-  .modal-sub {
-    font-size: 0.82rem; color: var(--muted); line-height: 1.65; margin-bottom: 32px;
-  }
-  hr.mdivider {
-    border: none; border-top: 1px solid var(--border); margin: 20px 0;
-  }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-  .field label {
-    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em;
-    text-transform: uppercase; color: var(--muted);
-  }
-  .field input, .field select, .field textarea {
-    padding: 12px 16px; border-radius: 6px;
-    border: 1px solid var(--border);
-    background: var(--dark-3); color: var(--white);
-    font-family: 'Manrope', sans-serif; font-size: 0.88rem;
-    outline: none; width: 100%;
-    transition: border-color 0.2s, background 0.2s;
+  .modal-eyebrow { font-size: 0.58rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--lime); margin-bottom: 7px; }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.9rem; letter-spacing: 0.02em; color: var(--white); line-height: 1; margin-bottom: 6px; }
+  .modal-sub { font-size: 0.78rem; color: var(--muted); line-height: 1.65; margin-bottom: 26px; }
+  hr.mdivider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+  .field label { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .field input, .field select {
+    padding: 12px 13px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--dark-3); color: var(--white); font-family: 'Manrope', sans-serif;
+    font-size: 0.88rem; outline: none; width: 100%; min-height: 48px;
+    transition: border-color 0.2s; -webkit-appearance: none;
   }
   .field input::placeholder { color: var(--muted-2); }
-  .field input:focus, .field select:focus, .field textarea:focus {
-    border-color: var(--lime); background: var(--dark);
-  }
+  .field input:focus, .field select:focus { border-color: var(--lime); }
   .field select {
-    appearance: none; cursor: none;
+    appearance: none; -webkit-appearance: none; cursor: pointer;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6B80' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 14px center;
-    padding-right: 36px;
+    background-repeat: no-repeat; background-position: right 13px center; padding-right: 34px;
   }
   .field select option { background: var(--dark-3); }
-  .field textarea { resize: vertical; min-height: 80px; }
   .modal-submit {
-    width: 100%; padding: 15px;
-    background: var(--lime); color: var(--black);
-    font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 0.85rem;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    border-radius: 4px; border: none; cursor: none;
-    transition: opacity 0.2s, transform 0.15s;
-    margin-top: 8px;
-    box-shadow: 0 4px 24px rgba(200,255,0,0.2);
+    width: 100%; padding: 15px; min-height: 52px;
+    background: var(--lime); color: var(--black); font-family: 'Manrope', sans-serif;
+    font-weight: 800; font-size: 0.84rem; letter-spacing: 0.08em; text-transform: uppercase;
+    border-radius: 4px; border: none; cursor: pointer; transition: opacity 0.2s, transform 0.15s;
+    margin-top: 8px; box-shadow: 0 4px 22px rgba(200,255,0,0.2);
   }
   .modal-submit:hover { opacity: 0.9; transform: translateY(-1px); }
-  .modal-note {
-    text-align: center; font-size: 0.7rem; color: var(--muted-2); margin-top: 14px;
-  }
+  .modal-note { text-align: center; font-size: 0.66rem; color: var(--muted-2); margin-top: 12px; }
   .modal-success { display: none; text-align: center; padding: 24px 0; }
   .modal-success.show { display: block; }
   .modal-form.hide { display: none; }
-  .success-icon { font-size: 3.5rem; margin-bottom: 16px; }
-  .success-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2.4rem; letter-spacing: 0.03em;
-    color: var(--lime); margin-bottom: 10px;
-  }
-  .success-sub { font-size: 0.88rem; color: var(--muted); line-height: 1.7; }
-
-  @media (max-width: 560px) {
-    .modal { padding: 36px 24px; }
-    .form-row { grid-template-columns: 1fr; }
-  }
+  .success-icon { font-size: 3.2rem; margin-bottom: 14px; }
+  .success-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.03em; color: var(--lime); margin-bottom: 9px; }
+  .success-sub { font-size: 0.84rem; color: var(--muted); line-height: 1.7; }
 
   /* ── FOOTER ── */
   footer {
-    background: var(--black);
-    border-top: 1px solid var(--border);
-    padding: 32px 5%;
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 16px;
+    background: var(--black); border-top: 1px solid var(--border); padding: 26px 5%;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
   }
-  .footer-logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.3rem; letter-spacing: 0.06em;
-    color: var(--white);
-  }
+  .footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.15rem; letter-spacing: 0.06em; color: var(--white); }
   .footer-logo .vx { color: var(--lime); }
-  .footer-note { font-size: 0.72rem; color: var(--muted-2); }
+  .footer-note { font-size: 0.68rem; color: var(--muted-2); }
 
-  /* ── ANIMATIONS ── */
-  .reveal {
-    opacity: 0; transform: translateY(28px);
-    transition: opacity 0.65s ease, transform 0.65s ease;
-  }
+  /* ── REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.65s ease, transform 0.65s ease; }
   .reveal.visible { opacity: 1; transform: translateY(0); }
 
-  /* ── RESPONSIVE ── */
+  /* ══════════════════════════════
+     TABLET ≤ 960px
+  ══════════════════════════════ */
   @media (max-width: 960px) {
-    .hero-inner { grid-template-columns: 1fr; gap: 50px; }
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    .mobile-menu { display: flex; }
+    .nav-cta { font-size: 0.7rem; padding: 8px 14px; }
+
+    .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+    .hero-sub { max-width: 100%; }
+
+    /* Metrics: show inline on tablet */
+    .metric-row { flex-direction: row; flex-wrap: wrap; gap: 12px; }
+    .metric-item { flex: 1; min-width: 110px; }
+    .metric-divider { display: none; }
+
     .services-grid { grid-template-columns: repeat(2, 1fr); }
     .results-grid { grid-template-columns: 1fr; }
     .result-card.big { grid-column: span 1; grid-template-columns: 1fr; }
-    .process-steps { grid-template-columns: repeat(2, 1fr); gap: 40px; }
+    .process-steps { grid-template-columns: repeat(2, 1fr); gap: 32px; }
     .process-steps::before { display: none; }
     .g-grid { grid-template-columns: 1fr; }
-    .pkg-grid { grid-template-columns: 1fr; }
+    .pkg-grid { grid-template-columns: 1fr; max-width: 440px; margin-left: auto; margin-right: auto; }
     .pkg-card.featured { transform: none; }
-    nav ul { display: none; }
   }
+
+  /* ══════════════════════════════
+     MOBILE ≤ 600px
+  ══════════════════════════════ */
   @media (max-width: 600px) {
+    section { padding: 68px 5%; }
+
+    /* Nav — hide desktop CTA, use mobile menu CTA */
+    nav { padding: 0 5%; }
+    .nav-cta { display: none; }
+
+    /* Hero */
+    .hero { padding: 84px 5% 52px; min-height: auto; }
+    .hero-title { font-size: clamp(3rem, 13vw, 5rem); }
+    .hero-sub { font-size: 0.9rem; }
+    .hero-actions { flex-direction: column; align-items: stretch; gap: 10px; }
+    .btn-lime, .btn-outline { width: 100%; justify-content: center; }
+
+    /* Metrics: back to column on mobile */
+    .metric-row { flex-direction: column; gap: 14px; }
+    .metric-divider { display: block; }
+    .metric-val { font-size: 2.1rem; }
+
+    /* Marquee */
+    .marquee-item { font-size: 0.6rem; padding: 0 18px; }
+
+    /* Services */
     .services-grid { grid-template-columns: 1fr; }
-    .process-steps { grid-template-columns: 1fr; }
-    footer { flex-direction: column; text-align: center; }
+    .service-card { padding: 28px 22px; }
+
+    /* Results */
+    .result-card { padding: 26px; }
+    .result-card.big { padding: 26px; }
+
+    /* Process — horizontal step layout on mobile */
+    .process-steps { grid-template-columns: 1fr; gap: 24px; }
+    .ps-card { padding: 0; text-align: left; display: flex; gap: 18px; align-items: flex-start; }
+    .ps-num-wrap { margin: 0; flex-shrink: 0; width: 50px; height: 50px; font-size: 1.1rem; }
+    .ps-content { flex: 1; }
+
+    /* Guarantees */
+    .g-card { flex-direction: column; gap: 12px; padding: 24px; }
+    .g-icon-wrap { width: 40px; height: 40px; }
+
+    /* Pricing */
+    .pkg-grid { max-width: 100%; }
+    .pkg-card.featured { transform: none; }
+    .pkg-card { padding: 28px 22px; }
+
+    /* CTA */
+    .cta-section { padding: 76px 5%; }
+    .cta-title { font-size: clamp(2.8rem, 13vw, 4.5rem); }
+    .cta-btn { width: 100%; display: flex; }
+
+    /* Modal */
+    .modal { padding: 36px 18px 28px; border-radius: 12px; max-height: 95vh; }
+    .modal-title { font-size: 1.65rem; }
+    .form-row { grid-template-columns: 1fr; }
+
+    /* Footer */
+    footer { flex-direction: column; text-align: center; padding: 22px 5%; }
+  }
+
+  /* ══════════════════════════════
+     VERY SMALL ≤ 380px
+  ══════════════════════════════ */
+  @media (max-width: 380px) {
+    .hero-title { font-size: 2.8rem; }
+    .nav-logo { font-size: 1.2rem; }
+    .modal { padding: 32px 14px 24px; }
   }
 </style>
 </head>
 <body>
 
-<!-- Custom cursor -->
-<div class="cursor" id="cursor"></div>
-<div class="cursor-ring" id="cursorRing"></div>
-
 <!-- NAV -->
 <nav>
-  <div class="nav-logo"><span class="vx">VX</span>&nbsp;VORTEX LABS</div>
+  <a class="nav-logo" href="#"><span class="vx">VX</span>&nbsp;VORTEX LABS</a>
   <ul class="nav-links">
     <li><a href="#services">Services</a></li>
     <li><a href="#results">Results</a></li>
     <li><a href="#process">Process</a></li>
     <li><a href="#pricing">Pricing</a></li>
   </ul>
-  <button class="nav-cta open-modal">Get a Free Audit →</button>
+  <div class="nav-right">
+    <button class="nav-cta open-modal">Get a Free Audit →</button>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
 </nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#services" class="mob-link">Services</a>
+  <a href="#results" class="mob-link">Results</a>
+  <a href="#process" class="mob-link">Process</a>
+  <a href="#pricing" class="mob-link">Pricing</a>
+  <button class="mob-cta open-modal">Get a Free Audit →</button>
+</div>
 
 <!-- HERO -->
 <section class="hero">
@@ -824,7 +694,6 @@
     <div class="marquee-item"><span class="marquee-dot">◆</span> Data & Analytics</div>
     <div class="marquee-item"><span class="marquee-dot">◆</span> Influencer Amplification</div>
     <div class="marquee-item"><span class="marquee-dot">◆</span> Email & Retention</div>
-    <!-- repeat -->
     <div class="marquee-item"><span class="marquee-dot">◆</span> Meta Ads</div>
     <div class="marquee-item"><span class="marquee-dot">◆</span> Google Ads</div>
     <div class="marquee-item"><span class="marquee-dot">◆</span> TikTok Ads</div>
@@ -842,77 +711,46 @@
 <section class="services" id="services">
   <div class="section-inner">
     <div class="reveal">
-      <div class="section-eyebrow">
-        <div class="eyebrow-bar"></div>
-        <span class="eyebrow-text">What We Do</span>
-      </div>
+      <div class="section-eyebrow"><div class="eyebrow-bar"></div><span class="eyebrow-text">What We Do</span></div>
       <h2 class="section-title">Full-Funnel.<br>Full-Force.</h2>
       <p class="section-sub">Every channel, every touchpoint — engineered to convert. We don't dabble. We dominate.</p>
     </div>
     <div class="services-grid reveal">
       <div class="service-card">
-        <div class="svc-num">01 /</div>
-        <span class="svc-icon">⚡</span>
+        <div class="svc-num">01 /</div><span class="svc-icon">⚡</span>
         <div class="svc-title">Paid Social Ads</div>
         <div class="svc-desc">Relentless testing on Meta, TikTok & LinkedIn. We find your winning creative-audience combo and scale it hard — without burning budget on guesswork.</div>
-        <div class="svc-tags">
-          <span class="svc-tag">Meta</span>
-          <span class="svc-tag">TikTok</span>
-          <span class="svc-tag">LinkedIn</span>
-        </div>
+        <div class="svc-tags"><span class="svc-tag">Meta</span><span class="svc-tag">TikTok</span><span class="svc-tag">LinkedIn</span></div>
       </div>
       <div class="service-card">
-        <div class="svc-num">02 /</div>
-        <span class="svc-icon">🔍</span>
+        <div class="svc-num">02 /</div><span class="svc-icon">🔍</span>
         <div class="svc-title">Google & YouTube</div>
         <div class="svc-desc">Search, Shopping, Display, YouTube — we capture demand at every stage and crush the competition on ROAS. Full account management from bid strategy to copy.</div>
-        <div class="svc-tags">
-          <span class="svc-tag">Search</span>
-          <span class="svc-tag">Shopping</span>
-          <span class="svc-tag">YouTube</span>
-        </div>
+        <div class="svc-tags"><span class="svc-tag">Search</span><span class="svc-tag">Shopping</span><span class="svc-tag">YouTube</span></div>
       </div>
       <div class="service-card">
-        <div class="svc-num">03 /</div>
-        <span class="svc-icon">🎨</span>
+        <div class="svc-num">03 /</div><span class="svc-icon">🎨</span>
         <div class="svc-title">Performance Creative</div>
-        <div class="svc-desc">Ads that stop the scroll and convert the click. Our in-house creative team produces UGC, motion, static, and video — all built for performance, not awards.</div>
-        <div class="svc-tags">
-          <span class="svc-tag">UGC</span>
-          <span class="svc-tag">Video</span>
-          <span class="svc-tag">Motion</span>
-        </div>
+        <div class="svc-desc">Ads that stop the scroll and convert the click. UGC, motion, static, and video — all built for performance, not awards.</div>
+        <div class="svc-tags"><span class="svc-tag">UGC</span><span class="svc-tag">Video</span><span class="svc-tag">Motion</span></div>
       </div>
       <div class="service-card">
-        <div class="svc-num">04 /</div>
-        <span class="svc-icon">📈</span>
+        <div class="svc-num">04 /</div><span class="svc-icon">📈</span>
         <div class="svc-title">Conversion Rate Optimization</div>
-        <div class="svc-desc">More traffic means nothing if your funnel leaks. We audit, redesign, and A/B test landing pages until every dollar of ad spend converts at peak efficiency.</div>
-        <div class="svc-tags">
-          <span class="svc-tag">A/B Testing</span>
-          <span class="svc-tag">Landing Pages</span>
-        </div>
+        <div class="svc-desc">More traffic means nothing if your funnel leaks. We audit, redesign, and A/B test landing pages until every dollar converts at peak efficiency.</div>
+        <div class="svc-tags"><span class="svc-tag">A/B Testing</span><span class="svc-tag">Landing Pages</span></div>
       </div>
       <div class="service-card">
-        <div class="svc-num">05 /</div>
-        <span class="svc-icon">📊</span>
+        <div class="svc-num">05 /</div><span class="svc-icon">📊</span>
         <div class="svc-title">Data & Analytics</div>
-        <div class="svc-desc">Real-time dashboards, attribution modeling, and weekly reports that actually mean something. You'll always know where your money went and why it worked.</div>
-        <div class="svc-tags">
-          <span class="svc-tag">Attribution</span>
-          <span class="svc-tag">Dashboards</span>
-        </div>
+        <div class="svc-desc">Real-time dashboards, attribution modeling, and weekly reports that actually mean something. Always know where your money went.</div>
+        <div class="svc-tags"><span class="svc-tag">Attribution</span><span class="svc-tag">Dashboards</span></div>
       </div>
       <div class="service-card">
-        <div class="svc-num">06 /</div>
-        <span class="svc-icon">🔁</span>
+        <div class="svc-num">06 /</div><span class="svc-icon">🔁</span>
         <div class="svc-title">Retention & Email</div>
-        <div class="svc-desc">Acquisition is only half the battle. We build email & SMS flows that turn first-time buyers into loyal customers — compounding your CAC payback period.</div>
-        <div class="svc-tags">
-          <span class="svc-tag">Klaviyo</span>
-          <span class="svc-tag">SMS</span>
-          <span class="svc-tag">LTV</span>
-        </div>
+        <div class="svc-desc">We build email & SMS flows that turn first-time buyers into loyal customers — compounding your CAC payback period every month.</div>
+        <div class="svc-tags"><span class="svc-tag">Klaviyo</span><span class="svc-tag">SMS</span><span class="svc-tag">LTV</span></div>
       </div>
     </div>
   </div>
@@ -922,10 +760,7 @@
 <section id="results">
   <div class="section-inner">
     <div class="reveal">
-      <div class="section-eyebrow">
-        <div class="eyebrow-bar"></div>
-        <span class="eyebrow-text">The Numbers</span>
-      </div>
+      <div class="section-eyebrow"><div class="eyebrow-bar"></div><span class="eyebrow-text">The Numbers</span></div>
       <h2 class="section-title">We Measure<br>Everything.</h2>
       <p class="section-sub">Results our clients actually care about — revenue, ROAS, and CAC. Not impressions.</p>
     </div>
@@ -934,31 +769,19 @@
         <div>
           <div class="result-num">4.8×</div>
           <div class="result-label">Average ROAS — all clients, all channels</div>
-          <div class="result-desc">Across Meta, Google, and TikTok campaigns. Some clients see 7–12× on well-optimized evergreen campaigns after the first 90 days.</div>
+          <div class="result-desc">Across Meta, Google, and TikTok. Some clients see 7–12× on well-optimized evergreen campaigns after the first 90 days.</div>
         </div>
         <div class="result-visual">
-          <div class="rbar-wrap">
-            <div class="rbar-head"><span>E-Commerce</span><span>7.2× ROAS</span></div>
-            <div class="rbar-track"><div class="rbar-fill" style="width:88%"></div></div>
-          </div>
-          <div class="rbar-wrap">
-            <div class="rbar-head"><span>SaaS / B2B</span><span>5.1× ROAS</span></div>
-            <div class="rbar-track"><div class="rbar-fill" style="width:70%"></div></div>
-          </div>
-          <div class="rbar-wrap">
-            <div class="rbar-head"><span>D2C Brands</span><span>6.4× ROAS</span></div>
-            <div class="rbar-track"><div class="rbar-fill" style="width:80%"></div></div>
-          </div>
-          <div class="rbar-wrap">
-            <div class="rbar-head"><span>Lead Gen</span><span>3.8× ROAS</span></div>
-            <div class="rbar-track"><div class="rbar-fill" style="width:52%"></div></div>
-          </div>
+          <div><div class="rbar-head"><span>E-Commerce</span><span>7.2× ROAS</span></div><div class="rbar-track"><div class="rbar-fill" style="width:88%"></div></div></div>
+          <div><div class="rbar-head"><span>SaaS / B2B</span><span>5.1× ROAS</span></div><div class="rbar-track"><div class="rbar-fill" style="width:70%"></div></div></div>
+          <div><div class="rbar-head"><span>D2C Brands</span><span>6.4× ROAS</span></div><div class="rbar-track"><div class="rbar-fill" style="width:80%"></div></div></div>
+          <div><div class="rbar-head"><span>Lead Gen</span><span>3.8× ROAS</span></div><div class="rbar-track"><div class="rbar-fill" style="width:52%"></div></div></div>
         </div>
       </div>
       <div class="result-card reveal">
         <div class="result-num">↓38%</div>
         <div class="result-label">CAC Reduction in 90 Days</div>
-        <div class="result-desc">On average, clients see cost-per-acquisition drop by 38% within the first quarter — without cutting spend.</div>
+        <div class="result-desc">Cost-per-acquisition drops by 38% within the first quarter on average — without cutting spend.</div>
       </div>
       <div class="result-card reveal">
         <div class="result-num">$47M</div>
@@ -967,7 +790,7 @@
       </div>
       <div class="result-card reveal">
         <div class="result-num">11 Days</div>
-        <div class="result-label">Average Onboarding to First Campaign Live</div>
+        <div class="result-label">Average Time to First Campaign Live</div>
         <div class="result-desc">Audit → Strategy → Launch. No months of discovery calls. We move fast.</div>
       </div>
     </div>
@@ -978,34 +801,39 @@
 <section class="process" id="process">
   <div class="section-inner">
     <div class="reveal">
-      <div class="section-eyebrow">
-        <div class="eyebrow-bar"></div>
-        <span class="eyebrow-text">How It Works</span>
-      </div>
+      <div class="section-eyebrow"><div class="eyebrow-bar"></div><span class="eyebrow-text">How It Works</span></div>
       <h2 class="section-title">From Zero to<br>Full Throttle.</h2>
       <p class="section-sub">A clean 4-step process that eliminates guesswork and gets campaigns live fast.</p>
     </div>
     <div class="process-steps reveal">
       <div class="ps-card">
         <div class="ps-num-wrap">01</div>
-        <div class="ps-title">Free Audit</div>
-        <div class="ps-desc">We tear apart your current ad accounts, funnel, and creative — and show you exactly where the money is leaking.</div>
-        <div class="ps-tag">👤 You do this</div>
+        <div class="ps-content">
+          <div class="ps-title">Free Audit</div>
+          <div class="ps-desc">We tear apart your current ad accounts, funnel, and creative — and show exactly where the money is leaking.</div>
+          <div class="ps-tag">👤 You do this</div>
+        </div>
       </div>
       <div class="ps-card">
         <div class="ps-num-wrap">02</div>
-        <div class="ps-title">Strategy Build</div>
-        <div class="ps-desc">Custom growth plan: channel mix, budget allocation, creative brief, audience map — everything tailored to your goals.</div>
+        <div class="ps-content">
+          <div class="ps-title">Strategy Build</div>
+          <div class="ps-desc">Custom growth plan: channel mix, budget allocation, creative brief, audience map — tailored to your goals.</div>
+        </div>
       </div>
       <div class="ps-card">
         <div class="ps-num-wrap">03</div>
-        <div class="ps-title">Launch & Test</div>
-        <div class="ps-desc">Campaigns go live within 11 days. We run rapid experiments across creatives, audiences, and placements simultaneously.</div>
+        <div class="ps-content">
+          <div class="ps-title">Launch & Test</div>
+          <div class="ps-desc">Campaigns go live within 11 days. We run rapid experiments across creatives, audiences, and placements simultaneously.</div>
+        </div>
       </div>
       <div class="ps-card">
         <div class="ps-num-wrap">04</div>
-        <div class="ps-title">Scale & Report</div>
-        <div class="ps-desc">Winners get scaled aggressively. You get weekly reports with clear numbers — ROAS, CAC, revenue attributed. No fluff.</div>
+        <div class="ps-content">
+          <div class="ps-title">Scale & Report</div>
+          <div class="ps-desc">Winners get scaled aggressively. Weekly reports with clear numbers — ROAS, CAC, revenue attributed. No fluff.</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1015,42 +843,15 @@
 <section id="guarantees">
   <div class="section-inner">
     <div class="reveal">
-      <div class="section-eyebrow">
-        <div class="eyebrow-bar"></div>
-        <span class="eyebrow-text">Our Guarantees</span>
-      </div>
+      <div class="section-eyebrow"><div class="eyebrow-bar"></div><span class="eyebrow-text">Our Guarantees</span></div>
       <h2 class="section-title">No Fluff.<br>Just Accountability.</h2>
       <p class="section-sub">We put our skin in the game. If we don't perform, you have every reason to leave.</p>
     </div>
     <div class="g-grid">
-      <div class="g-card reveal">
-        <div class="g-icon-wrap">⚡</div>
-        <div>
-          <div class="g-title">11-Day Launch Guarantee</div>
-          <div class="g-desc">From signed contract to campaigns live — 11 business days. No dragged-out onboarding. No endless intake forms.</div>
-        </div>
-      </div>
-      <div class="g-card reveal">
-        <div class="g-icon-wrap">📉</div>
-        <div>
-          <div class="g-title">CAC Reduction in 90 Days</div>
-          <div class="g-desc">We guarantee measurable cost-per-acquisition improvement within 90 days or we work for free until we hit it.</div>
-        </div>
-      </div>
-      <div class="g-card reveal">
-        <div class="g-icon-wrap">📊</div>
-        <div>
-          <div class="g-title">Full Transparency Reporting</div>
-          <div class="g-desc">Weekly reports, live dashboards, and 24/7 Slack access to your team. You always know exactly what we're doing and why.</div>
-        </div>
-      </div>
-      <div class="g-card reveal">
-        <div class="g-icon-wrap">🔓</div>
-        <div>
-          <div class="g-title">No Long-Term Lock-Ins</div>
-          <div class="g-desc">Month-to-month after month 3. We earn your business every single month. If we stop performing, you're free to leave. Simple.</div>
-        </div>
-      </div>
+      <div class="g-card reveal"><div class="g-icon-wrap">⚡</div><div><div class="g-title">11-Day Launch Guarantee</div><div class="g-desc">From signed contract to campaigns live — 11 business days. No dragged-out onboarding. No endless intake forms.</div></div></div>
+      <div class="g-card reveal"><div class="g-icon-wrap">📉</div><div><div class="g-title">CAC Reduction in 90 Days</div><div class="g-desc">We guarantee measurable cost-per-acquisition improvement within 90 days or we work for free until we hit it.</div></div></div>
+      <div class="g-card reveal"><div class="g-icon-wrap">📊</div><div><div class="g-title">Full Transparency Reporting</div><div class="g-desc">Weekly reports, live dashboards, and 24/7 Slack access to your team. You always know exactly what we're doing and why.</div></div></div>
+      <div class="g-card reveal"><div class="g-icon-wrap">🔓</div><div><div class="g-title">No Long-Term Lock-Ins</div><div class="g-desc">Month-to-month after month 3. We earn your business every single month. Stop performing, you're free to leave.</div></div></div>
     </div>
   </div>
 </section>
@@ -1059,10 +860,7 @@
 <section class="pricing" id="pricing">
   <div class="section-inner">
     <div class="reveal">
-      <div class="section-eyebrow">
-        <div class="eyebrow-bar"></div>
-        <span class="eyebrow-text">Packages</span>
-      </div>
+      <div class="section-eyebrow"><div class="eyebrow-bar"></div><span class="eyebrow-text">Packages</span></div>
       <h2 class="section-title">Invest in Growth.<br>Not Retainers.</h2>
       <p class="section-sub">Flat-rate retainers with zero hidden fees. Choose your growth tier.</p>
     </div>
@@ -1116,22 +914,15 @@
 <!-- CTA -->
 <section class="cta-section" id="contact">
   <div class="cta-inner">
-    <div class="cta-eyebrow">
-      <div class="kicker-line"></div>
-      Ready to scale?
-    </div>
-    <h2 class="cta-title reveal">
-      LET'S<br><span class="lime">PRINT</span><br>REVENUE.
-    </h2>
+    <div class="cta-eyebrow"><div class="kicker-line"></div>Ready to scale?</div>
+    <h2 class="cta-title reveal">LET'S<br><span class="lime">PRINT</span><br>REVENUE.</h2>
     <p class="cta-sub reveal">Tell us your goals. We'll audit your accounts for free and send you a growth plan within 48 hours. No commitment, no pitch deck theatre.</p>
     <div class="cta-pills reveal">
       <div class="cta-pill hot">⚡ Free account audit</div>
       <div class="cta-pill">✓ Response within 24 hrs</div>
       <div class="cta-pill">✓ No lock-in contracts</div>
     </div>
-    <div class="reveal">
-      <button class="cta-btn open-modal">Get My Free Audit →</button>
-    </div>
+    <div class="reveal"><button class="cta-btn open-modal">Get My Free Audit →</button></div>
   </div>
 </section>
 
@@ -1144,24 +935,12 @@
       <div class="modal-title">Let's See Where<br>You're Leaking Money.</div>
       <div class="modal-sub">Fill this out and we'll send you a free account audit + custom growth plan within 48 hours.</div>
       <div class="form-row">
-        <div class="field">
-          <label>Your Name *</label>
-          <input type="text" id="f-name" placeholder="Jordan Smith" required>
-        </div>
-        <div class="field">
-          <label>Phone / WhatsApp *</label>
-          <input type="tel" id="f-mobile" placeholder="+1 555 000 0000" required>
-        </div>
+        <div class="field"><label>Your Name *</label><input type="text" id="f-name" placeholder="Jordan Smith" required></div>
+        <div class="field"><label>Phone / WhatsApp *</label><input type="tel" id="f-mobile" placeholder="+1 555 000 0000" required></div>
       </div>
-      <div class="field">
-        <label>Business Email *</label>
-        <input type="email" id="f-email" placeholder="you@company.com" required>
-      </div>
+      <div class="field"><label>Business Email *</label><input type="email" id="f-email" placeholder="you@company.com" required></div>
       <hr class="mdivider">
-      <div class="field">
-        <label>Brand / Company Name *</label>
-        <input type="text" id="f-brand" placeholder="Acme Inc." required>
-      </div>
+      <div class="field"><label>Brand / Company Name *</label><input type="text" id="f-brand" placeholder="Acme Inc." required></div>
       <div class="field">
         <label>Current Monthly Ad Spend *</label>
         <select id="f-spend">
@@ -1191,7 +970,7 @@
     <div class="modal-success" id="modalSuccess">
       <div class="success-icon">⚡</div>
       <div class="success-title">Audit Request Sent!</div>
-      <div class="success-sub">Our team will review your accounts and send you a detailed audit + growth plan within 48 hours. Watch your inbox — this one's worth opening.</div>
+      <div class="success-sub">Our team will review your accounts and send a detailed audit + growth plan within 48 hours. Watch your inbox.</div>
     </div>
   </div>
 </div>
@@ -1203,21 +982,25 @@
 </footer>
 
 <script>
-  // Custom cursor
-  const cursor = document.getElementById('cursor');
-  const ring = document.getElementById('cursorRing');
-  let mx = 0, my = 0, rx = 0, ry = 0;
-  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-  function animateCursor() {
-    cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
-    rx += (mx - rx) * 0.14; ry += (my - ry) * 0.14;
-    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
-    requestAnimationFrame(animateCursor);
-  }
-  animateCursor();
+  // ── Hamburger ──
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
 
-  // Scroll reveal
-  const reveals = document.querySelectorAll('.reveal');
+  hamburger.addEventListener('click', () => {
+    const isOpen = hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open', isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  });
+
+  document.querySelectorAll('.mob-link').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+
+  // ── Scroll reveal ──
   const obs = new IntersectionObserver(entries => {
     entries.forEach((entry, i) => {
       if (entry.isIntersecting) {
@@ -1225,23 +1008,32 @@
       }
     });
   }, { threshold: 0.08 });
-  reveals.forEach(el => obs.observe(el));
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
-  // Modal
+  // ── Modal ──
   const modal = document.getElementById('leadModal');
-  const close = document.getElementById('modalClose');
-  const submit = document.getElementById('modalSubmit');
-  const form = document.getElementById('modalForm');
-  const success = document.getElementById('modalSuccess');
+  const modalClose = document.getElementById('modalClose');
+  const modalSubmit = document.getElementById('modalSubmit');
+  const modalForm = document.getElementById('modalForm');
+  const modalSuccess = document.getElementById('modalSuccess');
 
-  function openModal() { modal.classList.add('open'); document.body.style.overflow = 'hidden'; }
-  function closeModal() { modal.classList.remove('open'); document.body.style.overflow = ''; }
+  function openModal() {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
 
   document.querySelectorAll('.open-modal').forEach(el => el.addEventListener('click', openModal));
-  close.addEventListener('click', closeModal);
+  modalClose.addEventListener('click', closeModal);
   modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-  submit.addEventListener('click', () => {
+  modalSubmit.addEventListener('click', () => {
     const name = document.getElementById('f-name').value.trim();
     const mobile = document.getElementById('f-mobile').value.trim();
     const email = document.getElementById('f-email').value.trim();
@@ -1250,18 +1042,18 @@
     const goal = document.getElementById('f-goal').value;
 
     if (!name || !mobile || !email || !brand || !spend || !goal) {
-      submit.textContent = '⚠ Please fill all required fields';
-      submit.style.background = '#2A2A40';
-      submit.style.color = '#fff';
+      modalSubmit.textContent = '⚠ Please fill all required fields';
+      modalSubmit.style.background = '#1A1A24';
+      modalSubmit.style.color = '#fff';
       setTimeout(() => {
-        submit.textContent = 'Send My Audit Request →';
-        submit.style.background = '';
-        submit.style.color = '';
+        modalSubmit.textContent = 'Send My Audit Request →';
+        modalSubmit.style.background = '';
+        modalSubmit.style.color = '';
       }, 2200);
       return;
     }
-    form.classList.add('hide');
-    success.classList.add('show');
+    modalForm.classList.add('hide');
+    modalSuccess.classList.add('show');
   });
 </script>
 </body>
