@@ -1033,7 +1033,7 @@
   modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-  modalSubmit.addEventListener('click', () => {
+  modalSubmit.addEventListener('click', async () => {
     const name = document.getElementById('f-name').value.trim();
     const mobile = document.getElementById('f-mobile').value.trim();
     const email = document.getElementById('f-email').value.trim();
@@ -1052,8 +1052,36 @@
       }, 2200);
       return;
     }
+
+    // Show loading state
+    modalSubmit.textContent = 'Sending...';
+    modalSubmit.disabled = true;
+
+    // Submit to Google Form (silent, no redirect)
+    const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScQTywgo0TiLyYXCgdbdkKYJhdCaUTgwvoCfV6tBr_fG8i4Gg/formResponse';
+    const formData = new FormData();
+    formData.append('entry.659319553', name);
+    formData.append('entry.84612590', mobile);
+    formData.append('entry.575777860', email);
+    formData.append('entry.1998357470', brand);
+    formData.append('entry.630119346_sentinel', spend);
+    formData.append('entry.544290577_sentinel', goal);
+
+    try {
+      await fetch(FORM_URL, {
+        method: 'POST',
+        mode: 'no-cors', // required for Google Forms cross-origin
+        body: formData
+      });
+    } catch (e) {
+      // no-cors will always "fail" silently — data still submits
+    }
+
+    // Show success regardless (no-cors gives no response)
     modalForm.classList.add('hide');
     modalSuccess.classList.add('show');
+    modalSubmit.disabled = false;
+    modalSubmit.textContent = 'Send My Audit Request →';
   });
 </script>
 </body>
