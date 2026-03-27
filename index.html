@@ -511,7 +511,6 @@
     .hero-inner { grid-template-columns: 1fr; gap: 40px; }
     .hero-sub { max-width: 100%; }
 
-    /* Metrics: show inline on tablet */
     .metric-row { flex-direction: row; flex-wrap: wrap; gap: 12px; }
     .metric-item { flex: 1; min-width: 110px; }
     .metric-divider { display: none; }
@@ -532,59 +531,47 @@
   @media (max-width: 600px) {
     section { padding: 68px 5%; }
 
-    /* Nav — hide desktop CTA, use mobile menu CTA */
     nav { padding: 0 5%; }
     .nav-cta { display: none; }
 
-    /* Hero */
     .hero { padding: 84px 5% 52px; min-height: auto; }
     .hero-title { font-size: clamp(3rem, 13vw, 5rem); }
     .hero-sub { font-size: 0.9rem; }
     .hero-actions { flex-direction: column; align-items: stretch; gap: 10px; }
     .btn-lime, .btn-outline { width: 100%; justify-content: center; }
 
-    /* Metrics: back to column on mobile */
     .metric-row { flex-direction: column; gap: 14px; }
     .metric-divider { display: block; }
     .metric-val { font-size: 2.1rem; }
 
-    /* Marquee */
     .marquee-item { font-size: 0.6rem; padding: 0 18px; }
 
-    /* Services */
     .services-grid { grid-template-columns: 1fr; }
     .service-card { padding: 28px 22px; }
 
-    /* Results */
     .result-card { padding: 26px; }
     .result-card.big { padding: 26px; }
 
-    /* Process — horizontal step layout on mobile */
     .process-steps { grid-template-columns: 1fr; gap: 24px; }
     .ps-card { padding: 0; text-align: left; display: flex; gap: 18px; align-items: flex-start; }
     .ps-num-wrap { margin: 0; flex-shrink: 0; width: 50px; height: 50px; font-size: 1.1rem; }
     .ps-content { flex: 1; }
 
-    /* Guarantees */
     .g-card { flex-direction: column; gap: 12px; padding: 24px; }
     .g-icon-wrap { width: 40px; height: 40px; }
 
-    /* Pricing */
     .pkg-grid { max-width: 100%; }
     .pkg-card.featured { transform: none; }
     .pkg-card { padding: 28px 22px; }
 
-    /* CTA */
     .cta-section { padding: 76px 5%; }
     .cta-title { font-size: clamp(2.8rem, 13vw, 4.5rem); }
     .cta-btn { width: 100%; display: flex; }
 
-    /* Modal */
     .modal { padding: 36px 18px 28px; border-radius: 12px; max-height: 95vh; }
     .modal-title { font-size: 1.65rem; }
     .form-row { grid-template-columns: 1fr; }
 
-    /* Footer */
     footer { flex-direction: column; text-align: center; padding: 22px 5%; }
   }
 
@@ -1064,8 +1051,8 @@
     formData.append('entry.84612590', mobile);
     formData.append('entry.575777860', email);
     formData.append('entry.1998357470', brand);
-    formData.append('entry.630119346_sentinel', spend);
-    formData.append('entry.544290577_sentinel', goal);
+    formData.append('entry.630119346', spend);   // ✅ FIXED: removed _sentinel
+    formData.append('entry.544290577', goal);    // ✅ FIXED: removed _sentinel
 
     try {
       await fetch(FORM_URL, {
