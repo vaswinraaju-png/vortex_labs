@@ -47,7 +47,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .dval{color:rgba(255,255,255,.28);font-size:.52rem}
 
 /* CAT BAR */
-.catbar{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none;position:sticky;top:var(--nav-h);z-index:400}
+.catbar{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none;position:sticky;top:var(--nav-h);z-index:400;touch-action:pan-x;-webkit-overflow-scrolling:touch}
 .catbar::-webkit-scrollbar{display:none}
 .cat-item{position:relative;flex-shrink:0}
 .cat-btn{display:flex;align-items:center;gap:4px;padding:0 12px;height:var(--cat-h);font-family:var(--mono);font-size:.67rem;color:var(--text2);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;letter-spacing:.02em;transition:all .15s;margin-bottom:-1px}
@@ -86,6 +86,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 
 .sym-grid{display:grid;grid-template-columns:310px 1fr;gap:14px;align-items:start}
 .right-col{display:flex;flex-direction:column;gap:14px}
+/* Mobile: stack sentinel card above CPR+news */
+@media(max-width:900px){
+  .sym-grid{grid-template-columns:1fr}
+}
 
 /* GAUGE */
 .gauge-wrap{position:relative;width:175px;height:88px;margin:4px auto 7px}
@@ -261,27 +265,164 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .filt-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
 .filt-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 
-@media(max-width:900px){.sym-grid{grid-template-columns:1fr}.sum-stats{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:600px){
-  :root{--nav-h:46px;--cat-h:38px}
-  .sum-stats{grid-template-columns:repeat(2,1fr);gap:8px}
-  .scan-grid{grid-template-columns:repeat(2,1fr);gap:6px}
-  .cpr-stats{grid-template-columns:repeat(3,1fr)}
-  .bk-grid{grid-template-columns:1fr 1fr}
-  .page-body{padding:10px 10px 50px}
-  .cat-btn{padding:0 8px;font-size:.61rem}
-  .summary-btn{padding:0 9px;font-size:.61rem}
+/* ── MOBILE BOTTOM TAB BAR ── */
+.mob-tabbar{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--navy);border-top:1px solid rgba(255,255,255,.1);z-index:600;padding:0;padding-bottom:env(safe-area-inset-bottom)}
+@media(max-width:640px){.mob-tabbar{display:flex}}
+.mob-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;background:transparent;border:none;cursor:pointer;gap:3px;min-height:52px;transition:all .15s;color:rgba(255,255,255,.4);font-family:var(--mono);font-size:.5rem;letter-spacing:.06em;text-transform:uppercase}
+.mob-tab.active{color:var(--accent)}
+.mob-tab svg{width:18px;height:18px;flex-shrink:0}
+.mob-tab-dot{width:4px;height:4px;border-radius:50%;background:var(--accent);margin-top:1px;opacity:0;transition:opacity .15s}
+.mob-tab.active .mob-tab-dot{opacity:1}
+@media(max-width:900px){
+  .sym-grid{grid-template-columns:1fr}
+  .sum-stats{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ── MOBILE ── */
+@media(max-width:640px){
+  :root{--nav-h:46px;--cat-h:40px}
+  html{font-size:13px}
+
+  /* Nav */
+  .topnav{padding:0 12px;gap:6px}
+  .nav-tag{display:none}
+  .mkt-pill{display:none!important}
+  .live-pill{padding:3px 7px;font-size:.55rem}
+  .dval{display:none}
+  .tz-btn{padding:5px 6px;font-size:.56rem}
+  .tdisp{padding:5px 8px;font-size:.6rem}
+
+  /* Catbar — smaller, touch-friendly */
+  .catbar{top:var(--nav-h)}
+  .cat-btn{padding:0 9px;font-size:.62rem;height:var(--cat-h)}
+  .summary-btn{padding:0 10px;font-size:.62rem;height:var(--cat-h)}
   .cat-label{display:none}
   .cat-divider{margin:8px 0}
-  .dval{display:none}
-  .hist-summary{grid-template-columns:repeat(2,1fr)}
-  .nav-tag{display:none}
+
+  /* Page */
+  .page-body{padding:10px 10px 80px}
+
+  /* Sym grid: single column, full width */
+  .sym-grid{grid-template-columns:1fr;gap:10px}
+  .right-col{gap:10px}
+
+  /* Cards */
+  .card-hdr{padding:10px 12px 0}
+  .card-body{padding:10px 12px 12px}
+  .card-title{font-size:.6rem}
+
+  /* Gauge — smaller on mobile */
+  .gauge-wrap{width:150px;height:75px}
+  .gauge-score{font-size:1.5rem}
+  .gauge-lbl{font-size:.54rem}
+  .sig-pill{font-size:.65rem;padding:5px 11px}
+
+  /* Score bars */
+  .sc-lbl{width:68px;font-size:.58rem}
+  .sc-num{font-size:.6rem;width:18px}
+
+  /* Breakdown grid */
+  .bk-grid{grid-template-columns:1fr 1fr;gap:5px}
+  .bk-box{padding:6px}
+  .bk-name{font-size:.5rem}
+  .bk-val{font-size:.64rem}
+
+  /* AI box */
+  .ai-txt{font-size:.67rem}
+  .ai-lbl{font-size:.52rem}
+
+  /* Analyze btn */
+  .analyze-btn{font-size:.66rem;padding:10px}
+
+  /* CPR */
+  .cpr-stats{grid-template-columns:repeat(3,1fr);gap:6px}
+  .cpr-stat{padding:8px}
+  .cpr-sv{font-size:1.2rem}
+  .cpr-sl{font-size:.5rem}
+  .cpr-ss{font-size:.48rem}
+  .cpr-hdr-row{flex-direction:column;align-items:flex-start;gap:4px;margin-bottom:8px}
+  .cpr-day-badge{font-size:.58rem;padding:3px 8px}
+  .cpr-expand-btn{font-size:.57rem;padding:4px 9px}
+
+  /* CPR table — horizontal scroll, smaller text */
+  .cpr-twrap{-webkit-overflow-scrolling:touch}
+  .cpr-table th{font-size:.48rem;padding:5px 5px}
+  .cpr-table td{font-size:.58rem;padding:5px 5px}
+  .cpill{font-size:.48rem;padding:1px 4px}
+
+  /* Distribution bar row */
+  .db-row{gap:5px}
+  .db-row span{font-size:.5rem!important}
+
+  /* Summary view */
+  .summary-hero{padding:16px 10px 12px}
+  .summary-hero-title{font-size:.9rem}
+  .summary-hero-sub{font-size:.66rem}
+  .sum-stats{grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:14px}
+  .sstat{padding:10px}
+  .sstat-num{font-size:1.3rem}
+  .sstat-lbl{font-size:.5rem}
+  .scan-grid{grid-template-columns:repeat(2,1fr);gap:6px}
+  .scard{padding:9px 10px}
+  .scard-sym{font-size:.75rem}
+  .scard-name{font-size:.52rem}
+  .scard-badge{font-size:.5rem;padding:2px 6px}
+  .scard-meta{font-size:.52rem}
+  .scard-signal{font-size:.54rem}
+  .filter-row{gap:5px}
+  .filt-btn{padding:5px 9px;font-size:.58rem}
+
+  /* News */
+  .news-scroll{max-height:280px}
+  .ni{padding:7px 9px;gap:7px}
+  .nbadge{width:24px;height:24px;font-size:.65rem}
+  .nhl{font-size:.67rem}
+  .nsrc,.ntime{font-size:.53rem}
+  .npill{font-size:.5rem}
+
+  /* Historical panel */
+  .hist-summary{grid-template-columns:repeat(2,1fr);gap:6px}
+  .hs-val{font-size:.75rem}
+  .hs-lbl{font-size:.5rem}
+  .hist-table th{font-size:.46rem;padding:4px 4px}
+  .hist-table td{font-size:.55rem;padding:4px 4px}
+
+  /* Age tag */
+  .age-tag{font-size:.5rem;padding:2px 6px}
+  .sent-hdr-row{gap:4px}
+
+  /* NSE waitlist */
+  .nse-waitlist{padding:20px 14px}
+  .nse-wl-title{font-size:.82rem}
+  .nse-wl-form{flex-direction:column}
+  .nse-wl-btn{width:100%}
+
+  /* Dropdown — full width on very small screens */
+  .cat-dropdown{min-width:180px;max-height:260px}
+  .dd-item{padding:10px 12px}
+  .dd-sym{min-width:46px;font-size:.65rem}
+  .dd-name{font-size:.56rem}
 }
-@media(max-width:420px){
-  .topnav{padding:0 10px}
+
+/* ── SMALL PHONES ── */
+@media(max-width:380px){
   .time-block .tz-btn:not(.active){display:none}
-  .scan-grid{grid-template-columns:1fr 1fr}
-  .sum-stats{grid-template-columns:1fr 1fr}
+  .scan-grid{grid-template-columns:repeat(2,1fr)}
+  .sum-stats{grid-template-columns:repeat(2,1fr)}
+  .cpr-stats{grid-template-columns:repeat(3,1fr)}
+  .bk-grid{grid-template-columns:1fr 1fr}
+  .cat-btn{padding:0 7px;font-size:.58rem}
+  .gauge-wrap{width:135px;height:68px}
+  .gauge-score{font-size:1.35rem}
+}
+
+/* ── TOUCH TARGETS ── all interactive elements ≥ 44px on mobile ── */
+@media(max-width:640px){
+  .dd-item{min-height:44px}
+  .analyze-btn{min-height:44px}
+  .filt-btn{min-height:36px}
+  .cat-btn,.summary-btn{min-height:40px}
+  select,input[type=email]{font-size:16px!important} /* prevent iOS zoom */
 }
 </style>
 </head>
@@ -446,7 +587,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 
     <div class="sym-grid" id="symGrid">
       <!-- LEFT: Sentiment -->
-      <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
         <div class="card">
           <div class="card-hdr">
             <div class="sent-hdr-row" style="width:100%">
@@ -554,7 +695,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 
 <script>
 // ═══ CONFIG ═══════════════════════════════════════════════════════════════
-const TD_KEY = 'eb5e02ff78f14b5e9ef9acc9245d522f';
+const TD_KEY = 'f13c82ea98f947b48b9453b15a732cf1';
 const SENTIMENT_TTL = 15 * 60 * 1000; // 15 min cache
 
 // ═══ CLOCK ════════════════════════════════════════════════════════════════
@@ -695,6 +836,9 @@ function showSummary(){
   document.getElementById('summaryBtnEl').classList.add('active');
   document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
   showMktPill(false);
+  // sync mobile tab
+  document.querySelectorAll('.mob-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('mobt-overview')?.classList.add('active');
   if(!scanRunning) runScan();
 }
 function goSymbolView(){
@@ -729,6 +873,8 @@ function pickSym(cat,key,sym,name,el,e){
   loadCPR();
   renderNews(HL[cat]||HL.FOREX,null);
   setTimeout(()=>runAnalysis(false),400);
+  // Mobile: switch to signal tab
+  if(window.innerWidth<=640) setTimeout(()=>mobTab('signal'),100);
 }
 
 function pickSymDirect(cat,key){
@@ -749,6 +895,8 @@ function pickSymDirect(cat,key){
   loadCPR();
   renderNews(HL[cat]||HL.FOREX,null);
   setTimeout(()=>runAnalysis(false),400);
+  // Mobile: switch to signal tab
+  if(window.innerWidth<=640) setTimeout(()=>mobTab('signal'),100);
 }
 
 function activateNSE(e){
@@ -1205,6 +1353,79 @@ function resetUI(){
 // ═══ INIT ══════════════════════════════════════════════════════════════════
 drawGauge(0,'#d1d5db');
 showSummary();
+<!-- MOBILE BOTTOM TAB BAR -->
+<div class="mob-tabbar" id="mobTabbar">
+  <button class="mob-tab active" id="mobt-overview" onclick="mobTab('overview')">
+    <svg viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="7" height="7" rx="1.5" fill="currentColor"/><rect x="11" y="2" width="7" height="7" rx="1.5" fill="currentColor"/><rect x="2" y="11" width="7" height="7" rx="1.5" fill="currentColor"/><rect x="11" y="11" width="7" height="7" rx="1.5" fill="currentColor"/></svg>
+    Overview
+    <span class="mob-tab-dot"></span>
+  </button>
+  <button class="mob-tab" id="mobt-signal" onclick="mobTab('signal')">
+    <svg viewBox="0 0 20 20" fill="none"><path d="M3 14L7 9L11 12L17 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="17" cy="5" r="1.5" fill="currentColor"/></svg>
+    Signal
+    <span class="mob-tab-dot"></span>
+  </button>
+  <button class="mob-tab" id="mobt-cpr" onclick="mobTab('cpr')">
+    <svg viewBox="0 0 20 20" fill="none"><path d="M4 10h12M4 6h12M4 14h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    CPR
+    <span class="mob-tab-dot"></span>
+  </button>
+  <button class="mob-tab" id="mobt-news" onclick="mobTab('news')">
+    <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M7 8h6M7 11h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    News
+    <span class="mob-tab-dot"></span>
+  </button>
+</div>
+
+<script>
+// ── MOBILE TAB NAVIGATION ──────────────────────────────────────────────────
+let mobActiveTab = 'overview';
+function mobTab(tab) {
+  mobActiveTab = tab;
+  document.querySelectorAll('.mob-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('mobt-' + tab)?.classList.add('active');
+
+  if (tab === 'overview') {
+    showSummary();
+    return;
+  }
+
+  // For signal/cpr/news — ensure we're in symbol view
+  // If no symbol selected yet, show a prompt
+  if (!curAsset || curCat === 'NSE') {
+    goSymbolView();
+    document.getElementById('summaryBtnEl').classList.remove('active');
+    document.getElementById('nsePanel').style.display = 'none';
+    document.getElementById('symGrid').style.display = '';
+  }
+
+  // On mobile: show/hide cards based on active tab
+  const isMobile = window.innerWidth <= 640;
+  if (!isMobile) return;
+
+  const sentCard = document.querySelector('.sym-grid > div:first-child');
+  const rightCol = document.querySelector('.right-col');
+  const cprCard = rightCol ? rightCol.children[0] : null;
+  const newsCard = rightCol ? rightCol.children[1] : null;
+
+  if (sentCard) sentCard.style.display = tab === 'signal' ? 'flex' : 'none';
+  if (cprCard)  cprCard.style.display  = tab === 'cpr'    ? 'block' : 'none';
+  if (newsCard) newsCard.style.display  = tab === 'news'   ? 'block' : 'none';
+
+  if (rightCol) rightCol.style.display = (tab === 'cpr' || tab === 'news') ? 'flex' : 'none';
+}
+
+// Reset card visibility on desktop resize
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 640) {
+    const sentCard = document.querySelector('.sym-grid > div:first-child');
+    const rightCol = document.querySelector('.right-col');
+    if (sentCard) sentCard.style.display = '';
+    if (rightCol) {
+      rightCol.style.display = '';
+      Array.from(rightCol.children).forEach(c => c.style.display = '');
+    }
+  }
+});
 </script>
 </body>
-</html>
