@@ -97,11 +97,30 @@ header{padding:20px 0 18px;display:flex;align-items:center;justify-content:space
 .pill-neutral{background:rgba(240,180,41,.15);color:var(--neutral)}
 .pill-pending{background:rgba(255,255,255,.07);color:var(--muted)}
 
-/* BACKTEST */
-.bt-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
-.bt-stat{text-align:center}
-.bt-stat-val{font-family:var(--mono);font-size:1rem;font-weight:700;margin-bottom:2px}
-.bt-stat-label{font-size:.65rem;color:var(--muted);font-family:var(--mono);letter-spacing:.06em}
+/* CPR BREAKOUT */
+.cpr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.cpr-stat-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.cpr-stat-val{font-family:var(--mono);font-size:1.6rem;font-weight:700;line-height:1;margin-bottom:4px}
+.cpr-stat-label{font-size:.6rem;color:var(--muted);font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.cpr-stat-sub{font-size:.6rem;color:var(--muted);font-family:var(--mono);margin-top:3px}
+.cpr-table-wrap{overflow-x:auto}
+.cpr-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.68rem}
+.cpr-table th{color:var(--muted);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);font-weight:400}
+.cpr-table td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text);vertical-align:middle}
+.cpr-table tr:last-child td{border-bottom:none}
+.cpr-table tr:hover td{background:rgba(255,255,255,.02)}
+.cpr-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:4px;font-size:.6rem;font-weight:700;letter-spacing:.06em}
+.cpr-pill.bull{background:rgba(0,212,170,.15);color:var(--bull)}
+.cpr-pill.bear{background:rgba(255,77,109,.15);color:var(--bear)}
+.cpr-pill.neutral{background:rgba(240,180,41,.12);color:var(--neutral)}
+.cpr-loading{text-align:center;padding:36px;color:var(--muted);font-family:var(--mono);font-size:.75rem;letter-spacing:.08em}
+.cpr-loading-dot{display:inline-block;animation:cpr-blink 1.2s step-end infinite}
+.cpr-loading-dot:nth-child(2){animation-delay:.2s}
+.cpr-loading-dot:nth-child(3){animation-delay:.4s}
+@keyframes cpr-blink{0%,100%{opacity:1}50%{opacity:.2}}
+.cpr-bar-wrap{display:flex;align-items:center;gap:8px}
+.cpr-mini-bar{height:6px;border-radius:3px;min-width:4px;transition:width .6s ease}
+.cpr-err{color:var(--bear);font-family:var(--mono);font-size:.72rem;text-align:center;padding:24px}
 
 /* BUTTONS */
 .analyze-btn{display:flex;align-items:center;gap:10px;padding:11px 22px;background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.25);border-radius:8px;color:var(--accent);font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;cursor:pointer;transition:all .2s;white-space:nowrap}
@@ -247,15 +266,21 @@ header{padding:20px 0 18px;display:flex;align-items:center;justify-content:space
     </div>
   </div>
 
-  <!-- BACKTEST -->
-  <div class="card full-width">
-    <div class="card-label">Sentiment Backtest (90-day simulated)</div>
-    <canvas id="btChart" height="160" style="width:100%"></canvas>
-    <div class="bt-stats">
-      <div class="bt-stat"><div class="bt-stat-val" id="bt-ret" style="color:var(--bull)">--</div><div class="bt-stat-label">TOTAL RETURN</div></div>
-      <div class="bt-stat"><div class="bt-stat-val" id="bt-wr" style="color:var(--accent2)">--</div><div class="bt-stat-label">WIN RATE</div></div>
-      <div class="bt-stat"><div class="bt-stat-val" id="bt-sh" style="color:#a78bfa">--</div><div class="bt-stat-label">SHARPE RATIO</div></div>
-      <div class="bt-stat"><div class="bt-stat-val" id="bt-dd" style="color:var(--bear)">--</div><div class="bt-stat-label">MAX DRAWDOWN</div></div>
+  <!-- CPR BREAKOUT PANEL -->
+  <div class="card full-width" id="cprCard">
+    <div class="card-label" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <span style="display:flex;align-items:center;gap:8px">SimpleCPR Breakout — <span id="cprAssetLabel">USD/JPY</span> &nbsp;<span style="font-size:.6rem;color:var(--muted)">Last 30 days · R1 &amp; S1</span></span>
+      <button class="analyze-btn" style="padding:6px 14px;font-size:.65rem" onclick="loadCPR()">↻ REFRESH</button>
+    </div>
+    <!-- Summary stats -->
+    <div class="cpr-grid" id="cprStats">
+      <div class="cpr-stat-box"><div class="cpr-stat-val" id="cpr-r1-count" style="color:var(--bull)">--</div><div class="cpr-stat-label">R1 Breakouts</div><div class="cpr-stat-sub">↑ Price closed above R1</div></div>
+      <div class="cpr-stat-box"><div class="cpr-stat-val" id="cpr-s1-count" style="color:var(--bear)">--</div><div class="cpr-stat-label">S1 Breakouts</div><div class="cpr-stat-sub">↓ Price closed below S1</div></div>
+      <div class="cpr-stat-box"><div class="cpr-stat-val" id="cpr-neutral-count" style="color:var(--neutral)">--</div><div class="cpr-stat-label">Inside CPR Range</div><div class="cpr-stat-sub">◆ Closed between S1–R1</div></div>
+    </div>
+    <!-- Day-by-day table -->
+    <div class="cpr-table-wrap" id="cprTableWrap">
+      <div class="cpr-loading">AWAITING DATA — click REFRESH to load CPR levels<span class="cpr-loading-dot">.</span><span class="cpr-loading-dot">.</span><span class="cpr-loading-dot">.</span></div>
     </div>
   </div>
 
@@ -369,8 +394,10 @@ function switchAsset(asset, btn) {
   document.querySelectorAll('.asset-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('feedAssetLabel').textContent = ASSETS[asset].label;
+  document.getElementById('cprAssetLabel').textContent = ASSETS[asset].label;
   resetUI();
   if (analysisCache[asset]) restoreAnalysis(asset);
+  loadCPR();
 }
 
 function resetUI() {
@@ -399,8 +426,7 @@ function resetUI() {
   drawGauge(0, '#333');
   document.getElementById('newsList').innerHTML =
     '<div style="color:var(--muted);font-size:.8rem;text-align:center;padding:30px">Click "Analyze Now" to fetch and score headlines</div>';
-  ['bt-ret','bt-wr','bt-sh','bt-dd'].forEach(id => document.getElementById(id).textContent = '--');
-  drawBacktest(Array(90).fill(0), []);
+  resetCPR();
 }
 
 // ═══ GAUGE ═══════════════════════════════════════════════════════════
@@ -462,65 +488,179 @@ function renderNewsFeed(headlines, scores) {
   });
 }
 
-// ═══ BACKTEST ════════════════════════════════════════════════════════
-function drawBacktest(returns, signals) {
-  const canvas = document.getElementById('btChart');
-  const dpr = window.devicePixelRatio||1;
-  const W = canvas.offsetWidth||800, H = 160;
-  canvas.width=W*dpr; canvas.height=H*dpr;
-  canvas.style.width=W+'px'; canvas.style.height=H+'px';
-  const ctx = canvas.getContext('2d');
-  ctx.scale(dpr,dpr);
-  const pad={l:40,r:20,t:20,b:30};
-  const w=W-pad.l-pad.r, h=H-pad.t-pad.b;
-  let equity=[0], cum=0;
-  returns.forEach(r=>{cum+=r;equity.push(cum);});
-  const minE=Math.min(...equity), maxE=Math.max(...equity), range=maxE-minE||1;
-  const toY=v=>pad.t+h-((v-minE)/range)*h;
-  const toX=i=>pad.l+(i/(equity.length-1))*w;
-  ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=1;
-  ctx.beginPath();ctx.moveTo(pad.l,toY(0));ctx.lineTo(pad.l+w,toY(0));ctx.stroke();
-  const grad=ctx.createLinearGradient(0,pad.t,0,pad.t+h);
-  grad.addColorStop(0,'rgba(0,212,170,.25)');
-  grad.addColorStop(1,'rgba(0,212,170,0)');
-  ctx.beginPath();ctx.moveTo(toX(0),toY(equity[0]));
-  equity.forEach((v,i)=>ctx.lineTo(toX(i),toY(v)));
-  ctx.lineTo(toX(equity.length-1),pad.t+h);
-  ctx.lineTo(toX(0),pad.t+h);
-  ctx.closePath();ctx.fillStyle=grad;ctx.fill();
-  ctx.beginPath();
-  equity.forEach((v,i)=>{i===0?ctx.moveTo(toX(i),toY(v)):ctx.lineTo(toX(i),toY(v));});
-  ctx.strokeStyle='rgba(0,212,170,.9)';ctx.lineWidth=2;
-  ctx.shadowColor='rgba(0,212,170,.5)';ctx.shadowBlur=8;ctx.stroke();ctx.shadowBlur=0;
-  signals.forEach(s=>{
-    ctx.beginPath();ctx.arc(toX(s.idx+1),toY(equity[s.idx+1]),5,0,2*Math.PI);
-    ctx.fillStyle=s.dir==='LONG'?'rgba(0,212,170,.9)':'rgba(255,77,109,.9)';ctx.fill();
+// ═══ CPR BREAKOUT ENGINE (Twelve Data) ═══════════════════════════════
+const TWELVE_KEY = 'f13c82ea98f947b48b9453b15a732cf1';
+const TWELVE_SYMBOLS = {
+  USDJPY: 'USD/JPY',
+  EURUSD: 'EUR/USD',
+  USOIL:  'USOIL/USD',
+  XAUUSD: 'XAU/USD',
+  XAGUSD: 'XAG/USD',
+};
+let cprCache = {};
+
+function resetCPR() {
+  ['cpr-r1-count','cpr-s1-count','cpr-neutral-count'].forEach(id => {
+    document.getElementById(id).textContent = '--';
   });
-  ctx.font='10px "Space Mono",monospace';
-  ctx.fillStyle='rgba(255,255,255,.3)';ctx.textAlign='right';
-  [minE,0,maxE].forEach(v=>ctx.fillText((v>0?'+':'')+v.toFixed(1)+'%',pad.l-5,toY(v)+4));
+  document.getElementById('cprAssetLabel').textContent = ASSETS[currentAsset].label;
+  document.getElementById('cprTableWrap').innerHTML =
+    '<div class="cpr-loading">AWAITING DATA — click REFRESH to load CPR levels<span class="cpr-loading-dot">.</span><span class="cpr-loading-dot">.</span><span class="cpr-loading-dot">.</span></div>';
 }
 
-function generateBacktest(score) {
-  const days=90,returns=[],signals=[];
-  for(let i=0;i<days;i++){
-    const noise=(Math.random()-.5)*1.2;
-    const trend=(score/100)*0.08;
-    const r=trend+noise; returns.push(r);
-    if(Math.random()<.12) signals.push({idx:i,dir:r>0?'LONG':'SHORT'});
+async function loadCPR() {
+  document.getElementById('cprAssetLabel').textContent = ASSETS[currentAsset].label;
+
+  if (cprCache[currentAsset]) {
+    renderCPR(cprCache[currentAsset]);
+    return;
   }
-  const cum=returns.reduce((a,b)=>a+b,0);
-  const winRate=(returns.filter(r=>r>0).length/days*100).toFixed(0);
-  const avg=cum/days;
-  const std=Math.sqrt(returns.map(r=>(r-avg)**2).reduce((a,b)=>a+b,0)/days);
-  const sharpe=std>0?(avg/std*Math.sqrt(252)).toFixed(2):'0.00';
-  let maxDD=0,peak=0,rc=0;
-  returns.forEach(r=>{rc+=r;peak=Math.max(peak,rc);maxDD=Math.max(maxDD,peak-rc);});
-  document.getElementById('bt-ret').textContent=(cum>0?'+':'')+cum.toFixed(1)+'%';
-  document.getElementById('bt-wr').textContent=winRate+'%';
-  document.getElementById('bt-sh').textContent=sharpe;
-  document.getElementById('bt-dd').textContent='-'+maxDD.toFixed(1)+'%';
-  drawBacktest(returns,signals);
+
+  document.getElementById('cprTableWrap').innerHTML =
+    '<div class="cpr-loading">FETCHING OHLC FROM TWELVE DATA<span class="cpr-loading-dot">.</span><span class="cpr-loading-dot">.</span><span class="cpr-loading-dot">.</span></div>';
+  ['cpr-r1-count','cpr-s1-count','cpr-neutral-count'].forEach(id => {
+    document.getElementById(id).textContent = '…';
+  });
+
+  const symbol = TWELVE_SYMBOLS[currentAsset];
+  const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=1day&outputsize=32&apikey=${TWELVE_KEY}`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.status === 'error' || !data.values || data.values.length < 2) {
+      throw new Error(data.message || 'No data returned');
+    }
+
+    // Twelve Data returns newest first — reverse to chronological
+    const candles = data.values.slice().reverse();
+
+    // Calculate CPR levels for each day using PREVIOUS day's H/L/C
+    const rows = [];
+    for (let i = 1; i < candles.length; i++) {
+      const prev = candles[i - 1];
+      const curr = candles[i];
+      const pH = parseFloat(prev.high);
+      const pL = parseFloat(prev.low);
+      const pC = parseFloat(prev.close);
+
+      // SimpleCPR formulas
+      const pivot = (pH + pL + pC) / 3;
+      const bc    = (pH + pL) / 2;
+      const tc    = (pivot - bc) + pivot;
+      const r1    = (2 * pivot) - pL;
+      const s1    = (2 * pivot) - pH;
+
+      const currH = parseFloat(curr.high);
+      const currL = parseFloat(curr.low);
+      const currC = parseFloat(curr.close);
+
+      let breakout = 'inside';
+      if (currC > r1) breakout = 'r1';
+      else if (currC < s1) breakout = 's1';
+
+      rows.push({
+        date: curr.datetime,
+        open: parseFloat(curr.open),
+        high: currH,
+        low: currL,
+        close: currC,
+        pivot: pivot,
+        tc: tc,
+        bc: bc,
+        r1: r1,
+        s1: s1,
+        breakout,
+      });
+    }
+
+    // Take last 30 rows
+    const last30 = rows.slice(-30);
+    cprCache[currentAsset] = last30;
+    renderCPR(last30);
+
+  } catch(err) {
+    document.getElementById('cprTableWrap').innerHTML =
+      `<div class="cpr-err">⚠ Failed to load data: ${err.message}<br><span style="color:var(--muted);font-size:.65rem">Check API key or symbol. Twelve Data free tier supports Forex pairs. For commodities (USOIL, XAU, XAG) a paid plan may be required.</span></div>`;
+    ['cpr-r1-count','cpr-s1-count','cpr-neutral-count'].forEach(id => {
+      document.getElementById(id).textContent = '--';
+    });
+  }
+}
+
+function renderCPR(rows) {
+  const r1Count      = rows.filter(r => r.breakout === 'r1').length;
+  const s1Count      = rows.filter(r => r.breakout === 's1').length;
+  const insideCount  = rows.filter(r => r.breakout === 'inside').length;
+  const total        = rows.length;
+
+  document.getElementById('cpr-r1-count').textContent = r1Count;
+  document.getElementById('cpr-s1-count').textContent = s1Count;
+  document.getElementById('cpr-neutral-count').textContent = insideCount;
+
+  // Determine display precision based on asset
+  const isJpy   = currentAsset === 'USDJPY';
+  const isMetal = currentAsset === 'XAUUSD' || currentAsset === 'XAGUSD';
+  const isOil   = currentAsset === 'USOIL';
+  const dec = isJpy ? 3 : isMetal ? 2 : isOil ? 2 : 5;
+  const fmt = v => v.toFixed(dec);
+
+  const maxBreakBar = Math.max(r1Count, s1Count, insideCount, 1);
+
+  let tableHTML = `
+    <table class="cpr-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Close</th>
+          <th>Pivot</th>
+          <th>TC</th>
+          <th>BC</th>
+          <th>R1</th>
+          <th>S1</th>
+          <th>Breakout</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+  // Show newest first in table
+  [...rows].reverse().forEach(r => {
+    const bType = r.breakout === 'r1' ? 'bull' : r.breakout === 's1' ? 'bear' : 'neutral';
+    const bText = r.breakout === 'r1' ? '↑ R1 BREAK' : r.breakout === 's1' ? '↓ S1 BREAK' : '◆ INSIDE';
+    tableHTML += `
+      <tr>
+        <td style="color:var(--muted)">${r.date}</td>
+        <td style="font-weight:700">${fmt(r.close)}</td>
+        <td style="color:var(--muted)">${fmt(r.pivot)}</td>
+        <td style="color:rgba(0,212,170,.7)">${fmt(r.tc)}</td>
+        <td style="color:rgba(0,212,170,.5)">${fmt(r.bc)}</td>
+        <td style="color:var(--bull)">${fmt(r.r1)}</td>
+        <td style="color:var(--bear)">${fmt(r.s1)}</td>
+        <td><span class="cpr-pill ${bType}">${bText}</span></td>
+      </tr>`;
+  });
+
+  tableHTML += '</tbody></table>';
+
+  // Breakout distribution bar
+  const r1Pct   = Math.round((r1Count / total) * 100);
+  const s1Pct   = Math.round((s1Count / total) * 100);
+  const insPct  = 100 - r1Pct - s1Pct;
+  tableHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <span style="font-family:var(--mono);font-size:.6rem;color:var(--muted);letter-spacing:.08em">30-DAY DISTRIBUTION</span>
+      <div style="flex:1;min-width:160px;height:8px;border-radius:4px;overflow:hidden;display:flex;gap:2px">
+        <div style="width:${r1Pct}%;background:var(--bull);border-radius:3px 0 0 3px;transition:width .8s ease"></div>
+        <div style="width:${insPct}%;background:rgba(240,180,41,.5)"></div>
+        <div style="width:${s1Pct}%;background:var(--bear);border-radius:0 3px 3px 0;transition:width .8s ease"></div>
+      </div>
+      <span style="font-family:var(--mono);font-size:.6rem;color:var(--bull)">${r1Pct}% R1</span>
+      <span style="font-family:var(--mono);font-size:.6rem;color:var(--neutral)">${insPct}% Inside</span>
+      <span style="font-family:var(--mono);font-size:.6rem;color:var(--bear)">${s1Pct}% S1</span>
+    </div>` + tableHTML;
+
+  document.getElementById('cprTableWrap').innerHTML = tableHTML;
 }
 
 // ═══ ANALYSIS ════════════════════════════════════════════════════════
@@ -634,7 +774,6 @@ function applyAnalysis(result, headlines) {
   const aiEl=document.getElementById('aiText');
   aiEl.style.fontStyle='normal'; aiEl.style.color='var(--text)';
   typewriter(aiEl, result.reasoning);
-  generateBacktest(score);
 }
 
 function typewriter(el,text){
@@ -649,7 +788,7 @@ function loadFeed(){renderNewsFeed(ASSETS[currentAsset].headlines,null);}
 
 // INIT
 drawGauge(0,'#333');
-drawBacktest(Array(90).fill(0),[]);
+loadCPR();
 </script>
 </body>
 </html>
