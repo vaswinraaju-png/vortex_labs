@@ -57,7 +57,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .cat-label{font-family:var(--mono);font-size:.55rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;padding:0 8px;display:flex;align-items:center;white-space:nowrap;flex-shrink:0}
 /* dropdown */
 .cat-dropdown{display:none;position:absolute;top:100%;left:0;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:300;max-height:320px;overflow-y:auto}
-.cat-item:hover .cat-dropdown,.cat-item.open .cat-dropdown{display:block}
+.cat-item.open .cat-dropdown{display:block}
 .dd-item{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;font-family:var(--mono);font-size:.7rem;color:var(--text2);cursor:pointer;transition:all .1s;border-bottom:1px solid var(--surface3);white-space:nowrap}
 .dd-item:last-child{border-bottom:none}
 .dd-item:hover{background:var(--accent-l);color:var(--accent)}
@@ -228,15 +228,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
   <!-- FOREX -->
   <span class="cat-label">Forex</span>
   <div class="cat-item" id="ci-FOREX">
-    <button class="cat-btn active" onclick="toggleDropdown('FOREX')">
+    <button class="cat-btn active" onclick="toggleDropdown('FOREX',event)">
       <span id="forex-label">USD/JPY</span> <span class="chevron">▾</span>
     </button>
     <div class="cat-dropdown" id="dd-FOREX">
-      <div class="dd-item selected" onclick="selectInCat('FOREX','USDJPY','USD/JPY',this)"><span class="dd-sym">USD/JPY</span><span class="dd-name">US Dollar / Yen</span></div>
-      <div class="dd-item" onclick="selectInCat('FOREX','EURUSD','EUR/USD',this)"><span class="dd-sym">EUR/USD</span><span class="dd-name">Euro / Dollar</span></div>
-      <div class="dd-item" onclick="selectInCat('FOREX','GBPUSD','GBP/USD',this)"><span class="dd-sym">GBP/USD</span><span class="dd-name">Pound / Dollar</span></div>
-      <div class="dd-item" onclick="selectInCat('FOREX','AUDUSD','AUD/USD',this)"><span class="dd-sym">AUD/USD</span><span class="dd-name">Aussie / Dollar</span></div>
-      <div class="dd-item" onclick="selectInCat('FOREX','USDCAD','USD/CAD',this)"><span class="dd-sym">USD/CAD</span><span class="dd-name">Dollar / Loonie</span></div>
+      <div class="dd-item selected" onclick="selectInCat('FOREX','USDJPY','USD/JPY',this,event)"><span class="dd-sym">USD/JPY</span><span class="dd-name">US Dollar / Yen</span></div>
+      <div class="dd-item" onclick="selectInCat('FOREX','EURUSD','EUR/USD',this,event)"><span class="dd-sym">EUR/USD</span><span class="dd-name">Euro / Dollar</span></div>
+      <div class="dd-item" onclick="selectInCat('FOREX','GBPUSD','GBP/USD',this,event)"><span class="dd-sym">GBP/USD</span><span class="dd-name">Pound / Dollar</span></div>
+      <div class="dd-item" onclick="selectInCat('FOREX','AUDUSD','AUD/USD',this,event)"><span class="dd-sym">AUD/USD</span><span class="dd-name">Aussie / Dollar</span></div>
+      <div class="dd-item" onclick="selectInCat('FOREX','USDCAD','USD/CAD',this,event)"><span class="dd-sym">USD/CAD</span><span class="dd-name">Dollar / Loonie</span></div>
     </div>
   </div>
 
@@ -245,13 +245,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
   <!-- ENERGY -->
   <span class="cat-label">Energy</span>
   <div class="cat-item" id="ci-ENERGY">
-    <button class="cat-btn" onclick="toggleDropdown('ENERGY')">
+    <button class="cat-btn" onclick="toggleDropdown('ENERGY',event)">
       <span id="energy-label">Select</span> <span class="chevron">▾</span>
     </button>
     <div class="cat-dropdown" id="dd-ENERGY">
-      <div class="dd-item" onclick="selectInCat('ENERGY','USOIL','WTI Crude',this)"><span class="dd-sym">WTI OIL</span><span class="dd-name">West Texas Intermediate</span></div>
-      <div class="dd-item" onclick="selectInCat('ENERGY','BRENTOIL','Brent Crude',this)"><span class="dd-sym">BRENT</span><span class="dd-name">Brent Crude Oil</span></div>
-      <div class="dd-item" onclick="selectInCat('ENERGY','NATGAS','Natural Gas',this)"><span class="dd-sym">NAT GAS</span><span class="dd-name">Henry Hub Natural Gas</span></div>
+      <div class="dd-item" onclick="selectInCat('ENERGY','USOIL','WTI Crude',this,event)"><span class="dd-sym">WTI OIL</span><span class="dd-name">West Texas Intermediate</span></div>
+      <div class="dd-item" onclick="selectInCat('ENERGY','BRENTOIL','Brent Crude',this,event)"><span class="dd-sym">BRENT</span><span class="dd-name">Brent Crude Oil</span></div>
+      <div class="dd-item" onclick="selectInCat('ENERGY','NATGAS','Natural Gas',this,event)"><span class="dd-sym">NAT GAS</span><span class="dd-name">Henry Hub Natural Gas</span></div>
     </div>
   </div>
 
@@ -260,12 +260,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
   <!-- METALS -->
   <span class="cat-label">Metals</span>
   <div class="cat-item" id="ci-METALS">
-    <button class="cat-btn" onclick="toggleDropdown('METALS')">
+    <button class="cat-btn" onclick="toggleDropdown('METALS',event)">
       <span id="metals-label">Select</span> <span class="chevron">▾</span>
     </button>
     <div class="cat-dropdown" id="dd-METALS">
-      <div class="dd-item" onclick="selectInCat('METALS','XAUUSD','XAU/USD',this)"><span class="dd-sym">XAU/USD</span><span class="dd-name">Gold / Dollar</span></div>
-      <div class="dd-item" onclick="selectInCat('METALS','XAGUSD','XAG/USD',this)"><span class="dd-sym">XAG/USD</span><span class="dd-name">Silver / Dollar</span></div>
+      <div class="dd-item" onclick="selectInCat('METALS','XAUUSD','XAU/USD',this,event)"><span class="dd-sym">XAU/USD</span><span class="dd-name">Gold / Dollar</span></div>
+      <div class="dd-item" onclick="selectInCat('METALS','XAGUSD','XAG/USD',this,event)"><span class="dd-sym">XAG/USD</span><span class="dd-name">Silver / Dollar</span></div>
     </div>
   </div>
 
@@ -274,15 +274,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
   <!-- CRYPTO -->
   <span class="cat-label">Crypto</span>
   <div class="cat-item" id="ci-CRYPTO">
-    <button class="cat-btn" onclick="toggleDropdown('CRYPTO')">
+    <button class="cat-btn" onclick="toggleDropdown('CRYPTO',event)">
       <span id="crypto-label">Select</span> <span class="chevron">▾</span>
     </button>
     <div class="cat-dropdown" id="dd-CRYPTO">
-      <div class="dd-item" onclick="selectInCat('CRYPTO','BTCUSD','Bitcoin',this)"><span class="dd-sym">BTC/USD</span><span class="dd-name">Bitcoin</span></div>
-      <div class="dd-item" onclick="selectInCat('CRYPTO','ETHUSD','Ethereum',this)"><span class="dd-sym">ETH/USD</span><span class="dd-name">Ethereum</span></div>
-      <div class="dd-item" onclick="selectInCat('CRYPTO','SOLUSD','Solana',this)"><span class="dd-sym">SOL/USD</span><span class="dd-name">Solana</span></div>
-      <div class="dd-item" onclick="selectInCat('CRYPTO','BNBUSD','BNB',this)"><span class="dd-sym">BNB/USD</span><span class="dd-name">Binance Coin</span></div>
-      <div class="dd-item" onclick="selectInCat('CRYPTO','XRPUSD','XRP',this)"><span class="dd-sym">XRP/USD</span><span class="dd-name">Ripple</span></div>
+      <div class="dd-item" onclick="selectInCat('CRYPTO','BTCUSD','Bitcoin',this,event)"><span class="dd-sym">BTC/USD</span><span class="dd-name">Bitcoin</span></div>
+      <div class="dd-item" onclick="selectInCat('CRYPTO','ETHUSD','Ethereum',this,event)"><span class="dd-sym">ETH/USD</span><span class="dd-name">Ethereum</span></div>
+      <div class="dd-item" onclick="selectInCat('CRYPTO','SOLUSD','Solana',this,event)"><span class="dd-sym">SOL/USD</span><span class="dd-name">Solana</span></div>
+      <div class="dd-item" onclick="selectInCat('CRYPTO','BNBUSD','BNB',this,event)"><span class="dd-sym">BNB/USD</span><span class="dd-name">Binance Coin</span></div>
+      <div class="dd-item" onclick="selectInCat('CRYPTO','XRPUSD','XRP',this,event)"><span class="dd-sym">XRP/USD</span><span class="dd-name">Ripple</span></div>
     </div>
   </div>
 
@@ -291,60 +291,60 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
   <!-- US STOCKS -->
   <span class="cat-label">US Stocks</span>
   <div class="cat-item" id="ci-US">
-    <button class="cat-btn" onclick="toggleDropdown('US')">
+    <button class="cat-btn" onclick="toggleDropdown('US',event)">
       <span id="us-label">Select</span> <span class="chevron">▾</span>
     </button>
     <div class="cat-dropdown" id="dd-US">
-      <div class="dd-item" onclick="selectInCat('US','AAPL','Apple',this)"><span class="dd-sym">AAPL</span><span class="dd-name">Apple Inc.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','MSFT','Microsoft',this)"><span class="dd-sym">MSFT</span><span class="dd-name">Microsoft Corp.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','NVDA','NVIDIA',this)"><span class="dd-sym">NVDA</span><span class="dd-name">NVIDIA Corp.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','GOOGL','Alphabet',this)"><span class="dd-sym">GOOGL</span><span class="dd-name">Alphabet Inc.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','AMZN','Amazon',this)"><span class="dd-sym">AMZN</span><span class="dd-name">Amazon.com</span></div>
-      <div class="dd-item" onclick="selectInCat('US','META','Meta',this)"><span class="dd-sym">META</span><span class="dd-name">Meta Platforms</span></div>
-      <div class="dd-item" onclick="selectInCat('US','TSLA','Tesla',this)"><span class="dd-sym">TSLA</span><span class="dd-name">Tesla Inc.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','BRK.B','Berkshire',this)"><span class="dd-sym">BRK.B</span><span class="dd-name">Berkshire Hathaway</span></div>
-      <div class="dd-item" onclick="selectInCat('US','JPM','JPMorgan',this)"><span class="dd-sym">JPM</span><span class="dd-name">JPMorgan Chase</span></div>
-      <div class="dd-item" onclick="selectInCat('US','V','Visa',this)"><span class="dd-sym">V</span><span class="dd-name">Visa Inc.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','WMT','Walmart',this)"><span class="dd-sym">WMT</span><span class="dd-name">Walmart Inc.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','UNH','UnitedHealth',this)"><span class="dd-sym">UNH</span><span class="dd-name">UnitedHealth Group</span></div>
-      <div class="dd-item" onclick="selectInCat('US','LLY','Eli Lilly',this)"><span class="dd-sym">LLY</span><span class="dd-name">Eli Lilly & Co.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','MA','Mastercard',this)"><span class="dd-sym">MA</span><span class="dd-name">Mastercard Inc.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','XOM','ExxonMobil',this)"><span class="dd-sym">XOM</span><span class="dd-name">ExxonMobil Corp.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','COST','Costco',this)"><span class="dd-sym">COST</span><span class="dd-name">Costco Wholesale</span></div>
-      <div class="dd-item" onclick="selectInCat('US','HD','Home Depot',this)"><span class="dd-sym">HD</span><span class="dd-name">Home Depot Inc.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','AVGO','Broadcom',this)"><span class="dd-sym">AVGO</span><span class="dd-name">Broadcom Inc.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','PG','Procter & Gamble',this)"><span class="dd-sym">PG</span><span class="dd-name">Procter & Gamble</span></div>
-      <div class="dd-item" onclick="selectInCat('US','JNJ','J&J',this)"><span class="dd-sym">JNJ</span><span class="dd-name">Johnson & Johnson</span></div>
-      <div class="dd-item" onclick="selectInCat('US','NFLX','Netflix',this)"><span class="dd-sym">NFLX</span><span class="dd-name">Netflix Inc.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','AMD','AMD',this)"><span class="dd-sym">AMD</span><span class="dd-name">Advanced Micro Devices</span></div>
-      <div class="dd-item" onclick="selectInCat('US','INTC','Intel',this)"><span class="dd-sym">INTC</span><span class="dd-name">Intel Corp.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','CRM','Salesforce',this)"><span class="dd-sym">CRM</span><span class="dd-name">Salesforce Inc.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','ORCL','Oracle',this)"><span class="dd-sym">ORCL</span><span class="dd-name">Oracle Corp.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','IBM','IBM',this)"><span class="dd-sym">IBM</span><span class="dd-name">IBM Corp.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','ADBE','Adobe',this)"><span class="dd-sym">ADBE</span><span class="dd-name">Adobe Inc.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','PYPL','PayPal',this)"><span class="dd-sym">PYPL</span><span class="dd-name">PayPal Holdings</span></div>
-      <div class="dd-item" onclick="selectInCat('US','DIS','Disney',this)"><span class="dd-sym">DIS</span><span class="dd-name">Walt Disney Co.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','BA','Boeing',this)"><span class="dd-sym">BA</span><span class="dd-name">Boeing Co.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','GS','Goldman Sachs',this)"><span class="dd-sym">GS</span><span class="dd-name">Goldman Sachs</span></div>
-      <div class="dd-item" onclick="selectInCat('US','MS','Morgan Stanley',this)"><span class="dd-sym">MS</span><span class="dd-name">Morgan Stanley</span></div>
-      <div class="dd-item" onclick="selectInCat('US','BAC','Bank of America',this)"><span class="dd-sym">BAC</span><span class="dd-name">Bank of America</span></div>
-      <div class="dd-item" onclick="selectInCat('US','CVX','Chevron',this)"><span class="dd-sym">CVX</span><span class="dd-name">Chevron Corp.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','PFE','Pfizer',this)"><span class="dd-sym">PFE</span><span class="dd-name">Pfizer Inc.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','KO','Coca-Cola',this)"><span class="dd-sym">KO</span><span class="dd-name">Coca-Cola Co.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','AAPL','Apple',this,event)"><span class="dd-sym">AAPL</span><span class="dd-name">Apple Inc.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','MSFT','Microsoft',this,event)"><span class="dd-sym">MSFT</span><span class="dd-name">Microsoft Corp.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','NVDA','NVIDIA',this,event)"><span class="dd-sym">NVDA</span><span class="dd-name">NVIDIA Corp.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','GOOGL','Alphabet',this,event)"><span class="dd-sym">GOOGL</span><span class="dd-name">Alphabet Inc.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','AMZN','Amazon',this,event)"><span class="dd-sym">AMZN</span><span class="dd-name">Amazon.com</span></div>
+      <div class="dd-item" onclick="selectInCat('US','META','Meta',this,event)"><span class="dd-sym">META</span><span class="dd-name">Meta Platforms</span></div>
+      <div class="dd-item" onclick="selectInCat('US','TSLA','Tesla',this,event)"><span class="dd-sym">TSLA</span><span class="dd-name">Tesla Inc.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','BRK.B','Berkshire',this,event)"><span class="dd-sym">BRK.B</span><span class="dd-name">Berkshire Hathaway</span></div>
+      <div class="dd-item" onclick="selectInCat('US','JPM','JPMorgan',this,event)"><span class="dd-sym">JPM</span><span class="dd-name">JPMorgan Chase</span></div>
+      <div class="dd-item" onclick="selectInCat('US','V','Visa',this,event)"><span class="dd-sym">V</span><span class="dd-name">Visa Inc.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','WMT','Walmart',this,event)"><span class="dd-sym">WMT</span><span class="dd-name">Walmart Inc.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','UNH','UnitedHealth',this,event)"><span class="dd-sym">UNH</span><span class="dd-name">UnitedHealth Group</span></div>
+      <div class="dd-item" onclick="selectInCat('US','LLY','Eli Lilly',this,event)"><span class="dd-sym">LLY</span><span class="dd-name">Eli Lilly & Co.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','MA','Mastercard',this,event)"><span class="dd-sym">MA</span><span class="dd-name">Mastercard Inc.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','XOM','ExxonMobil',this,event)"><span class="dd-sym">XOM</span><span class="dd-name">ExxonMobil Corp.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','COST','Costco',this,event)"><span class="dd-sym">COST</span><span class="dd-name">Costco Wholesale</span></div>
+      <div class="dd-item" onclick="selectInCat('US','HD','Home Depot',this,event)"><span class="dd-sym">HD</span><span class="dd-name">Home Depot Inc.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','AVGO','Broadcom',this,event)"><span class="dd-sym">AVGO</span><span class="dd-name">Broadcom Inc.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','PG','Procter & Gamble',this,event)"><span class="dd-sym">PG</span><span class="dd-name">Procter & Gamble</span></div>
+      <div class="dd-item" onclick="selectInCat('US','JNJ','J&J',this,event)"><span class="dd-sym">JNJ</span><span class="dd-name">Johnson & Johnson</span></div>
+      <div class="dd-item" onclick="selectInCat('US','NFLX','Netflix',this,event)"><span class="dd-sym">NFLX</span><span class="dd-name">Netflix Inc.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','AMD','AMD',this,event)"><span class="dd-sym">AMD</span><span class="dd-name">Advanced Micro Devices</span></div>
+      <div class="dd-item" onclick="selectInCat('US','INTC','Intel',this,event)"><span class="dd-sym">INTC</span><span class="dd-name">Intel Corp.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','CRM','Salesforce',this,event)"><span class="dd-sym">CRM</span><span class="dd-name">Salesforce Inc.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','ORCL','Oracle',this,event)"><span class="dd-sym">ORCL</span><span class="dd-name">Oracle Corp.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','IBM','IBM',this,event)"><span class="dd-sym">IBM</span><span class="dd-name">IBM Corp.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','ADBE','Adobe',this,event)"><span class="dd-sym">ADBE</span><span class="dd-name">Adobe Inc.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','PYPL','PayPal',this,event)"><span class="dd-sym">PYPL</span><span class="dd-name">PayPal Holdings</span></div>
+      <div class="dd-item" onclick="selectInCat('US','DIS','Disney',this,event)"><span class="dd-sym">DIS</span><span class="dd-name">Walt Disney Co.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','BA','Boeing',this,event)"><span class="dd-sym">BA</span><span class="dd-name">Boeing Co.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','GS','Goldman Sachs',this,event)"><span class="dd-sym">GS</span><span class="dd-name">Goldman Sachs</span></div>
+      <div class="dd-item" onclick="selectInCat('US','MS','Morgan Stanley',this,event)"><span class="dd-sym">MS</span><span class="dd-name">Morgan Stanley</span></div>
+      <div class="dd-item" onclick="selectInCat('US','BAC','Bank of America',this,event)"><span class="dd-sym">BAC</span><span class="dd-name">Bank of America</span></div>
+      <div class="dd-item" onclick="selectInCat('US','CVX','Chevron',this,event)"><span class="dd-sym">CVX</span><span class="dd-name">Chevron Corp.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','PFE','Pfizer',this,event)"><span class="dd-sym">PFE</span><span class="dd-name">Pfizer Inc.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','KO','Coca-Cola',this,event)"><span class="dd-sym">KO</span><span class="dd-name">Coca-Cola Co.</span></div>
       <div class="dd-item" onclick="selectInCat('US','MCD','McDonald\'s',this)"><span class="dd-sym">MCD</span><span class="dd-name">McDonald's Corp.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','NKE','Nike',this)"><span class="dd-sym">NKE</span><span class="dd-name">Nike Inc.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','SBUX','Starbucks',this)"><span class="dd-sym">SBUX</span><span class="dd-name">Starbucks Corp.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','T','AT&T',this)"><span class="dd-sym">T</span><span class="dd-name">AT&T Inc.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','VZ','Verizon',this)"><span class="dd-sym">VZ</span><span class="dd-name">Verizon Comm.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','UBER','Uber',this)"><span class="dd-sym">UBER</span><span class="dd-name">Uber Technologies</span></div>
-      <div class="dd-item" onclick="selectInCat('US','ABNB','Airbnb',this)"><span class="dd-sym">ABNB</span><span class="dd-name">Airbnb Inc.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','SPOT','Spotify',this)"><span class="dd-sym">SPOT</span><span class="dd-name">Spotify Technology</span></div>
-      <div class="dd-item" onclick="selectInCat('US','PLTR','Palantir',this)"><span class="dd-sym">PLTR</span><span class="dd-name">Palantir Technologies</span></div>
-      <div class="dd-item" onclick="selectInCat('US','RIVN','Rivian',this)"><span class="dd-sym">RIVN</span><span class="dd-name">Rivian Automotive</span></div>
-      <div class="dd-item" onclick="selectInCat('US','COIN','Coinbase',this)"><span class="dd-sym">COIN</span><span class="dd-name">Coinbase Global</span></div>
-      <div class="dd-item" onclick="selectInCat('US','HOOD','Robinhood',this)"><span class="dd-sym">HOOD</span><span class="dd-name">Robinhood Markets</span></div>
-      <div class="dd-item" onclick="selectInCat('US','SOFI','SoFi',this)"><span class="dd-sym">SOFI</span><span class="dd-name">SoFi Technologies</span></div>
-      <div class="dd-item" onclick="selectInCat('US','SNAP','Snap',this)"><span class="dd-sym">SNAP</span><span class="dd-name">Snap Inc.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','NKE','Nike',this,event)"><span class="dd-sym">NKE</span><span class="dd-name">Nike Inc.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','SBUX','Starbucks',this,event)"><span class="dd-sym">SBUX</span><span class="dd-name">Starbucks Corp.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','T','AT&T',this,event)"><span class="dd-sym">T</span><span class="dd-name">AT&T Inc.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','VZ','Verizon',this,event)"><span class="dd-sym">VZ</span><span class="dd-name">Verizon Comm.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','UBER','Uber',this,event)"><span class="dd-sym">UBER</span><span class="dd-name">Uber Technologies</span></div>
+      <div class="dd-item" onclick="selectInCat('US','ABNB','Airbnb',this,event)"><span class="dd-sym">ABNB</span><span class="dd-name">Airbnb Inc.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','SPOT','Spotify',this,event)"><span class="dd-sym">SPOT</span><span class="dd-name">Spotify Technology</span></div>
+      <div class="dd-item" onclick="selectInCat('US','PLTR','Palantir',this,event)"><span class="dd-sym">PLTR</span><span class="dd-name">Palantir Technologies</span></div>
+      <div class="dd-item" onclick="selectInCat('US','RIVN','Rivian',this,event)"><span class="dd-sym">RIVN</span><span class="dd-name">Rivian Automotive</span></div>
+      <div class="dd-item" onclick="selectInCat('US','COIN','Coinbase',this,event)"><span class="dd-sym">COIN</span><span class="dd-name">Coinbase Global</span></div>
+      <div class="dd-item" onclick="selectInCat('US','HOOD','Robinhood',this,event)"><span class="dd-sym">HOOD</span><span class="dd-name">Robinhood Markets</span></div>
+      <div class="dd-item" onclick="selectInCat('US','SOFI','SoFi',this,event)"><span class="dd-sym">SOFI</span><span class="dd-name">SoFi Technologies</span></div>
+      <div class="dd-item" onclick="selectInCat('US','SNAP','Snap',this,event)"><span class="dd-sym">SNAP</span><span class="dd-name">Snap Inc.</span></div>
     </div>
   </div>
 
@@ -353,7 +353,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
   <!-- NSE INDIA -->
   <span class="cat-label" style="color:#f97316">NSE 🇮🇳</span>
   <div class="cat-item" id="ci-NSE">
-    <button class="cat-btn" onclick="toggleDropdown('NSE')">
+    <button class="cat-btn" onclick="toggleDropdown('NSE',event)">
       <span id="nse-label">Select</span> <span class="chevron">▾</span>
     </button>
     <div class="cat-dropdown" id="dd-NSE" style="min-width:260px">
@@ -527,19 +527,22 @@ function getSRC(cat){return SRC[cat]||SRC.FOREX;}
 // ═══════════════════════════════════════════════════
 //  DROPDOWN MENU LOGIC
 // ═══════════════════════════════════════════════════
-function toggleDropdown(cat){
+function toggleDropdown(cat, event){
+  if(event) event.stopPropagation();
   const item=document.getElementById('ci-'+cat);
   const wasOpen=item.classList.contains('open');
-  // close all
   document.querySelectorAll('.cat-item').forEach(i=>i.classList.remove('open'));
   if(!wasOpen) item.classList.add('open');
 }
-// Close dropdowns on outside click
-document.addEventListener('click',e=>{
-  if(!e.target.closest('.cat-item')) document.querySelectorAll('.cat-item').forEach(i=>i.classList.remove('open'));
+// Close dropdowns on outside click — use mousedown so it fires before click
+document.addEventListener('mousedown',e=>{
+  if(!e.target.closest('.cat-item')&&!e.target.closest('.cat-btn')){
+    document.querySelectorAll('.cat-item').forEach(i=>i.classList.remove('open'));
+  }
 });
 
-function selectInCat(cat, assetKey, label, el){
+function selectInCat(cat, assetKey, label, el, event){
+  if(event) event.stopPropagation();
   // Mark selected in dropdown
   document.querySelectorAll(`#dd-${cat} .dd-item`).forEach(i=>i.classList.remove('selected'));
   el.classList.add('selected');
