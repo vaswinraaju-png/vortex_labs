@@ -416,9 +416,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 // ══════════════════════════════════════════════════════════════════
 //  CONFIG
 // ══════════════════════════════════════════════════════════════════
-const SHEET_ID      = '1kKectUWEsXJJ-_BnrQxi-7ppku0WpLY36JoQcr2J7pk';
-const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Nifty50`;
-const AV_KEY        = 'CKUO0K8TIHW63PL6'; // Alpha Vantage — forex/metals fallback
+const SHEET_ID     = '1kKectUWEsXJJ-_BnrQxi-7ppku0WpLY36JoQcr2J7pk';
+const TD_KEY       = 'f13c82ea98f947b48b9453b15a732cf1'; // Twelve Data
 
 // ══════════════════════════════════════════════════════════════════
 //  CLOCK + TIMEZONE
@@ -518,6 +517,10 @@ function parseCSVRow(line){
   return result;
 }
 
+// Three strategies to fetch sheet data, tried in order:
+// 1. /export?format=csv  — works when sheet is "Published to web"
+// 2. /gviz/tq?tqx=out:csv — works when sheet is shared publicly (anyone with link)
+// 3. JSONP via gviz/tq?tqx=out:json — CORS-safe callback trick
 async function loadSheetData(forceRefresh=false){
   if(sheetLoading) return;
   if(sheetLoaded&&!forceRefresh) return;
@@ -526,37 +529,126 @@ async function loadSheetData(forceRefresh=false){
   pill.className='nse-status-pill loading';
   pill.textContent='⟳ SYNCING...';
 
-  try{
-    const res=await fetch(SHEET_CSV_URL+'&_='+Date.now());
-    if(!res.ok) throw new Error('Sheet not accessible. Make sure it is shared publicly.');
-    const text=await res.text();
-    sheetData=parseCSV(text);
-    sheetLoaded=true;
-    sheetLoading=false;
+  const URLS=[
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`,
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Nifty50`,
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`,
+  ];
 
-    // Populate dropdown
-    const sel=document.getElementById('nseStockSelect');
-    sel.innerHTML='<option value="">— Select a stock —</option>';
-    sheetData.forEach(row=>{
-      const sym=row['Symbol']||'';
-      const name=(row['Name']||sym).substring(0,22);
-      const cmp=row['CMP (₹)']?` — ₹${parseFloat(row['CMP (₹)']).toFixed(2)}`:'';
-      const opt=document.createElement('option');
-      opt.value=sym;
-      opt.textContent=`${sym}  ${name}${cmp}`;
-      sel.appendChild(opt);
-    });
-    pill.className='nse-status-pill ok';
-    pill.textContent=`✓ ${sheetData.length} STOCKS`;
-    updateSheetBanner();
-
-  }catch(err){
-    sheetLoading=false;
-    const pill2=document.getElementById('sheetStatusPill');
-    pill2.className='nse-status-pill err';
-    pill2.textContent='⚠ SHEET ERROR';
-    document.getElementById('nseStockSelect').innerHTML=`<option value="">— ${err.message} —</option>`;
+  let lastErr='';
+  for(const url of URLS){
+    try{
+      const res=await fetch(url,{cache:'no-store'});
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text=await res.text();
+      // Detect if we got an HTML error page instead of CSV
+      if(text.trim().startsWith('<!DOCTYPE')||text.trim().startsWith('<html')){
+        throw new Error('Got HTML instead of CSV — sheet may not be published');
+      }
+      const parsed=parseCSV(text);
+      if(!parsed||parsed.length===0) throw new Error('CSV parsed but no rows found');
+      sheetData=parsed;
+      sheetLoaded=true;
+      sheetLoading=false;
+      populateDropdown();
+      pill.className='nse-status-pill ok';
+      pill.textContent=`✓ ${sheetData.length} STOCKS`;
+      updateSheetBanner();
+      return;
+    }catch(e){
+      lastErr=e.message;
+    }
   }
+
+  // All URLs failed — try JSONP gviz as last resort
+  try{
+    const rows=await fetchSheetViaJSONP();
+    if(rows&&rows.length>0){
+      sheetData=rows;
+      sheetLoaded=true;
+      sheetLoading=false;
+      populateDropdown();
+      pill.className='nse-status-pill ok';
+      pill.textContent=`✓ ${sheetData.length} STOCKS`;
+      updateSheetBanner();
+      return;
+    }
+  }catch(e2){lastErr=e2.message;}
+
+  // Complete failure
+  sheetLoading=false;
+  pill.className='nse-status-pill err';
+  pill.textContent='⚠ SHEET ERROR';
+  document.getElementById('nseStockSelect').innerHTML=
+    `<option value="">— Sheet not accessible: ${lastErr} —</option>`;
+  document.getElementById('sheetStatusPill').title=
+    'Fix: In your Google Sheet, go to File → Share → Publish to web → select "Nifty50" sheet → CSV → Publish';
+  showSheetHelp(lastErr);
+}
+
+function showSheetHelp(err){
+  const wrap=document.getElementById('cprTableWrap');
+  wrap.innerHTML=`<div style="background:#fff8f0;border:1px solid rgba(249,115,22,.25);border-radius:8px;padding:16px;font-family:var(--mono);font-size:.68rem;line-height:1.8;color:var(--text2)">
+    <div style="color:var(--accent);font-weight:700;margin-bottom:8px">⚠ Google Sheet not accessible</div>
+    <div style="color:var(--muted);margin-bottom:10px">Error: ${err}</div>
+    <div style="font-weight:600;margin-bottom:6px">To fix, complete ONE of these steps in your Google Sheet:</div>
+    <div><b>Option A (Recommended):</b><br>
+    File → Share → <b>Publish to web</b> → Select sheet "Nifty50" → Format "CSV" → Click Publish</div>
+    <div style="margin-top:8px"><b>Option B:</b><br>
+    File → Share → Share with others → Change from "Restricted" to <b>"Anyone with the link"</b> → Viewer</div>
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+      <a href="https://docs.google.com/spreadsheets/d/${SHEET_ID}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">Open your sheet ↗</a>
+      &nbsp;·&nbsp;
+      <span style="cursor:pointer;color:var(--accent2)" onclick="loadSheetData(true)">Retry after publishing ↺</span>
+    </div>
+  </div>`;
+}
+
+// JSONP fallback — injects a script tag that calls back with sheet data
+function fetchSheetViaJSONP(){
+  return new Promise((resolve,reject)=>{
+    const cbName='_vfSheetCB_'+Date.now();
+    const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Nifty50&callback=${cbName}`;
+    const script=document.createElement('script');
+    const timeout=setTimeout(()=>{
+      cleanup();reject(new Error('JSONP timeout'));
+    },8000);
+    window[cbName]=(data)=>{
+      cleanup();
+      try{
+        const table=data.table;
+        if(!table||!table.cols||!table.rows) return reject(new Error('No table in JSONP response'));
+        const headers=table.cols.map(c=>c.label||c.id);
+        const rows=table.rows.map(r=>{
+          const obj={};
+          r.c.forEach((cell,i)=>{obj[headers[i]]=cell?cell.v:'';});
+          return obj;
+        }).filter(r=>r['Symbol']&&String(r['Symbol']).trim());
+        resolve(rows);
+      }catch(e){reject(e);}
+    };
+    function cleanup(){clearTimeout(timeout);delete window[cbName];if(script.parentNode)script.parentNode.removeChild(script);}
+    script.onerror=()=>{cleanup();reject(new Error('JSONP script load failed'));};
+    script.src=url;
+    document.head.appendChild(script);
+  });
+}
+
+function populateDropdown(){
+  const sel=document.getElementById('nseStockSelect');
+  sel.innerHTML='<option value="">— Select a stock —</option>';
+  sheetData.forEach(row=>{
+    const sym=String(row['Symbol']||'').trim();
+    if(!sym) return;
+    const name=String(row['Name']||sym).substring(0,24);
+    const rawCmp=row['CMP (₹)']||row['CMP']||'';
+    const cmpNum=parseFloat(String(rawCmp).replace(/[₹,]/g,''));
+    const cmpStr=!isNaN(cmpNum)&&cmpNum>0?`  ₹${cmpNum.toFixed(2)}`:'';
+    const opt=document.createElement('option');
+    opt.value=sym;
+    opt.textContent=`${sym}${cmpStr}  ${name}`;
+    sel.appendChild(opt);
+  });
 }
 
 function updateSheetBanner(){
@@ -571,11 +663,18 @@ function updateSheetBanner(){
 function onNseStockChange(sym){
   if(!sym) return;
   currentNseSymbol=sym;
-  const row=sheetData.find(r=>r['Symbol']===sym);
+  const row=sheetData.find(r=>String(r['Symbol']||'').trim()===sym);
   if(!row) return;
 
-  // Update asset label
-  const name=row['Name']||sym;
+  const safeFloat=(key)=>{
+    const v=row[key];
+    if(v===null||v===undefined||v==='') return 0;
+    const n=parseFloat(String(v).replace(/[₹,]/g,''));
+    return isNaN(n)?0:n;
+  };
+  const safeStr=(key)=>String(row[key]||'').trim();
+
+  const name=safeStr('Name')||sym;
   ASSETS.NSE.label=name;
   ASSETS.NSE.headlines=NSE_HEADLINES_TPL.map(h=>h.replace('stock',sym));
   ASSETS.NSE.sources=NSE_SOURCES;
@@ -584,26 +683,26 @@ function onNseStockChange(sym){
   document.getElementById('feedAssetLabel').textContent=sym;
   document.getElementById('cprAssetLabel').textContent=sym;
 
-  // Build CPR from sheet row directly
-  const cmp=parseFloat(row['CMP (₹)'])||0;
-  const pivot=parseFloat(row['Pivot'])||0;
-  const tc=parseFloat(row['TC'])||0;
-  const bc=parseFloat(row['BC'])||0;
-  const r1=parseFloat(row['R1'])||0;
-  const s1=parseFloat(row['S1'])||0;
-  const r2=parseFloat(row['R2'])||0;
-  const s2=parseFloat(row['S2'])||0;
-  const r3=parseFloat(row['R3'])||0;
-  const s3=parseFloat(row['S3'])||0;
-  const breakout=row['Breakout']||'--';
-  const cprWidth=parseFloat(row['CPR Width'])||0;
-  const lastUpdated=row['Last Updated (IST)']||row['Last Updated']||'';
+  const d={
+    sym, name,
+    cmp:       safeFloat('CMP (₹)') || safeFloat('CMP'),
+    pivot:     safeFloat('Pivot'),
+    tc:        safeFloat('TC'),
+    bc:        safeFloat('BC'),
+    r1:        safeFloat('R1'),
+    s1:        safeFloat('S1'),
+    r2:        safeFloat('R2'),
+    s2:        safeFloat('S2'),
+    r3:        safeFloat('R3'),
+    s3:        safeFloat('S3'),
+    breakout:  safeStr('Breakout')||'--',
+    cprWidth:  safeFloat('CPR Width'),
+    lastUpdated: safeStr('Last Updated (IST)')||safeStr('Last Updated'),
+  };
 
-  renderNSECPR({sym,name,cmp,pivot,tc,bc,r1,s1,r2,s2,r3,s3,breakout,cprWidth,lastUpdated});
-
-  // Reset analysis so user re-runs for the new stock
+  renderNSECPR(d);
   resetSentimentUI();
-  renderNewsFeed(ASSETS.NSE.headlines,null);
+  renderNewsFeed(ASSETS.NSE.headlines, null);
 }
 
 function renderNSECPR(d){
@@ -682,7 +781,7 @@ function switchAsset(asset,btn){
     return;
   }
 
-  document.getElementById('cprSubLabel').textContent='R1 & S1 · Previous day H/L/C · Alpha Vantage';
+  document.getElementById('cprSubLabel').textContent='R1 & S1 · Previous day H/L/C · Twelve Data';
   resetSentimentUI();
   if(analysisCache[asset]) restoreAnalysis(asset);
   loadCPR(false);
@@ -750,8 +849,14 @@ function renderNewsFeed(headlines,scores){
 }
 
 // ══════════════════════════════════════════════════════════════════
-//  CPR — ALPHA VANTAGE (forex/metals/oil only)
+//  CPR — TWELVE DATA (forex / metals / oil)
 // ══════════════════════════════════════════════════════════════════
+const TD_SYMBOLS={
+  USDJPY:'USD/JPY', EURUSD:'EUR/USD',
+  XAUUSD:'XAU/USD', XAGUSD:'XAG/USD',
+  USOIL:'USOIL/USD',
+};
+
 async function loadCPR(forceRefresh){
   if(currentAsset==='NSE'){
     if(currentNseSymbol) onNseStockChange(currentNseSymbol);
@@ -760,41 +865,60 @@ async function loadCPR(forceRefresh){
   const asset=ASSETS[currentAsset];
   document.getElementById('cprAssetLabel').textContent=asset.label;
   if(!forceRefresh&&cprCache[currentAsset]){renderCPR(cprCache[currentAsset]);return;}
-  document.getElementById('cprTableWrap').innerHTML=`<div class="cpr-loading">FETCHING FROM ALPHA VANTAGE<span class="cpr-loading-dot">.</span><span class="cpr-loading-dot">.</span><span class="cpr-loading-dot">.</span></div>`;
-  ['cpr-r1-count','cpr-s1-count','cpr-neutral-count'].forEach(id=>{document.getElementById(id).textContent='…';document.getElementById(id).style.color='var(--muted)';});
+
+  document.getElementById('cprTableWrap').innerHTML=`<div class="cpr-loading">FETCHING FROM TWELVE DATA<span class="cpr-loading-dot">.</span><span class="cpr-loading-dot">.</span><span class="cpr-loading-dot">.</span></div>`;
+  ['cpr-r1-count','cpr-s1-count','cpr-neutral-count'].forEach(id=>{
+    document.getElementById(id).textContent='…';
+    document.getElementById(id).style.color='var(--muted)';
+  });
+
+  const tdSym=TD_SYMBOLS[currentAsset];
+  if(!tdSym){
+    document.getElementById('cprTableWrap').innerHTML=`<div class="cpr-err">No Twelve Data symbol mapped for ${currentAsset}</div>`;
+    return;
+  }
 
   try{
-    let candles=[];
-    if(asset.avFn==='FX_DAILY'){
-      const[fc,tc]=asset.avSym.split('/');
-      const data=await(await fetch(`https://www.alphavantage.co/query?function=FX_DAILY&from_symbol=${fc}&to_symbol=${tc}&outputsize=compact&apikey=${AV_KEY}`)).json();
-      if(data['Note']||data['Information']) throw new Error('Rate limit — 25 req/day on free tier');
-      const series=data['Time Series FX (Daily)'];
-      if(!series) throw new Error(data['Error Message']||'No data returned');
-      candles=Object.entries(series).sort((a,b)=>a[0].localeCompare(b[0])).map(([date,v])=>({date,open:+v['1. open'],high:+v['2. high'],low:+v['3. low'],close:+v['4. close']}));
-    } else if(asset.avFn==='COMMODITY'){
-      const data=await(await fetch(`https://www.alphavantage.co/query?function=WTI&interval=daily&apikey=${AV_KEY}`)).json();
-      if(data['Note']||data['Information']) throw new Error('Rate limit hit');
-      const arr=data['data'];
-      if(!arr||!arr.length) throw new Error('No WTI data');
-      const sorted=arr.filter(d=>d.value&&d.value!=='.').sort((a,b)=>a.date.localeCompare(b.date)).map(d=>({date:d.date,close:parseFloat(d.value)}));
-      candles=sorted.map((d,i)=>{const p=i>0?sorted[i-1].close:d.close,sp=d.close*0.008;return{date:d.date,open:p,high:Math.max(d.close,p)+sp*.5,low:Math.min(d.close,p)-sp*.5,close:d.close};});
+    const url=`https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(tdSym)}&interval=1day&outputsize=32&apikey=${TD_KEY}`;
+    const res=await fetch(url);
+    const data=await res.json();
+
+    if(data.status==='error'||!data.values||data.values.length<2){
+      throw new Error(data.message||`No data returned for ${tdSym}. Twelve Data free tier covers major FX pairs. Check your plan for XAU/XAG/OIL.`);
     }
-    if(candles.length<2) throw new Error('Not enough data');
+
+    // Twelve Data returns newest first — reverse to oldest-first
+    const candles=[...data.values].reverse().map(v=>({
+      date:v.datetime,
+      open:parseFloat(v.open),
+      high:parseFloat(v.high),
+      low:parseFloat(v.low),
+      close:parseFloat(v.close),
+    }));
+
     const rows=[];
     for(let i=1;i<candles.length;i++){
       const p=candles[i-1],c=candles[i];
-      const pivot=(p.high+p.low+p.close)/3,bc=(p.high+p.low)/2,tc=(pivot-bc)+pivot;
-      const r1=(2*pivot)-p.low,s1=(2*pivot)-p.high;
-      let bo='inside';if(c.close>r1)bo='r1';else if(c.close<s1)bo='s1';
+      const pivot=(p.high+p.low+p.close)/3;
+      const bc=(p.high+p.low)/2;
+      const tc=(pivot-bc)+pivot;
+      const r1=(2*pivot)-p.low;
+      const s1=(2*pivot)-p.high;
+      let bo='inside';
+      if(c.close>r1) bo='r1';
+      else if(c.close<s1) bo='s1';
       rows.push({date:c.date,close:c.close,pivot,tc,bc,r1,s1,breakout:bo});
     }
     const last30=rows.slice(-30);
     cprCache[currentAsset]=last30;
     renderCPR(last30);
+
   }catch(err){
-    document.getElementById('cprTableWrap').innerHTML=`<div class="cpr-err">⚠ ${err.message}<br><span style="color:var(--muted);font-size:.62rem">Alpha Vantage free tier supports FX pairs. Upgrade at alphavantage.co/premium for more requests.</span></div>`;
-    ['cpr-r1-count','cpr-s1-count','cpr-neutral-count'].forEach(id=>{document.getElementById(id).textContent='--';document.getElementById(id).style.color='var(--muted)';});
+    document.getElementById('cprTableWrap').innerHTML=`<div class="cpr-err">⚠ ${err.message}<br><span style="color:var(--muted);font-size:.62rem">Twelve Data free plan supports major FX pairs (USD/JPY, EUR/USD). Commodities and metals may require a paid plan.</span></div>`;
+    ['cpr-r1-count','cpr-s1-count','cpr-neutral-count'].forEach(id=>{
+      document.getElementById(id).textContent='--';
+      document.getElementById(id).style.color='var(--muted)';
+    });
   }
 }
 
