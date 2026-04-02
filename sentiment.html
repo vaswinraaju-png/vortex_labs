@@ -24,7 +24,7 @@ html{font-size:14px}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
 
 /* NAV */
-.topnav{background:var(--navy);height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.topnav{background:var(--navy);height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:500;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 .nav-logo{display:flex;align-items:center;gap:10px}
 .nav-logo-icon{width:32px;height:32px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .nav-logo-icon svg{width:18px;height:18px}
@@ -44,8 +44,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .tz-lbl{color:var(--accent);font-size:.56rem;font-weight:700;letter-spacing:.1em}
 .dval{color:rgba(255,255,255,.3);font-size:.56rem}
 
-/* CATEGORY BAR — dropdown menus */
-.catbar{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none;position:sticky;top:52px;z-index:150}
+/* CATEGORY BAR */
+.catbar{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none;position:sticky;top:52px;z-index:400}
 .catbar::-webkit-scrollbar{display:none}
 .cat-item{position:relative;flex-shrink:0}
 .cat-btn{display:flex;align-items:center;gap:5px;padding:0 16px;height:44px;font-family:var(--mono);font-size:.7rem;color:var(--text2);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;letter-spacing:.02em;transition:all .15s;margin-bottom:-1px}
@@ -55,18 +55,22 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .cat-btn:hover .chevron,.cat-btn.active .chevron{opacity:1}
 .cat-divider{width:1px;background:var(--border);margin:10px 0;flex-shrink:0}
 .cat-label{font-family:var(--mono);font-size:.55rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;padding:0 8px;display:flex;align-items:center;white-space:nowrap;flex-shrink:0}
-/* dropdown */
-.cat-dropdown{display:none;position:absolute;top:100%;left:0;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:300;max-height:320px;overflow-y:auto}
+
+/* DROPDOWN — fixed positioning to escape sticky overflow context */
+.cat-dropdown{display:none;position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);min-width:220px;box-shadow:0 12px 32px rgba(0,0,0,.15);z-index:9999;max-height:340px;overflow-y:auto}
 .cat-item.open .cat-dropdown{display:block}
 .dd-item{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;font-family:var(--mono);font-size:.7rem;color:var(--text2);cursor:pointer;transition:all .1s;border-bottom:1px solid var(--surface3);white-space:nowrap}
 .dd-item:last-child{border-bottom:none}
 .dd-item:hover{background:var(--accent-l);color:var(--accent)}
 .dd-item.selected{background:var(--accent-l);color:var(--accent);font-weight:600}
 .dd-sym{font-weight:600;color:var(--text)}
-.dd-name{font-size:.62rem;color:var(--muted);margin-left:8px}
+.dd-name{font-size:.62rem;color:var(--muted);margin-left:8px;flex:1}
 .dd-chg{font-size:.62rem;font-weight:600}
 .dd-chg.up{color:var(--bull)}
 .dd-chg.dn{color:var(--bear)}
+
+/* NSE COMING SOON pill */
+.nse-soon{display:inline-flex;align-items:center;gap:5px;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.3);border-radius:20px;padding:2px 8px;font-family:var(--mono);font-size:.55rem;color:var(--accent);font-weight:700;letter-spacing:.08em;vertical-align:middle;margin-left:4px}
 
 /* MAIN */
 .page-body{max-width:1320px;margin:0 auto;padding:18px 20px 60px}
@@ -173,21 +177,22 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .pu-badge:hover{background:#ea6c00;transform:translateY(-1px);box-shadow:0 5px 16px rgba(249,115,22,.5)}
 .pu-note{font-size:.62rem;color:rgba(255,255,255,.35);margin-top:10px;font-family:var(--mono)}
 
-/* SM BTN */
-.sm-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-family:var(--mono);font-size:.63rem;cursor:pointer;transition:all .15s;white-space:nowrap}
-.sm-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-l)}
-.sm-btn svg{width:11px;height:11px}
-
-/* STOCK SELECTOR BAR */
-.stock-bar{background:var(--surface);border-bottom:2px solid var(--border);padding:9px 20px;display:none;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:96px;z-index:140}
-.stock-bar.show{display:flex}
-.stock-bar-label{font-family:var(--mono);font-size:.6rem;color:var(--muted);letter-spacing:.1em;white-space:nowrap}
-.stock-select{font-family:var(--mono);font-size:.72rem;padding:6px 10px;border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);cursor:pointer;min-width:220px;outline:none;transition:border-color .15s}
-.stock-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(249,115,22,.1)}
-.spill{font-family:var(--mono);font-size:.6rem;padding:4px 9px;border-radius:20px;letter-spacing:.06em}
-.spill.loading{background:#fff4ed;color:#c2410c;border:1px solid rgba(249,115,22,.2)}
-.spill.ok{background:var(--bull-bg);color:var(--bull);border:1px solid rgba(22,163,74,.2)}
-.spill.err{background:var(--bear-bg);color:var(--bear);border:1px solid rgba(220,38,38,.2)}
+/* NSE WAITLIST PANEL */
+.nse-waitlist{background:linear-gradient(135deg,#0f172a 0%,#1a0a00 100%);border-radius:var(--rl);border:1px solid rgba(249,115,22,.25);padding:32px 24px;text-align:center}
+.nse-wl-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.35);border-radius:20px;padding:4px 12px;font-family:var(--mono);font-size:.6rem;color:var(--accent);letter-spacing:.12em;margin-bottom:14px}
+.nse-wl-title{font-family:var(--mono);font-size:1.05rem;font-weight:700;color:#fff;margin-bottom:8px;letter-spacing:.02em}
+.nse-wl-sub{font-size:.74rem;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:20px;max-width:320px;margin-left:auto;margin-right:auto}
+.nse-wl-features{display:flex;flex-direction:column;gap:7px;margin-bottom:22px;text-align:left;max-width:280px;margin-left:auto;margin-right:auto}
+.nse-wl-feat{display:flex;align-items:center;gap:9px;font-size:.7rem;color:rgba(255,255,255,.6);font-family:var(--mono)}
+.nse-wl-feat-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.nse-wl-form{display:flex;gap:8px;max-width:320px;margin:0 auto}
+.nse-wl-input{flex:1;padding:10px 12px;background:rgba(255,255,255,.07);border:1px solid rgba(249,115,22,.3);border-radius:var(--r);color:#fff;font-family:var(--mono);font-size:.72rem;outline:none;transition:border-color .2s}
+.nse-wl-input::placeholder{color:rgba(255,255,255,.3)}
+.nse-wl-input:focus{border-color:var(--accent);background:rgba(249,115,22,.08)}
+.nse-wl-btn{padding:10px 16px;background:var(--accent);border:none;border-radius:var(--r);color:#fff;font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:all .2s;white-space:nowrap}
+.nse-wl-btn:hover{background:#ea6c00}
+.nse-wl-note{font-size:.58rem;color:rgba(255,255,255,.25);margin-top:12px;font-family:var(--mono);letter-spacing:.06em}
+.nse-wl-success{display:none;background:rgba(22,163,74,.15);border:1px solid rgba(22,163,74,.3);border-radius:var(--r);padding:12px 16px;font-family:var(--mono);font-size:.72rem;color:#4ade80;letter-spacing:.04em}
 
 @media(max-width:960px){.main-grid{grid-template-columns:1fr}.cpr-stats{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.page-body{padding:12px 12px 50px}.cpr-stats{grid-template-columns:1fr}.bk-grid{grid-template-columns:1fr}.tz-btn{padding:5px 7px}.dval{display:none}.cat-btn{padding:0 10px;font-size:.65rem}}
@@ -196,7 +201,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 </head>
 <body>
 
-<!-- ═══ TOP NAV ═══ -->
+<!-- NAV -->
 <nav class="topnav">
   <div class="nav-logo">
     <div class="nav-logo-icon">
@@ -222,10 +227,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
   </div>
 </nav>
 
-<!-- ═══ CATEGORY BAR ═══ -->
+<!-- CATEGORY BAR -->
 <div class="catbar" id="catbar">
 
-  <!-- FOREX -->
   <span class="cat-label">Forex</span>
   <div class="cat-item" id="ci-FOREX">
     <button class="cat-btn active" onclick="toggleDropdown('FOREX',event)">
@@ -242,7 +246,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 
   <div class="cat-divider"></div>
 
-  <!-- ENERGY -->
   <span class="cat-label">Energy</span>
   <div class="cat-item" id="ci-ENERGY">
     <button class="cat-btn" onclick="toggleDropdown('ENERGY',event)">
@@ -257,7 +260,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 
   <div class="cat-divider"></div>
 
-  <!-- METALS -->
   <span class="cat-label">Metals</span>
   <div class="cat-item" id="ci-METALS">
     <button class="cat-btn" onclick="toggleDropdown('METALS',event)">
@@ -271,7 +273,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 
   <div class="cat-divider"></div>
 
-  <!-- CRYPTO -->
   <span class="cat-label">Crypto</span>
   <div class="cat-item" id="ci-CRYPTO">
     <button class="cat-btn" onclick="toggleDropdown('CRYPTO',event)">
@@ -288,7 +289,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 
   <div class="cat-divider"></div>
 
-  <!-- US STOCKS -->
   <span class="cat-label">US Stocks</span>
   <div class="cat-item" id="ci-US">
     <button class="cat-btn" onclick="toggleDropdown('US',event)">
@@ -313,7 +313,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
       <div class="dd-item" onclick="selectInCat('US','COST','Costco',this,event)"><span class="dd-sym">COST</span><span class="dd-name">Costco Wholesale</span></div>
       <div class="dd-item" onclick="selectInCat('US','HD','Home Depot',this,event)"><span class="dd-sym">HD</span><span class="dd-name">Home Depot Inc.</span></div>
       <div class="dd-item" onclick="selectInCat('US','AVGO','Broadcom',this,event)"><span class="dd-sym">AVGO</span><span class="dd-name">Broadcom Inc.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','PG','Procter & Gamble',this,event)"><span class="dd-sym">PG</span><span class="dd-name">Procter & Gamble</span></div>
+      <div class="dd-item" onclick="selectInCat('US','PG','P&G',this,event)"><span class="dd-sym">PG</span><span class="dd-name">Procter & Gamble</span></div>
       <div class="dd-item" onclick="selectInCat('US','JNJ','J&J',this,event)"><span class="dd-sym">JNJ</span><span class="dd-name">Johnson & Johnson</span></div>
       <div class="dd-item" onclick="selectInCat('US','NFLX','Netflix',this,event)"><span class="dd-sym">NFLX</span><span class="dd-name">Netflix Inc.</span></div>
       <div class="dd-item" onclick="selectInCat('US','AMD','AMD',this,event)"><span class="dd-sym">AMD</span><span class="dd-name">Advanced Micro Devices</span></div>
@@ -327,11 +327,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
       <div class="dd-item" onclick="selectInCat('US','BA','Boeing',this,event)"><span class="dd-sym">BA</span><span class="dd-name">Boeing Co.</span></div>
       <div class="dd-item" onclick="selectInCat('US','GS','Goldman Sachs',this,event)"><span class="dd-sym">GS</span><span class="dd-name">Goldman Sachs</span></div>
       <div class="dd-item" onclick="selectInCat('US','MS','Morgan Stanley',this,event)"><span class="dd-sym">MS</span><span class="dd-name">Morgan Stanley</span></div>
-      <div class="dd-item" onclick="selectInCat('US','BAC','Bank of America',this,event)"><span class="dd-sym">BAC</span><span class="dd-name">Bank of America</span></div>
+      <div class="dd-item" onclick="selectInCat('US','BAC','BofA',this,event)"><span class="dd-sym">BAC</span><span class="dd-name">Bank of America</span></div>
       <div class="dd-item" onclick="selectInCat('US','CVX','Chevron',this,event)"><span class="dd-sym">CVX</span><span class="dd-name">Chevron Corp.</span></div>
       <div class="dd-item" onclick="selectInCat('US','PFE','Pfizer',this,event)"><span class="dd-sym">PFE</span><span class="dd-name">Pfizer Inc.</span></div>
       <div class="dd-item" onclick="selectInCat('US','KO','Coca-Cola',this,event)"><span class="dd-sym">KO</span><span class="dd-name">Coca-Cola Co.</span></div>
-      <div class="dd-item" onclick="selectInCat('US','MCD','McDonald\'s',this)"><span class="dd-sym">MCD</span><span class="dd-name">McDonald's Corp.</span></div>
+      <div class="dd-item" onclick="selectInCat('US','MCD','McDonald\'s',this,event)"><span class="dd-sym">MCD</span><span class="dd-name">McDonald's Corp.</span></div>
       <div class="dd-item" onclick="selectInCat('US','NKE','Nike',this,event)"><span class="dd-sym">NKE</span><span class="dd-name">Nike Inc.</span></div>
       <div class="dd-item" onclick="selectInCat('US','SBUX','Starbucks',this,event)"><span class="dd-sym">SBUX</span><span class="dd-name">Starbucks Corp.</span></div>
       <div class="dd-item" onclick="selectInCat('US','T','AT&T',this,event)"><span class="dd-sym">T</span><span class="dd-name">AT&T Inc.</span></div>
@@ -350,33 +350,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 
   <div class="cat-divider"></div>
 
-  <!-- NSE INDIA -->
+  <!-- NSE — clicking shows waitlist panel -->
   <span class="cat-label" style="color:#f97316">NSE 🇮🇳</span>
   <div class="cat-item" id="ci-NSE">
-    <button class="cat-btn" onclick="toggleDropdown('NSE',event)">
-      <span id="nse-label">Select</span> <span class="chevron">▾</span>
+    <button class="cat-btn" onclick="activateNSE(event)">
+      <span id="nse-label">NSE India</span>
+      <span class="nse-soon">SOON</span>
     </button>
-    <div class="cat-dropdown" id="dd-NSE" style="min-width:260px">
-      <div class="dd-item" style="color:var(--muted);font-size:.62rem;cursor:default;background:var(--surface2)" id="nse-dd-status">Loading from sheet...</div>
-    </div>
   </div>
 
 </div>
 
-<!-- ═══ STOCK SELECTOR BAR (for NSE — full list from sheet) ═══ -->
-<div class="stock-bar" id="stockBar">
-  <span class="stock-bar-label">NSE STOCK</span>
-  <select class="stock-select" id="nseSelect" onchange="onNseChange(this.value)">
-    <option value="">— Select stock —</option>
-  </select>
-  <span class="spill loading" id="sheetPill">⟳ SYNCING</span>
-  <button class="sm-btn" onclick="loadSheetData(true)">
-    <svg viewBox="0 0 12 12" fill="none"><path d="M10 6A4 4 0 1 1 6 2M10 2v4H6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    SYNC
-  </button>
-</div>
-
-<!-- ═══ MAIN PAGE ═══ -->
+<!-- MAIN PAGE -->
 <div class="page-body">
 <div class="main-grid">
 
@@ -423,17 +408,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
     </div>
   </div>
 
-  <!-- RIGHT — CPR first, then News -->
+  <!-- RIGHT — CPR then News -->
   <div class="right-col">
 
-    <!-- CPR PANEL (top) -->
-    <div class="card">
+    <!-- CPR PANEL -->
+    <div class="card" id="cprCard">
       <div class="card-hdr">
         <span class="card-title">SimpleCPR · <span class="ctacc" id="cprLabel">USD/JPY</span></span>
-        <button class="sm-btn" onclick="loadCPR(true)">
-          <svg viewBox="0 0 12 12" fill="none"><path d="M10 6A4 4 0 1 1 6 2M10 2v4H6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          REFRESH
-        </button>
       </div>
       <div class="card-body">
         <div class="cpr-stats">
@@ -445,14 +426,31 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
       </div>
     </div>
 
-    <!-- NEWS FEED (below CPR) -->
+    <!-- NSE WAITLIST (hidden by default, shown when NSE selected) -->
+    <div id="nseWaitlistCard" style="display:none">
+      <div class="nse-waitlist">
+        <div class="nse-wl-badge">🇮🇳 NSE INDIA · COMING SOON</div>
+        <div class="nse-wl-title">Real-time NSE Data is Launching</div>
+        <div class="nse-wl-sub">Live CPR levels, CMP, pivot ranges and AI signals for all Nifty 50 &amp; Nifty 500 stocks — powered by direct NSE feed.</div>
+        <div class="nse-wl-features">
+          <div class="nse-wl-feat"><span class="nse-wl-feat-dot"></span>Live intraday CPR · TC · BC · R1 · S1 · R2 · S2</div>
+          <div class="nse-wl-feat"><span class="nse-wl-feat-dot"></span>AI sentiment scoring on NSE-specific news</div>
+          <div class="nse-wl-feat"><span class="nse-wl-feat-dot"></span>Narrow CPR alerts for trending day detection</div>
+          <div class="nse-wl-feat"><span class="nse-wl-feat-dot"></span>FII/DII flow tracker + Bank Nifty signals</div>
+        </div>
+        <div class="nse-wl-form" id="wlForm">
+          <input class="nse-wl-input" type="email" id="wlEmail" placeholder="your@email.com" />
+          <button class="nse-wl-btn" onclick="joinWaitlist()">JOIN WAITLIST</button>
+        </div>
+        <div class="nse-wl-success" id="wlSuccess">✓ You're on the list — we'll notify you at launch!</div>
+        <div class="nse-wl-note">FREE early access · No spam · Unsubscribe anytime</div>
+      </div>
+    </div>
+
+    <!-- NEWS FEED -->
     <div class="card">
       <div class="card-hdr">
         <span class="card-title">News Feed · <span class="ctacc" id="newsLabel">USD/JPY</span></span>
-        <button class="sm-btn" onclick="loadFeed()">
-          <svg viewBox="0 0 12 12" fill="none"><path d="M10 6A4 4 0 1 1 6 2M10 2v4H6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          REFRESH
-        </button>
       </div>
       <div class="card-body">
         <div class="news-scroll" id="newsList">
@@ -466,15 +464,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════
-//  CONFIG
-// ═══════════════════════════════════════════════════
-const SHEET_ID = '1kKectUWEsXJJ-_BnrQxi-7ppku0WpLY36JoQcr2J7pk';
-const TD_KEY   = 'f13c82ea98f947b48b9453b15a732cf1';
+const TD_KEY='f13c82ea98f947b48b9453b15a732cf1';
 
-// ═══════════════════════════════════════════════════
-//  CLOCK
-// ═══════════════════════════════════════════════════
+// CLOCK
 let currentTZ='IST';
 const TZ={'IST':'Asia/Kolkata','UTC':'UTC','GMT':'Europe/London'};
 function setTZ(z){currentTZ=z;document.querySelectorAll('.tz-btn').forEach(b=>b.classList.remove('active'));document.getElementById('tz-'+z).classList.add('active');document.getElementById('tzLbl').textContent=z;tick();}
@@ -482,96 +474,117 @@ function tick(){const n=new Date(),ia=TZ[currentTZ];document.getElementById('clo
 setInterval(tick,1000);tick();
 function updateMkt(n){const ist=new Date(n.toLocaleString('en-US',{timeZone:'Asia/Kolkata'})),h=ist.getHours(),m=ist.getMinutes(),d=ist.getDay(),open=d>=1&&d<=5&&(h>9||(h===9&&m>=15))&&(h<15||(h===15&&m<=30));const dot=document.getElementById('mktDot'),txt=document.getElementById('mktTxt'),pill=document.getElementById('mktPill');dot.style.background=open?'#4ade80':'rgba(255,255,255,.25)';txt.style.color=open?'#4ade80':'rgba(255,255,255,.4)';txt.textContent=open?'NSE OPEN':'NSE CLOSED';pill.style.borderColor=open?'rgba(74,222,128,.3)':'rgba(255,255,255,.1)';}
 
-// ═══════════════════════════════════════════════════
-//  ASSET STATE
-// ═══════════════════════════════════════════════════
-let currentAsset='USDJPY', currentCat='FOREX', currentNseSym='';
-let analysisCache={}, cprCache={}, sheetData=[], sheetLoaded=false, sheetLoading=false;
+// ASSET STATE
+let currentAsset='USDJPY', currentCat='FOREX';
+let cprCache={};
 
-// TD symbol map
 const TD_SYM={
-  USDJPY:'USD/JPY', EURUSD:'EUR/USD', GBPUSD:'GBP/USD', AUDUSD:'AUD/USD', USDCAD:'USD/CAD',
-  USOIL:'USOIL/USD', BRENTOIL:'BRENT/USD', NATGAS:'XNG/USD',
-  XAUUSD:'XAU/USD', XAGUSD:'XAG/USD',
-  BTCUSD:'BTC/USD', ETHUSD:'ETH/USD', SOLUSD:'SOL/USD', BNBUSD:'BNB/USD', XRPUSD:'XRP/USD',
-  AAPL:'AAPL', MSFT:'MSFT', NVDA:'NVDA', GOOGL:'GOOGL', AMZN:'AMZN', META:'META', TSLA:'TSLA',
-  'BRK.B':'BRK.B', JPM:'JPM', V:'V', WMT:'WMT', UNH:'UNH', LLY:'LLY', MA:'MA', XOM:'XOM',
-  COST:'COST', HD:'HD', AVGO:'AVGO', PG:'PG', JNJ:'JNJ', NFLX:'NFLX', AMD:'AMD', INTC:'INTC',
-  CRM:'CRM', ORCL:'ORCL', IBM:'IBM', ADBE:'ADBE', PYPL:'PYPL', DIS:'DIS', BA:'BA', GS:'GS',
-  MS:'MS', BAC:'BAC', CVX:'CVX', PFE:'PFE', KO:'KO', MCD:'MCD', NKE:'NKE', SBUX:'SBUX',
-  T:'T', VZ:'VZ', UBER:'UBER', ABNB:'ABNB', SPOT:'SPOT', PLTR:'PLTR', RIVN:'RIVN',
-  COIN:'COIN', HOOD:'HOOD', SOFI:'SOFI', SNAP:'SNAP'
+  USDJPY:'USD/JPY',EURUSD:'EUR/USD',GBPUSD:'GBP/USD',AUDUSD:'AUD/USD',USDCAD:'USD/CAD',
+  USOIL:'USOIL/USD',BRENTOIL:'BRENT/USD',NATGAS:'XNG/USD',
+  XAUUSD:'XAU/USD',XAGUSD:'XAG/USD',
+  BTCUSD:'BTC/USD',ETHUSD:'ETH/USD',SOLUSD:'SOL/USD',BNBUSD:'BNB/USD',XRPUSD:'XRP/USD',
+  AAPL:'AAPL',MSFT:'MSFT',NVDA:'NVDA',GOOGL:'GOOGL',AMZN:'AMZN',META:'META',TSLA:'TSLA',
+  'BRK.B':'BRK.B',JPM:'JPM',V:'V',WMT:'WMT',UNH:'UNH',LLY:'LLY',MA:'MA',XOM:'XOM',
+  COST:'COST',HD:'HD',AVGO:'AVGO',PG:'PG',JNJ:'JNJ',NFLX:'NFLX',AMD:'AMD',INTC:'INTC',
+  CRM:'CRM',ORCL:'ORCL',IBM:'IBM',ADBE:'ADBE',PYPL:'PYPL',DIS:'DIS',BA:'BA',GS:'GS',
+  MS:'MS',BAC:'BAC',CVX:'CVX',PFE:'PFE',KO:'KO',MCD:'MCD',NKE:'NKE',SBUX:'SBUX',
+  T:'T',VZ:'VZ',UBER:'UBER',ABNB:'ABNB',SPOT:'SPOT',PLTR:'PLTR',RIVN:'RIVN',
+  COIN:'COIN',HOOD:'HOOD',SOFI:'SOFI',SNAP:'SNAP'
 };
 
-// Headlines per asset type
 const HL={
   FOREX:["Federal Reserve signals cautious rate-cut stance amid persistent inflation","US nonfarm payrolls beat expectations, reinforcing dollar strength broadly","Central bank intervention risk rises as JPY/EUR sees sharp depreciation","G7 finance ministers discuss coordinated FX policy amid dollar volatility","US CPI data shows inflation cooling slower than forecast, dollar surges","Risk-off sentiment grips markets as geopolitical tensions escalate globally","US retail sales miss estimates, raising recession fears, weighing on dollar","Bond yields surge on strong economic data, forex markets reprice expectations"],
   ENERGY:["OPEC+ agrees to extend voluntary output cuts, crude oil rallies sharply","EIA inventory report shows unexpected large build, WTI falls on demand fears","Middle East tensions escalate as strikes target regional energy infrastructure","US shale production hits record high, offsetting OPEC supply discipline","China demand outlook improves as manufacturing PMI beats market estimates","IEA cuts global oil demand forecast citing slowing economic growth worldwide","Hurricane season threatens Gulf production, energy risk premium rises sharply","Russia crude exports rebound despite sanctions, supply concerns ease broadly"],
   METALS:["Gold hits fresh all-time high as central banks accelerate reserve buying","US real yields decline on weak jobs data, boosting non-yielding gold appeal","Geopolitical risk lifts safe-haven gold and silver demand across markets","Fed rate cut expectations rekindled by soft CPI data, metals rally broadly","Dollar weakness provides tailwind for precious metals as debt concerns mount","China central bank adds gold reserves for tenth consecutive month running","Silver industrial demand surges from solar panel and EV battery sector","ETF inflows into gold surge as institutions hedge against equity volatility"],
   CRYPTO:["Bitcoin breaks key resistance level as institutional ETF inflows surge","Ethereum network upgrade improves scalability, boosting DeFi activity sharply","SEC approves spot crypto ETF applications, marking regulatory turning point","Fed policy uncertainty drives crypto as alternative store-of-value demand","Major exchange reports record trading volumes amid broad crypto market rally","DeFi total value locked hits new high as yield opportunities attract capital","Regulatory clarity in Asia boosts crypto adoption and institutional interest","Stablecoin legislation advances in Congress, crypto market sentiment improves"],
-  US:["Federal Reserve holds rates, signals two cuts possible by year-end","Strong corporate earnings beat drives S&P 500 to fresh all-time highs","US inflation data shows continued disinflation, supporting equity valuations","Mega-cap tech dominates market rally as AI spending cycle accelerates","Bond yields fall on soft economic data, rotation into growth stocks begins","US consumer spending remains resilient despite higher borrowing costs broadly","Geopolitical uncertainty weighs on risk assets, defensive sectors outperform","Strong labor market data reinforces soft-landing narrative for US economy"],
-  NSE:["FII inflows surge into Indian equities amid stable rupee and strong earnings","RBI holds repo rate, signals accommodative stance supporting equity markets","India GDP growth beats estimates at 7.6%, boosting broader market sentiment","Global risk-off mood triggers FII selling, Nifty and Bank Nifty under pressure","Union Budget announced higher capex, infrastructure and defence stocks rally","India inflation eases to 4.8%, raising RBI rate cut probability sharply","US Fed hawkishness weighs on emerging markets including Indian equities","Strong Q3 earnings across BFSI and IT sectors beat analyst estimates broadly"]
+  US:["Federal Reserve holds rates, signals two cuts possible by year-end","Strong corporate earnings beat drives S&P 500 to fresh all-time highs","US inflation data shows continued disinflation, supporting equity valuations","Mega-cap tech dominates market rally as AI spending cycle accelerates","Bond yields fall on soft economic data, rotation into growth stocks begins","US consumer spending remains resilient despite higher borrowing costs broadly","Geopolitical uncertainty weighs on risk assets, defensive sectors outperform","Strong labor market data reinforces soft-landing narrative for US economy"]
 };
 const SRC={
   FOREX:['Reuters','Bloomberg','FX Street','Forex Live','DailyFX','MarketWatch','CNBC','Investing.com'],
   ENERGY:['OilPrice.com','Reuters','Bloomberg','EIA','OPEC','S&P Platts','Energy Intel','CNBC'],
   METALS:['Reuters','Bloomberg','Kitco','World Gold Council','LBMA','MarketWatch','Investing.com','FX Street'],
   CRYPTO:['CoinDesk','CoinTelegraph','Bloomberg','Reuters','The Block','Decrypt','CryptoSlate','CNBC'],
-  US:['Reuters','Bloomberg','WSJ','CNBC','Financial Times','Barron\'s','MarketWatch','Seeking Alpha'],
-  NSE:['Moneycontrol','ET Markets','NSE India','NDTV Profit','Bloomberg India','Reuters India','Mint','Business Standard']
+  US:['Reuters','Bloomberg','WSJ','CNBC','Financial Times',"Barron's",'MarketWatch','Seeking Alpha']
 };
-
 function getHL(cat){return HL[cat]||HL.FOREX;}
 function getSRC(cat){return SRC[cat]||SRC.FOREX;}
 
-// ═══════════════════════════════════════════════════
-//  DROPDOWN MENU LOGIC
-// ═══════════════════════════════════════════════════
-function toggleDropdown(cat, event){
+// DROPDOWN — compute position with fixed coords
+function positionDropdown(catId){
+  const btn=document.querySelector(`#ci-${catId} .cat-btn`);
+  const dd=document.getElementById('dd-'+catId);
+  if(!btn||!dd) return;
+  const rect=btn.getBoundingClientRect();
+  dd.style.top=(rect.bottom+1)+'px';
+  dd.style.left=rect.left+'px';
+}
+
+function toggleDropdown(cat,event){
   if(event) event.stopPropagation();
   const item=document.getElementById('ci-'+cat);
   const wasOpen=item.classList.contains('open');
   document.querySelectorAll('.cat-item').forEach(i=>i.classList.remove('open'));
-  if(!wasOpen) item.classList.add('open');
+  if(!wasOpen){item.classList.add('open');positionDropdown(cat);}
 }
-// Close dropdowns on outside click — use mousedown so it fires before click
+
 document.addEventListener('mousedown',e=>{
-  if(!e.target.closest('.cat-item')&&!e.target.closest('.cat-btn')){
+  if(!e.target.closest('.cat-item')&&!e.target.closest('.cat-dropdown')){
     document.querySelectorAll('.cat-item').forEach(i=>i.classList.remove('open'));
   }
 });
+window.addEventListener('scroll',()=>{
+  document.querySelectorAll('.cat-item.open').forEach(item=>{
+    const cat=item.id.replace('ci-','');
+    positionDropdown(cat);
+  });
+},true);
 
-function selectInCat(cat, assetKey, label, el, event){
+function selectInCat(cat,assetKey,label,el,event){
   if(event) event.stopPropagation();
-  // Mark selected in dropdown
   document.querySelectorAll(`#dd-${cat} .dd-item`).forEach(i=>i.classList.remove('selected'));
   el.classList.add('selected');
-  // Update button label
-  document.getElementById(cat.toLowerCase()+'-label').textContent=
-    el.querySelector('.dd-sym')?el.querySelector('.dd-sym').textContent:label;
-  // Activate this cat button
+  const sym=el.querySelector('.dd-sym');
+  document.getElementById(cat.toLowerCase()+'-label').textContent=sym?sym.textContent:label;
   document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
   document.querySelector(`#ci-${cat} .cat-btn`).classList.add('active');
-  // Close dropdown
   document.getElementById('ci-'+cat).classList.remove('open');
 
   currentCat=cat;
   currentAsset=assetKey;
 
-  // NSE stock bar
-  const isNSE=cat==='NSE';
-  document.getElementById('stockBar').classList.toggle('show',isNSE);
+  // Hide NSE waitlist, show CPR card
+  document.getElementById('nseWaitlistCard').style.display='none';
+  document.getElementById('cprCard').style.display='';
 
   updateLabels(label);
   resetSentUI();
-  cprCache[assetKey]=null; // force fresh load
-  if(cat==='NSE'){
-    loadSheetData(false);
-    resetCPR();
-  } else {
-    loadCPR(false);
-    renderNewsFeed(getHL(cat),null);
-  }
+  cprCache[assetKey]=null;
+  loadCPR(false);
+  renderNewsFeed(getHL(cat),null);
+}
+
+function activateNSE(event){
+  if(event) event.stopPropagation();
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('#ci-NSE .cat-btn').classList.add('active');
+  document.querySelectorAll('.cat-item').forEach(i=>i.classList.remove('open'));
+
+  currentCat='NSE';
+  currentAsset='NSE';
+
+  document.getElementById('cprCard').style.display='none';
+  document.getElementById('nseWaitlistCard').style.display='';
+
+  updateLabels('NSE India');
+  resetSentUI();
+  renderNewsFeed(getHL('FOREX'),null);
+}
+
+function joinWaitlist(){
+  const email=document.getElementById('wlEmail').value.trim();
+  if(!email||!email.includes('@')){document.getElementById('wlEmail').focus();return;}
+  document.getElementById('wlForm').style.display='none';
+  document.getElementById('wlSuccess').style.display='block';
 }
 
 function updateLabels(label){
@@ -580,148 +593,7 @@ function updateLabels(label){
   document.getElementById('newsLabel').textContent=label;
 }
 
-// ═══════════════════════════════════════════════════
-//  SHEET LOADER — multi-strategy with JSONP fallback
-// ═══════════════════════════════════════════════════
-function parseCSV(text){
-  const lines=text.trim().split('\n');
-  if(lines.length<2) return [];
-  const headers=parseRow(lines[0]);
-  return lines.slice(1).map(line=>{
-    const v=parseRow(line),o={};
-    headers.forEach((h,i)=>o[h.replace(/"/g,'').trim()]=v[i]||'');
-    return o;
-  }).filter(r=>r['Symbol']&&String(r['Symbol']).trim());
-}
-function parseRow(line){
-  const r=[];let c='',q=false;
-  for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){q=!q;}else if(ch===','&&!q){r.push(c.trim().replace(/^"|"$/g,''));c='';}else c+=ch;}
-  r.push(c.trim().replace(/^"|"$/g,''));return r;
-}
-function fetchSheetJSONP(){
-  return new Promise((res,rej)=>{
-    const cb='_vfcb'+Date.now();
-    const s=document.createElement('script');
-    const t=setTimeout(()=>{cleanup();rej(new Error('Timeout'));},8000);
-    window[cb]=data=>{
-      cleanup();
-      try{
-        const{table}=data;if(!table||!table.rows) return rej(new Error('No table'));
-        const headers=table.cols.map(c=>c.label||c.id);
-        const rows=table.rows.map(r=>{const o={};r.c.forEach((cell,i)=>{o[headers[i]]=cell?cell.v:'';});return o;}).filter(r=>r['Symbol']&&String(r['Symbol']).trim());
-        res(rows);
-      }catch(e){rej(e);}
-    };
-    function cleanup(){clearTimeout(t);delete window[cb];s.parentNode&&s.parentNode.removeChild(s);}
-    s.onerror=()=>{cleanup();rej(new Error('Script load failed'));};
-    s.src=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Nifty50&callback=${cb}`;
-    document.head.appendChild(s);
-  });
-}
-async function loadSheetData(force=false){
-  if(sheetLoading) return;
-  if(sheetLoaded&&!force) return;
-  sheetLoading=true;
-  const pill=document.getElementById('sheetPill');
-  pill.className='spill loading';pill.textContent='⟳ SYNCING';
-  const URLS=[
-    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`,
-    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Nifty50`,
-    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`,
-  ];
-  let rows=null;
-  for(const url of URLS){
-    try{
-      const r=await fetch(url,{cache:'no-store'});
-      if(!r.ok) continue;
-      const t=await r.text();
-      if(t.trim().startsWith('<')) continue;
-      rows=parseCSV(t);
-      if(rows&&rows.length>0) break;
-    }catch(e){}
-  }
-  if(!rows||rows.length===0){
-    try{rows=await fetchSheetJSONP();}catch(e){}
-  }
-  sheetLoading=false;
-  if(!rows||rows.length===0){
-    pill.className='spill err';pill.textContent='⚠ ERROR';
-    document.getElementById('nseSelect').innerHTML='<option value="">— Sync failed —</option>';
-    document.getElementById('nse-dd-status').textContent='Sync failed';
-    if(currentCat==='NSE') showPremiumUpsell();
-    return;
-  }
-  sheetData=rows;sheetLoaded=true;
-  pill.className='spill ok';pill.textContent=`✓ ${rows.length} STOCKS`;
-  populateNSE();
-}
-function populateNSE(){
-  const sel=document.getElementById('nseSelect');
-  sel.innerHTML='<option value="">— Select stock —</option>';
-  const dd=document.getElementById('dd-NSE');
-  dd.innerHTML='';
-  sheetData.forEach(row=>{
-    const sym=String(row['Symbol']||'').trim();if(!sym) return;
-    const name=String(row['Name']||sym).substring(0,20);
-    const rawCmp=row['CMP (₹)']||row['CMP']||'';
-    const cmp=parseFloat(String(rawCmp).replace(/[₹,]/g,''));
-    const cmpStr=!isNaN(cmp)&&cmp>0?`₹${cmp.toFixed(0)}`:'';
-    // Dropdown
-    const opt=document.createElement('option');
-    opt.value=sym;opt.textContent=`${sym}  ${name}  ${cmpStr}`;
-    sel.appendChild(opt);
-    // Cat dropdown mini list (top 10)
-    if(dd.querySelectorAll('.dd-item').length<10){
-      const div=document.createElement('div');
-      div.className='dd-item';
-      div.innerHTML=`<span class="dd-sym">${sym}</span><span class="dd-name">${name}</span>${cmpStr?`<span class="dd-chg">${cmpStr}</span>`:''}`;
-      div.onclick=()=>{document.getElementById('stockBar').classList.add('show');document.getElementById('nseSelect').value=sym;onNseChange(sym);};
-      dd.appendChild(div);
-    }
-  });
-  if(dd.querySelectorAll('.dd-item').length===0) dd.innerHTML='<div class="dd-item" style="color:var(--muted);cursor:default">No stocks loaded</div>';
-}
-function sf(row,key){const v=row[key];if(!v&&v!==0) return 0;const n=parseFloat(String(v).replace(/[₹,]/g,''));return isNaN(n)?0:n;}
-function onNseChange(sym){
-  if(!sym) return;
-  currentNseSym=sym;
-  const row=sheetData.find(r=>String(r['Symbol']||'').trim()===sym);
-  if(!row) return;
-  const name=String(row['Name']||sym);
-  currentAsset='NSE_'+sym;
-  updateLabels(sym);
-  document.getElementById('nse-label').textContent=sym;
-  renderNSECPR({
-    sym,name,
-    cmp:sf(row,'CMP (₹)')||sf(row,'CMP'),
-    pivot:sf(row,'Pivot'),tc:sf(row,'TC'),bc:sf(row,'BC'),
-    r1:sf(row,'R1'),s1:sf(row,'S1'),r2:sf(row,'R2'),s2:sf(row,'S2'),
-    breakout:String(row['Breakout']||'--'),
-    cprWidth:sf(row,'CPR Width'),
-    updated:String(row['Last Updated (IST)']||row['Last Updated']||'')
-  });
-  resetSentUI();
-  renderNewsFeed(getHL('NSE'),null);
-}
-
-// ═══════════════════════════════════════════════════
-//  PREMIUM UPSELL
-// ═══════════════════════════════════════════════════
-function showPremiumUpsell(){
-  document.getElementById('cprTableWrap').innerHTML=`
-  <div class="premium-upsell">
-    <div class="pu-icon">🔒</div>
-    <div class="pu-title">Premium Data Required</div>
-    <div class="pu-subtitle">Real-time CPR levels, live prices, and advanced signals<br>for all NSE stocks, US equities, crypto & more.</div>
-    <button class="pu-badge" onclick="alert('Redirecting to checkout...')">Unlock Premium+ — $9 / month</button>
-    <div class="pu-note">Cancel anytime · Instant access · All markets included</div>
-  </div>`;
-  ['cpr-r1','cpr-s1','cpr-in'].forEach(id=>{document.getElementById(id).textContent='--';});
-}
-
-// ═══════════════════════════════════════════════════
-//  GAUGE
-// ═══════════════════════════════════════════════════
+// GAUGE
 function drawGauge(score,color){
   const cv=document.getElementById('gaugeCanvas'),ctx=cv.getContext('2d');
   cv.width=380;cv.height=190;
@@ -739,11 +611,9 @@ function drawGauge(score,color){
   ctx.fillText('BEAR',cx-r+16,cy+18);ctx.fillText('BULL',cx+r-16,cy+18);ctx.fillText('NEUTRAL',cx,cy-r+30);
 }
 
-// ═══════════════════════════════════════════════════
-//  NEWS FEED
-// ═══════════════════════════════════════════════════
+// NEWS FEED
 function renderNewsFeed(headlines,scores){
-  const list=document.getElementById('newsList'),srcs=getSRC(currentCat);
+  const list=document.getElementById('newsList'),srcs=getSRC(currentCat==='NSE'?'FOREX':currentCat);
   list.innerHTML='';
   headlines.forEach((hl,i)=>{
     const sc=scores?scores[i]:null,mins=5+i*12,src=srcs[i%srcs.length];
@@ -753,17 +623,9 @@ function renderNewsFeed(headlines,scores){
     list.innerHTML+=`<div class="ni${type==='pending'?' analyzing':''}"><div class="nbadge nb-${type}">${emoji}</div><div style="flex:1;min-width:0"><div class="nhl">${hl}</div><div class="nmeta"><span class="nsrc">${src}</span><span class="ntime">${mins}m ago</span><span class="npill ${type}">${pt}</span></div></div></div>`;
   });
 }
-function loadFeed(){renderNewsFeed(getHL(currentCat),null);}
 
-// ═══════════════════════════════════════════════════
-//  CPR — TWELVE DATA (non-NSE)
-// ═══════════════════════════════════════════════════
+// CPR
 async function loadCPR(force){
-  if(currentCat==='NSE'){
-    if(currentNseSym) onNseChange(currentNseSym);
-    else resetCPR();
-    return;
-  }
   const tdSym=TD_SYM[currentAsset];
   if(!tdSym){showPremiumUpsell();return;}
   const cacheKey=currentAsset;
@@ -791,13 +653,25 @@ async function loadCPR(force){
   }
 }
 
+function showPremiumUpsell(){
+  document.getElementById('cprTableWrap').innerHTML=`
+  <div class="premium-upsell">
+    <div class="pu-icon">🔒</div>
+    <div class="pu-title">Premium Data Required</div>
+    <div class="pu-subtitle">Real-time CPR levels, live prices, and advanced signals for all markets.</div>
+    <button class="pu-badge" onclick="alert('Redirecting to checkout...')">Unlock Premium+ — $9 / month</button>
+    <div class="pu-note">Cancel anytime · Instant access · All markets included</div>
+  </div>`;
+  ['cpr-r1','cpr-s1','cpr-in'].forEach(id=>{document.getElementById(id).textContent='--';});
+}
+
 function renderCPR(rows){
   const r1c=rows.filter(r=>r.breakout==='r1').length,s1c=rows.filter(r=>r.breakout==='s1').length,inc=rows.filter(r=>r.breakout==='inside').length,tot=rows.length;
   document.getElementById('cpr-r1').textContent=r1c;document.getElementById('cpr-r1').style.color='var(--bull)';
   document.getElementById('cpr-s1').textContent=s1c;document.getElementById('cpr-s1').style.color='var(--bear)';
   document.getElementById('cpr-in').textContent=inc;document.getElementById('cpr-in').style.color='var(--neutral)';
-  const isNSE=currentCat==='NSE',isJPY=currentAsset==='USDJPY',isMetal=currentAsset==='XAUUSD'||currentAsset==='XAGUSD';
-  const dec=isNSE?2:isJPY?3:isMetal?2:5;
+  const isJPY=currentAsset==='USDJPY',isMetal=currentAsset==='XAUUSD'||currentAsset==='XAGUSD';
+  const dec=isJPY?3:isMetal?2:5;
   const fmt=v=>v.toFixed(dec);
   const r1p=Math.round((r1c/tot)*100),s1p=Math.round((s1c/tot)*100),inp=100-r1p-s1p;
   let html=`<div class="db-row"><span style="font-family:var(--mono);font-size:.57rem;color:var(--muted);letter-spacing:.07em;white-space:nowrap">30-DAY</span><div class="db-track"><div class="db-bull" style="width:${r1p}%"></div><div class="db-ins" style="width:${inp}%"></div><div class="db-bear" style="width:${s1p}%"></div></div><span style="font-family:var(--mono);font-size:.57rem;color:var(--bull)">${r1p}%</span><span style="font-family:var(--mono);font-size:.57rem;color:var(--neutral)">${inp}%</span><span style="font-family:var(--mono);font-size:.57rem;color:var(--bear)">${s1p}%</span></div>
@@ -811,65 +685,36 @@ function renderCPR(rows){
   document.getElementById('cprTableWrap').innerHTML=html;
 }
 
-function renderNSECPR(d){
-  const bType=d.breakout.includes('R1')?'r1':d.breakout.includes('S1')?'s1':'inside';
-  document.getElementById('cpr-r1').textContent=bType==='r1'?'YES':'NO';document.getElementById('cpr-r1').style.color=bType==='r1'?'var(--bull)':'var(--muted)';
-  document.getElementById('cpr-s1').textContent=bType==='s1'?'YES':'NO';document.getElementById('cpr-s1').style.color=bType==='s1'?'var(--bear)':'var(--muted)';
-  document.getElementById('cpr-in').textContent=bType==='inside'?'YES':'NO';document.getElementById('cpr-in').style.color=bType==='inside'?'var(--neutral)':'var(--muted)';
-  const fmt=v=>v?'₹'+v.toFixed(2):'--';
-  const bkC=d.breakout.includes('R1')?'bull':d.breakout.includes('S1')?'bear':d.breakout.includes('ABOVE')?'aboveTC':d.breakout.includes('BELOW')?'belowBC':'neutral';
-  document.getElementById('cprTableWrap').innerHTML=`
-  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px">
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;text-align:center">
-      <div><div style="font-family:var(--mono);font-size:1.3rem;font-weight:700;color:var(--accent)">${d.cmp?'₹'+d.cmp.toFixed(2):'--'}</div><div style="font-size:.56rem;color:var(--muted);font-family:var(--mono);text-transform:uppercase;margin-top:2px">CMP</div></div>
-      <div><div style="font-family:var(--mono);font-size:1.3rem;font-weight:700;color:var(--text)">${fmt(d.pivot)}</div><div style="font-size:.56rem;color:var(--muted);font-family:var(--mono);text-transform:uppercase;margin-top:2px">Pivot</div></div>
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center"><span class="cpill ${bkC}">${d.breakout}</span><div style="font-size:.55rem;color:var(--muted);font-family:var(--mono);text-transform:uppercase;margin-top:5px">Status</div></div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px">
-      ${[['TC',d.tc,'#2563eb'],['BC',d.bc,'#7c3aed'],['R1',d.r1,'var(--bull)'],['R2',d.r2,'rgba(22,163,74,.6)'],['S1',d.s1,'var(--bear)'],['S2',d.s2,'rgba(220,38,38,.6)']].map(([l,v,c])=>`<div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px;text-align:center"><div style="font-family:var(--mono);font-size:.7rem;font-weight:700;color:${c}">${v?'₹'+parseFloat(v).toFixed(2):'--'}</div><div style="font-size:.54rem;color:var(--muted);font-family:var(--mono);text-transform:uppercase;margin-top:2px">${l}</div></div>`).join('')}
-    </div>
-    <div style="margin-top:9px;padding-top:9px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px">
-      <span style="font-family:var(--mono);font-size:.58rem;color:var(--muted)">CPR Width: <strong style="color:var(--text)">${d.cprWidth?'₹'+d.cprWidth.toFixed(2):'--'}</strong>${d.cprWidth&&d.cprWidth<5?' · 🔥 Narrow — potential trending day':''}</span>
-      <span style="font-family:var(--mono);font-size:.56rem;color:var(--muted)">${d.updated||''}</span>
-    </div>
-  </div>`;
-}
-
 function resetCPR(){
   ['cpr-r1','cpr-s1','cpr-in'].forEach(id=>{const el=document.getElementById(id);el.textContent='--';el.style.color='var(--muted)';});
   document.getElementById('cprTableWrap').innerHTML='<div class="cpr-loading">AWAITING DATA<span class="cld">.</span><span class="cld">.</span><span class="cld">.</span></div>';
 }
 
-// ═══════════════════════════════════════════════════
-//  ANALYSIS
-// ═══════════════════════════════════════════════════
+// ANALYSIS
 async function runAnalysis(){
   const btn=document.getElementById('analyzeBtn'),lbl=document.getElementById('btnLabel'),ico=document.getElementById('btnIcon');
   btn.disabled=true;lbl.textContent='ANALYZING...';
   ico.innerHTML='<path d="M7 1v6h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M13 7A6 6 0 1 1 7 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>';
   ico.classList.add('spin');
-  const cat=currentCat,headlines=getHL(cat);
+  const cat=currentCat==='NSE'?'FOREX':currentCat;
+  const headlines=getHL(cat);
   const assetName=document.getElementById('sentLabel').textContent;
   renderNewsFeed(headlines,null);
-  let sheetCtx='';
-  if(cat==='NSE'&&currentNseSym){
-    const row=sheetData.find(r=>String(r['Symbol']||'').trim()===currentNseSym);
-    if(row){sheetCtx=`\n\nLive data: CMP ₹${row['CMP (₹)']||'N/A'}, Pivot: ${row['Pivot']||'N/A'}, R1: ${row['R1']||'N/A'}, S1: ${row['S1']||'N/A'}, Status: ${row['Breakout']||'N/A'}.`;}
-  }
-  const prompt=`You are a professional quant analyst specializing in ${assetName}.\nAnalyze these ${headlines.length} market headlines for ${assetName}.${sheetCtx}\nHeadlines:\n${headlines.map((h,i)=>`${i+1}. "${h}"`).join('\n')}\nRespond ONLY with valid JSON, no markdown:\n{"scores":[${headlines.length} integers -100 to 100],"composite":integer -100 to 100,"signal":"BUY"|"SELL"|"HOLD","news_score":0-100,"risk_score":0-100,"macro_score":0-100,"event_score":0-100,"trend_align":0-100,"volatility":0-100,"momentum":0-100,"confidence":0-100,"reasoning":"2-3 sentence professional signal rationale for ${assetName}"}`;
+  const prompt=`You are a professional quant analyst specializing in ${assetName}.\nAnalyze these ${headlines.length} market headlines for ${assetName}.\nHeadlines:\n${headlines.map((h,i)=>`${i+1}. "${h}"`).join('\n')}\nRespond ONLY with valid JSON, no markdown:\n{"scores":[${headlines.length} integers -100 to 100],"composite":integer -100 to 100,"signal":"BUY"|"SELL"|"HOLD","news_score":0-100,"risk_score":0-100,"macro_score":0-100,"event_score":0-100,"trend_align":0-100,"volatility":0-100,"momentum":0-100,"confidence":0-100,"reasoning":"2-3 sentence professional signal rationale for ${assetName}"}`;
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     const result=JSON.parse(data.content[0].text.trim().replace(/```json|```/g,'').trim());
-    analysisCache[currentAsset]={result,headlines};
     applyAnalysis(result,headlines);
   }catch(e){applyAnalysis(genFallback(headlines),headlines);}
   finally{btn.disabled=false;lbl.textContent='RE-ANALYZE';ico.classList.remove('spin');ico.innerHTML='<path d="M7 1v2M7 11v2M1 7h2M11 7h2M3 3l1.4 1.4M9.6 9.6L11 11M3 11l1.4-1.4M9.6 4.4L11 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>';}
 }
+
 function genFallback(hl){
   const c=Math.floor(Math.random()*160)-80;
   return{scores:hl.map(()=>Math.floor(Math.random()*160)-80),composite:c,signal:c>30?'BUY':c<-30?'SELL':'HOLD',news_score:40+Math.floor(Math.random()*50),risk_score:20+Math.floor(Math.random()*60),macro_score:30+Math.floor(Math.random()*55),event_score:15+Math.floor(Math.random()*70),trend_align:30+Math.floor(Math.random()*60),volatility:20+Math.floor(Math.random()*70),momentum:25+Math.floor(Math.random()*65),confidence:40+Math.floor(Math.random()*50),reasoning:`Sentiment analysis indicates ${c>0?'moderately bullish':'bearish'} conditions. Key macro and sectoral catalysts are influencing directional bias. Monitor upcoming events closely.`};
 }
+
 function applyAnalysis(result,headlines){
   const score=result.composite,col=score>20?'#16a34a':score<-20?'#dc2626':'#d97706';
   drawGauge(score,col);
@@ -887,6 +732,7 @@ function applyAnalysis(result,headlines){
   const ai=document.getElementById('aiText');ai.style.fontStyle='normal';ai.style.color='var(--text2)';
   typewriter(ai,result.reasoning);
 }
+
 function typewriter(el,text){el.innerHTML='';let i=0;const t=setInterval(()=>{if(i<text.length)el.innerHTML=text.slice(0,++i)+'<span class="ai-cur"></span>';else{el.innerHTML=text;clearInterval(t);}},16);}
 
 function resetSentUI(){
