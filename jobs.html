@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EtradeIndia Job Placement Services</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue:#2164F3; --blue-d:#1449C8; --blue-l:#EBF1FF;
+  --green:#0DBD6E; --green-l:#E6FAF2;
+  --orange:#FF6B2B; --orange-l:#FFF0E9;
+  --text:#1A1A2E; --muted:#5A6070; --border:#E4E8F0;
+  --bg:#F7F9FF; --navy:#0A1628; --white:#fff;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--text);line-height:1.6;overflow-x:hidden}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:68px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{width:38px;height:38px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.logo-icon svg{width:22px;height:22px;fill:white}
+.logo-text{font-family:'Sora',sans-serif;font-weight:700;font-size:1.05rem;color:var(--text)}
+.logo-text span{color:var(--blue)}
+.nav-links{display:flex;align-items:center;gap:1.8rem;list-style:none}
+.nav-links a{text-decoration:none;color:var(--muted);font-size:.875rem;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--blue)}
+.nav-cta{background:var(--blue);color:white;padding:10px 22px;border-radius:8px;font-weight:600;font-size:.875rem;text-decoration:none;white-space:nowrap;transition:background .2s}
+.nav-cta:hover{background:var(--blue-d)}
+.hbg{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px}
+.hbg span{display:block;width:24px;height:2px;background:var(--text);border-radius:2px}
+.mnav{display:none;position:fixed;top:68px;left:0;right:0;background:white;z-index:99;border-bottom:1px solid var(--border);padding:1.5rem 5%;flex-direction:column;gap:1.2rem;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.mnav.open{display:flex}
+.mnav a{text-decoration:none;color:var(--text);font-size:1rem;font-weight:500}
+.mnav .mcta{background:var(--blue);color:white;padding:12px;border-radius:8px;text-align:center;font-weight:600}
+
+/* HERO */
+.hero{background:var(--navy);position:relative;overflow:hidden;padding:90px 5% 100px;display:flex;align-items:center}
+.dots{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(33,100,243,.18) 1px,transparent 1px);background-size:36px 36px}
+.glow1{position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(33,100,243,.28) 0%,transparent 70%);top:-200px;right:-100px;pointer-events:none}
+.glow2{position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(13,189,110,.12) 0%,transparent 70%);bottom:-150px;left:10%;pointer-events:none}
+.hero-in{position:relative;z-index:2;max-width:1100px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(33,100,243,.2);border:1px solid rgba(33,100,243,.4);color:#7EB3FF;padding:6px 14px;border-radius:100px;font-size:.76rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:1.2rem}
+.badge::before{content:'';width:7px;height:7px;background:#7EB3FF;border-radius:50%;animation:pd 1.8s ease-in-out infinite}
+@keyframes pd{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.hero h1{font-family:'Sora',sans-serif;font-size:clamp(1.9rem,4vw,2.9rem);font-weight:800;color:white;line-height:1.15;letter-spacing:-.5px;margin-bottom:1.2rem}
+.hero h1 .hg{color:var(--green)}
+.hero-sub{color:rgba(255,255,255,.62);font-size:.97rem;max-width:460px;margin-bottom:2rem;line-height:1.75}
+.ha{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.btn-blue{background:var(--blue);color:white;padding:14px 28px;border-radius:10px;font-weight:700;font-size:.93rem;text-decoration:none;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn-blue:hover{background:var(--blue-d);transform:translateY(-2px);box-shadow:0 8px 24px rgba(33,100,243,.35)}
+.btn-ghost{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:white;padding:14px 28px;border-radius:10px;font-weight:600;font-size:.93rem;text-decoration:none;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn-ghost:hover{background:rgba(255,255,255,.14)}
+.hstats{display:flex;gap:2.5rem;margin-top:2.5rem;flex-wrap:wrap}
+.hs-n{font-family:'Sora',sans-serif;font-size:1.55rem;font-weight:800;color:white}
+.hs-l{font-size:.72rem;color:rgba(255,255,255,.48);text-transform:uppercase;letter-spacing:.5px}
+
+/* HERO CARD */
+.hcard{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:26px;backdrop-filter:blur(10px)}
+.hc-t{font-family:'Sora',sans-serif;color:rgba(255,255,255,.48);font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
+.psm{display:flex;align-items:center;gap:11px;padding:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;margin-bottom:8px;transition:background .2s}
+.psm:hover{background:rgba(255,255,255,.1)}
+.psm-n{width:26px;height:26px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:.68rem;font-weight:800;color:white;flex-shrink:0}
+.psm-t{font-size:.78rem;color:rgba(255,255,255,.8);font-weight:500;line-height:1.3}
+.psm-t span{color:rgba(255,255,255,.4);font-size:.68rem;display:block;margin-top:1px}
+.vb{background:rgba(13,189,110,.15);border:1px solid rgba(13,189,110,.3);border-radius:10px;padding:11px 13px;margin-top:11px;display:flex;align-items:center;gap:9px}
+.vb svg{width:15px;height:15px;stroke:var(--green);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.vb p{color:var(--green);font-size:.74rem;font-weight:600;line-height:1.4}
+
+/* TRUST BAR */
+.tbar{background:var(--blue-l);padding:14px 5%;display:flex;align-items:center;justify-content:center;gap:2.2rem;flex-wrap:wrap}
+.ti{display:flex;align-items:center;gap:7px;font-size:.76rem;font-weight:600;color:#1449C8}
+.ti svg{width:13px;height:13px;stroke:var(--blue);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* SHARED */
+section{padding:80px 5%}
+.si{max-width:1100px;margin:0 auto}
+.sl{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue);margin-bottom:9px}
+.st{font-family:'Sora',sans-serif;font-size:clamp(1.55rem,3.5vw,2.25rem);font-weight:800;color:var(--text);line-height:1.2;letter-spacing:-.3px;margin-bottom:.9rem}
+.ss{color:var(--muted);font-size:.92rem;max-width:560px;line-height:1.72}
+.bg-alt{background:var(--bg)}
+
+/* PROCESS */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:46px}
+.pc{background:white;border:1.5px solid var(--border);border-radius:16px;padding:26px;position:relative;overflow:hidden;transition:all .25s}
+.pc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--blue);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.pc:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.08);border-color:transparent}
+.pc:hover::before{transform:scaleX(1)}
+.pc-num{font-family:'Sora',sans-serif;font-size:1.7rem;font-weight:800;color:var(--blue-l);margin-bottom:11px;line-height:1}
+.pc-ic{width:42px;height:42px;border-radius:11px;background:var(--blue-l);display:flex;align-items:center;justify-content:center;margin-bottom:13px}
+.pc-ic svg{width:21px;height:21px;stroke:var(--blue);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pc h3{font-family:'Sora',sans-serif;font-size:.92rem;font-weight:700;margin-bottom:6px}
+.pc p{color:var(--muted);font-size:.82rem;line-height:1.65}
+.cstag{display:inline-flex;align-items:center;gap:5px;background:#FFF3E0;border:1px solid #FFCC80;color:#E65100;font-size:.66rem;font-weight:700;padding:3px 9px;border-radius:100px;margin-top:9px;text-transform:uppercase;letter-spacing:.3px}
+
+/* TRANSPARENCY */
+.trans-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;margin-top:40px}
+.trans-items{display:flex;flex-direction:column;gap:14px}
+.trans-item{display:flex;gap:14px;align-items:flex-start;padding:18px;background:white;border:1px solid var(--border);border-radius:14px;transition:all .2s}
+.trans-item:hover{border-color:var(--orange);box-shadow:0 4px 16px rgba(255,107,43,.08)}
+.ti-icon{width:36px;height:36px;border-radius:10px;background:var(--orange-l);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.ti-icon svg{width:18px;height:18px;stroke:var(--orange);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.trans-item h4{font-family:'Sora',sans-serif;font-size:.88rem;font-weight:700;margin-bottom:3px}
+.trans-item p{color:var(--muted);font-size:.8rem;line-height:1.6}
+.ethics-box{background:white;border:2px solid var(--orange);border-radius:18px;padding:28px;margin-top:0}
+.ethics-box h3{font-family:'Sora',sans-serif;font-size:1rem;font-weight:800;margin-bottom:16px;color:var(--text);display:flex;align-items:center;gap:8px}
+.ethics-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:13px;padding-bottom:13px;border-bottom:1px solid var(--border)}
+.ethics-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.er-icon{width:28px;height:28px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+.er-icon.g{background:var(--green-l)}
+.er-icon.r{background:#FFE0E0}
+.ethics-row h5{font-family:'Sora',sans-serif;font-size:.82rem;font-weight:700;margin-bottom:2px}
+.ethics-row p{color:var(--muted);font-size:.78rem;line-height:1.55}
+
+/* TRACKING DASHBOARD */
+.dash-wrap{background:var(--navy);border-radius:24px;padding:36px;margin-top:48px;position:relative;overflow:hidden}
+.dash-glow{position:absolute;width:500px;height:400px;background:radial-gradient(ellipse,rgba(33,100,243,.2) 0%,transparent 70%);top:-100px;right:-100px;pointer-events:none}
+.dash-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;position:relative;z-index:2}
+.dash-title{font-family:'Sora',sans-serif;color:white;font-size:1rem;font-weight:700}
+.dash-sub{color:rgba(255,255,255,.45);font-size:.75rem;margin-top:2px}
+.live-pill{display:flex;align-items:center;gap:6px;background:rgba(13,189,110,.15);border:1px solid rgba(13,189,110,.3);color:var(--green);padding:6px 14px;border-radius:100px;font-size:.72rem;font-weight:700}
+.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pd 1.5s ease-in-out infinite}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;position:relative;z-index:2}
+.dstat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:18px}
+.dstat-l{color:rgba(255,255,255,.45);font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.dstat-v{font-family:'Sora',sans-serif;color:white;font-size:1.5rem;font-weight:800}
+.dstat-s{font-size:.72rem;margin-top:3px}
+.dstat-s.g{color:var(--green)}
+.dstat-s.b{color:#7EB3FF}
+.timeline{position:relative;z-index:2}
+.tl-title{font-family:'Sora',sans-serif;color:rgba(255,255,255,.45);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
+.tl-track{position:relative;padding-left:20px}
+.tl-track::before{content:'';position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:rgba(255,255,255,.1);border-radius:2px}
+.tl-item{position:relative;margin-bottom:0;padding:13px 14px 13px 22px;border-radius:12px;transition:background .2s;cursor:default}
+.tl-item:hover{background:rgba(255,255,255,.05)}
+.tl-item::before{content:'';position:absolute;left:-5px;top:50%;transform:translateY(-50%);width:12px;height:12px;border-radius:50%;border:2px solid;z-index:1}
+.tl-item.done::before{background:var(--green);border-color:var(--green);box-shadow:0 0 0 3px rgba(13,189,110,.2)}
+.tl-item.active::before{background:var(--blue);border-color:var(--blue);box-shadow:0 0 0 3px rgba(33,100,243,.25);animation:pulse-ring 2s ease-in-out infinite}
+@keyframes pulse-ring{0%,100%{box-shadow:0 0 0 3px rgba(33,100,243,.25)}50%{box-shadow:0 0 0 6px rgba(33,100,243,.1)}}
+.tl-item.pending::before{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.2)}
+.tl-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.tl-name{font-size:.82rem;font-weight:600}
+.tl-item.done .tl-name{color:white}
+.tl-item.active .tl-name{color:white}
+.tl-item.pending .tl-name{color:rgba(255,255,255,.35)}
+.tl-date{font-size:.7rem;white-space:nowrap}
+.tl-item.done .tl-date{color:var(--green)}
+.tl-item.active .tl-date{color:#7EB3FF}
+.tl-item.pending .tl-date{color:rgba(255,255,255,.25)}
+.tl-badge{font-size:.65rem;font-weight:700;padding:2px 9px;border-radius:100px;white-space:nowrap}
+.tl-item.done .tl-badge{background:rgba(13,189,110,.2);color:var(--green);border:1px solid rgba(13,189,110,.3)}
+.tl-item.active .tl-badge{background:rgba(33,100,243,.25);color:#7EB3FF;border:1px solid rgba(33,100,243,.35)}
+.tl-item.pending .tl-badge{background:rgba(255,255,255,.06);color:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.1)}
+.dash-apps{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:18px;margin-top:16px;position:relative;z-index:2}
+.da-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.da-title{font-family:'Sora',sans-serif;color:rgba(255,255,255,.45);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.da-total{font-family:'Sora',sans-serif;color:white;font-size:.9rem;font-weight:700}
+.app-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.app-row:last-child{border-bottom:none}
+.app-co{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0;color:white}
+.app-name{flex:1;font-size:.8rem;color:rgba(255,255,255,.8);font-weight:500}
+.app-role{font-size:.7rem;color:rgba(255,255,255,.35)}
+.app-status{font-size:.68rem;font-weight:700;padding:2px 9px;border-radius:100px;border:1px solid;white-space:nowrap}
+.app-status.sent{background:rgba(33,100,243,.15);color:#7EB3FF;border-color:rgba(33,100,243,.3)}
+.app-status.view{background:rgba(255,200,43,.12);color:#FFD43B;border-color:rgba(255,200,43,.3)}
+.app-status.inv{background:rgba(13,189,110,.15);color:var(--green);border-color:rgba(13,189,110,.3)}
+.app-date{font-size:.67rem;color:rgba(255,255,255,.25);text-align:right}
+
+/* PROMISE */
+.prom-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;margin-top:40px}
+.prom-list{display:flex;flex-direction:column;gap:14px}
+.pi{display:flex;gap:14px;align-items:flex-start;padding:18px;background:white;border:1px solid var(--border);border-radius:14px;transition:all .2s}
+.pi:hover{border-color:var(--blue);box-shadow:0 4px 16px rgba(33,100,243,.08)}
+.pi-ic{width:36px;height:36px;border-radius:10px;background:var(--green-l);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.pi-ic svg{width:17px;height:17px;stroke:var(--green);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.pi-ic.bl{background:var(--blue-l)}
+.pi-ic.bl svg{stroke:var(--blue)}
+.pi h4{font-family:'Sora',sans-serif;font-size:.88rem;font-weight:700;margin-bottom:3px}
+.pi p{color:var(--muted);font-size:.8rem;line-height:1.6}
+.disc{background:#FFF8E1;border:1.5px solid #FFE082;border-radius:14px;padding:16px 20px;margin-top:16px;display:flex;gap:12px;align-items:flex-start}
+.disc svg{width:17px;height:17px;stroke:#F57F17;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:2px}
+.disc p{font-size:.8rem;color:#5D4037;line-height:1.65}
+.disc strong{color:#E65100}
+.mpanel{background:var(--navy);border-radius:20px;padding:30px;position:relative;overflow:hidden}
+.mpg{position:absolute;width:300px;height:300px;background:radial-gradient(circle,rgba(33,100,243,.22) 0%,transparent 70%);top:-100px;right:-80px}
+.mc{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:16px;margin-bottom:12px;position:relative;z-index:1}
+.mc-l{color:rgba(255,255,255,.48);font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.mc-v{font-family:'Sora',sans-serif;color:white;font-size:1.4rem;font-weight:800}
+.mc-s{color:var(--green);font-size:.72rem;font-weight:600;margin-top:3px}
+.mbar{height:4px;background:rgba(255,255,255,.1);border-radius:100px;margin-top:9px;overflow:hidden}
+.mfill{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:100px}
+.vhl{background:rgba(13,189,110,.15);border:1px solid rgba(13,189,110,.3);border-radius:12px;padding:14px;position:relative;z-index:1}
+.vhl-l{color:var(--green);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.vhl-v{font-family:'Sora',sans-serif;color:white;font-size:1rem;font-weight:800;line-height:1.3}
+.vhl-s{color:rgba(255,255,255,.4);font-size:.68rem;margin-top:3px}
+
+/* WHO WE HELP */
+.agrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:14px;margin-top:44px}
+.ac{background:white;border:1.5px solid var(--border);border-radius:14px;padding:22px 18px;text-align:center;transition:all .22s}
+.ac:hover{border-color:var(--blue);background:var(--blue-l);transform:translateY(-3px)}
+.ac .em{font-size:1.9rem;margin-bottom:10px}
+.ac h4{font-family:'Sora',sans-serif;font-size:.86rem;font-weight:700;margin-bottom:4px}
+.ac p{color:var(--muted);font-size:.76rem;line-height:1.55}
+
+/* TESTIMONIALS */
+.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;margin-top:44px}
+.tcard{background:white;border:1px solid var(--border);border-radius:16px;padding:26px;transition:all .22s}
+.tcard:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.07)}
+.stars{color:#F5A623;font-size:.84rem;margin-bottom:12px;letter-spacing:2px}
+.ttxt{color:var(--muted);font-size:.84rem;line-height:1.72;font-style:italic;margin-bottom:16px}
+.tauth{display:flex;align-items:center;gap:11px}
+.tav{width:38px;height:38px;border-radius:50%;color:white;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:700;font-size:.82rem}
+.tname{font-family:'Sora',sans-serif;font-weight:700;font-size:.84rem}
+.trole{color:var(--muted);font-size:.74rem}
+
+/* CTA */
+.cta-sec{background:var(--navy);text-align:center;position:relative;overflow:hidden}
+.cta-glow{position:absolute;width:600px;height:400px;background:radial-gradient(ellipse,rgba(33,100,243,.22) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%)}
+.cta-in{position:relative;z-index:2}
+.cta-in h2{font-family:'Sora',sans-serif;font-size:clamp(1.7rem,4vw,2.5rem);font-weight:800;color:white;margin-bottom:.9rem;line-height:1.2}
+.cta-in p{color:rgba(255,255,255,.58);font-size:.92rem;margin-bottom:1.8rem;max-width:490px;margin-left:auto;margin-right:auto}
+.cta-acts{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap}
+.btn-wh{background:white;color:var(--blue);padding:14px 32px;border-radius:10px;font-weight:700;font-size:.93rem;text-decoration:none;transition:all .2s}
+.btn-wh:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.btn-wa{background:#25D366;color:white;padding:14px 32px;border-radius:10px;font-weight:700;font-size:.93rem;text-decoration:none;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn-wa:hover{background:#1fbe5a;transform:translateY(-2px)}
+
+/* CONTACT */
+.cgrid{display:grid;grid-template-columns:1fr 1.3fr;gap:56px;align-items:start;margin-top:38px}
+.ci-inf h3{font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:.8rem}
+.ci-inf p{color:var(--muted);font-size:.86rem;line-height:1.72;margin-bottom:1.5rem}
+.cits{display:flex;flex-direction:column;gap:11px}
+.cit{display:flex;align-items:center;gap:13px;padding:14px;background:var(--bg);border-radius:12px;border:1px solid var(--border);text-decoration:none;color:var(--text);transition:all .2s}
+.cit:hover{border-color:var(--blue);background:var(--blue-l)}
+.cit-ic{width:37px;height:37px;border-radius:9px;background:var(--blue-l);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cit-ic svg{width:17px;height:17px;stroke:var(--blue);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cit-l{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.cit-v{font-weight:600;font-size:.86rem}
+.cform{background:white;border:1px solid var(--border);border-radius:20px;padding:32px}
+.cform h3{font-family:'Sora',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:18px}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.fg label{font-size:.76rem;font-weight:600}
+.fg input,.fg select,.fg textarea{padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:.86rem;font-family:'DM Sans',sans-serif;color:var(--text);background:white;outline:none;transition:border-color .2s,box-shadow .2s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(33,100,243,.1)}
+.fg textarea{resize:vertical;min-height:92px}
+.fsub{width:100%;background:var(--blue);color:white;padding:13px;border-radius:10px;border:none;cursor:pointer;font-family:'Sora',sans-serif;font-weight:700;font-size:.92rem;transition:all .2s}
+.fsub:hover{background:var(--blue-d);transform:translateY(-1px);box-shadow:0 6px 20px rgba(33,100,243,.3)}
+
+/* FOOTER */
+footer{background:var(--navy);padding:48px 5% 26px}
+.ft{max-width:1100px;margin:0 auto}
+.ft-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:28px;margin-bottom:34px}
+.ft-brand-name{font-family:'Sora',sans-serif;color:white;font-size:.92rem;font-weight:700}
+.ft-brand-desc{font-size:.76rem;color:rgba(255,255,255,.48);line-height:1.7;margin-top:7px;max-width:280px}
+.ft-links{display:flex;gap:42px;flex-wrap:wrap}
+.fc h5{font-family:'Sora',sans-serif;color:white;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:11px}
+.fc ul{list-style:none;display:flex;flex-direction:column;gap:8px}
+.fc ul li a{text-decoration:none;color:rgba(255,255,255,.48);font-size:.76rem;transition:color .2s}
+.fc ul li a:hover{color:white}
+.ft-bot{border-top:1px solid rgba(255,255,255,.08);padding-top:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-size:.71rem;color:rgba(255,255,255,.38)}
+.ft-bot a{color:rgba(255,255,255,.38);text-decoration:none}
+.ft-bot a:hover{color:white}
+
+.waf{position:fixed;bottom:26px;right:26px;z-index:200;width:54px;height:54px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(37,211,102,.45);text-decoration:none;animation:fwa 3s ease-in-out infinite}
+@keyframes fwa{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.waf svg{width:27px;height:27px;fill:white}
+
+.fi{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease}
+.fi.vis{opacity:1;transform:translateY(0)}
+
+/* TABLET */
+@media(max-width:900px){
+  .nav-links,.nav-cta{display:none}
+  .hbg{display:flex}
+  .hero-in{grid-template-columns:1fr}
+  .hcard{display:none}
+  .trans-grid,.prom-grid,.cgrid{grid-template-columns:1fr}
+  .promise-grid{grid-template-columns:1fr}
+  .dash-inner-grid{grid-template-columns:1fr!important}
+  .pgrid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .agrid{grid-template-columns:repeat(3,1fr)}
+  .tgrid{grid-template-columns:1fr}
+  .ft-top{flex-direction:column;gap:24px}
+}
+
+/* MOBILE */
+@media(max-width:600px){
+  section{padding:52px 4%}
+  .hero{padding:52px 4% 64px}
+  .hero h1{font-size:1.75rem;letter-spacing:-.3px}
+  .hero-sub{font-size:.92rem}
+  .btn-blue,.btn-ghost{padding:13px 22px;font-size:.88rem}
+  .ha{gap:.75rem}
+  .hstats{gap:1.4rem;margin-top:2rem}
+  .hs-n{font-size:1.3rem}
+
+  /* Trust bar — scroll horizontally on tiny screens */
+  .tbar{justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap;padding:12px 4%;gap:1.4rem;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tbar::-webkit-scrollbar{display:none}
+  .ti{white-space:nowrap;flex-shrink:0}
+
+  /* Process cards — single column */
+  .pgrid{grid-template-columns:1fr;gap:14px}
+  .pc{padding:22px}
+  .pc-num{font-size:1.4rem}
+
+  /* Transparency */
+  .trans-grid{grid-template-columns:1fr;gap:28px}
+  .ethics-box{padding:22px}
+
+  /* Dashboard */
+  .dash-wrap{padding:22px}
+  .dash-header{flex-direction:column;align-items:flex-start;gap:10px}
+  .dash-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .dstat{padding:14px}
+  .dstat-v{font-size:1.2rem}
+  .dash-inner-grid{grid-template-columns:1fr!important;gap:14px!important}
+  .app-name{font-size:.75rem}
+  .app-role{display:none}
+
+  /* Promise */
+  .prom-grid{grid-template-columns:1fr;gap:28px}
+  .mpanel{padding:22px}
+
+  /* Who we help */
+  .agrid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .ac{padding:18px 14px}
+  .ac .em{font-size:1.6rem}
+
+  /* Testimonials */
+  .tgrid{grid-template-columns:1fr;gap:16px}
+  .tcard{padding:22px}
+
+  /* CTA */
+  .cta-in h2{font-size:1.6rem}
+  .cta-acts{flex-direction:column;align-items:center}
+  .btn-wh,.btn-wa{width:100%;justify-content:center;text-align:center}
+
+  /* Contact */
+  .cgrid{grid-template-columns:1fr;gap:32px}
+  .fr{grid-template-columns:1fr}
+  .cform{padding:24px}
+
+  /* Footer */
+  .ft-top{flex-direction:column;gap:24px}
+  .ft-links{gap:24px}
+  .ft-bot{flex-direction:column;align-items:flex-start;gap:8px}
+
+  /* Section text */
+  .st{font-size:1.5rem}
+  .ss{font-size:.88rem}
+
+  /* Float WA lower on mobile so it doesn't cover content */
+  .waf{bottom:20px;right:16px;width:50px;height:50px}
+  .waf svg{width:24px;height:24px}
+}
+
+/* SMALL MOBILE */
+@media(max-width:400px){
+  .dash-grid{grid-template-columns:1fr}
+  .agrid{grid-template-columns:1fr 1fr}
+  .hero h1{font-size:1.55rem}
+  .hstats{gap:1rem}
+  .hs-n{font-size:1.2rem}
+  .cta-in h2{font-size:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">
+    <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+    <span class="logo-text"><span>Etrade</span>India</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#process">How It Works</a></li>
+    <li><a href="#transparency">Ethical Guidance</a></li>
+    <li><a href="#tracking">Live Tracking</a></li>
+    <li><a href="#promise">Our Promise</a></li>
+    <li><a href="#testimonials">Reviews</a></li>
+  </ul>
+  <a href="tel:+919980291663" class="nav-cta">📞 Book a Call</a>
+  <button class="hbg" onclick="toggleNav()" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+<div class="mnav" id="mnav">
+  <a href="#process" onclick="closeNav()">How It Works</a>
+  <a href="#transparency" onclick="closeNav()">Ethical Guidance</a>
+  <a href="#tracking" onclick="closeNav()">Live Tracking</a>
+  <a href="#promise" onclick="closeNav()">Our Promise</a>
+  <a href="#testimonials" onclick="closeNav()">Reviews</a>
+  <a href="#contact" onclick="closeNav()">Contact</a>
+  <a href="tel:+919980291663" class="mcta" onclick="closeNav()">📞 Book Free Discovery Call</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="dots"></div><div class="glow1"></div><div class="glow2"></div>
+  <div class="hero-in">
+    <div>
+      <div class="badge">India's Job Placement Partner</div>
+      <h1>We Don't Just Send<br>Your CV We Get<br>You <span class="hg">Interview Invites</span></h1>
+      <p class="hero-sub">Profile analysis → ATS-ready CV → 5+ proven strategies → real interview calls. 100% transparent. Fully ethical. Zero job guarantees only honest results.</p>
+      <div class="ha">
+        <a href="tel:+919980291663" class="btn-blue">
+          <svg style="width:16px;height:16px;fill:none;stroke:white;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.81 19.79 19.79 0 01.1 2.18 2 2 0 012.1 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.06 6.06l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          Book Free Discovery Call
+        </a>
+        <a href="https://wa.me/919980291663" class="btn-ghost" target="_blank">WhatsApp Us →</a>
+      </div>
+      <div class="hstats">
+        <div><div class="hs-n">500+</div><div class="hs-l">Candidates Helped</div></div>
+        <div><div class="hs-n">85%</div><div class="hs-l">Interview Invite Rate</div></div>
+        <div><div class="hs-n">5+</div><div class="hs-l">Proven Strategies</div></div>
+      </div>
+    </div>
+    <div class="hcard">
+      <div class="hc-t">Your Journey Step by Step</div>
+      <div class="psm"><div class="psm-n">1</div><div class="psm-t">30-Min Discovery Call<span>Understand your goals &amp; blockers</span></div></div>
+      <div class="psm"><div class="psm-n">2</div><div class="psm-t">In-Depth Profile Analysis<span>Skills, gaps &amp; role alignment</span></div></div>
+      <div class="psm"><div class="psm-n">3</div><div class="psm-t">Job Market Analysis Report<span>Sent to you before we proceed</span></div></div>
+      <div class="psm"><div class="psm-n">4</div><div class="psm-t">ATS-Optimized CV Built<span>Role-specific, keyword-engineered</span></div></div>
+      <div class="psm"><div class="psm-n">5</div><div class="psm-t">5+ Application Strategies<span>Hidden market, direct outreach &amp; more</span></div></div>
+      <div class="psm" style="border-color:rgba(255,204,128,.3)"><div class="psm-n" style="background:#E65100">6</div><div class="psm-t">Interview Coaching<span style="color:#FFB74D;font-weight:600">🚀 Coming Soon</span></div></div>
+      <div class="vb">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <p>Hired by an overseas recruiter? <strong>Visa filing fee is FREE for you.</strong></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="tbar">
+  <div class="ti"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>100% Transparent</div>
+  <div class="ti"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Fully Ethical Practice</div>
+  <div class="ti"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Realtime Progress Tracking</div>
+  <div class="ti"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Interview Invites Assured</div>
+  <div class="ti"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Free Visa Filing for Overseas Hires</div>
+</div>
+
+<!-- PROCESS -->
+<section class="bg-alt" id="process">
+  <div class="si">
+    <p class="sl fi">The Process</p>
+    <h2 class="st fi">6 Steps from Profile<br>to Interview Invite</h2>
+    <p class="ss fi">A structured system not random applications. Every step is designed to maximise your chances of getting shortlisted.</p>
+    <div class="pgrid">
+      <div class="pc fi">
+        <div class="pc-num">01</div>
+        <div class="pc-ic"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.81 19.79 19.79 0 01.1 2.18 2 2 0 012.1 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.06 6.06l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div>
+        <h3>30-Minute Discovery Call</h3>
+        <p>A focused call to understand your background, goals, target roles, and exactly what's stopping you from getting interview calls.</p>
+      </div>
+      <div class="pc fi">
+        <div class="pc-num">02</div>
+        <div class="pc-ic"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+        <h3>In-Depth Profile Analysis</h3>
+        <p>We analyse your experience, skills, and current CV to identify gaps and determine the most strategic positioning for your target role.</p>
+      </div>
+      <div class="pc fi">
+        <div class="pc-num">03</div>
+        <div class="pc-ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        <h3>Job Market Analysis &amp; Report</h3>
+        <p>We research demand, roles, companies, and salary bands and send you a full report for your review before we proceed. No surprises.</p>
+      </div>
+      <div class="pc fi">
+        <div class="pc-num">04</div>
+        <div class="pc-ic"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+        <h3>ATS-First CV Strategy</h3>
+        <p>Your CV is rebuilt not edited with role-specific keywords, impact metrics, and formatting engineered to pass ATS filters and impress recruiters.</p>
+      </div>
+      <div class="pc fi">
+        <div class="pc-num">05</div>
+        <div class="pc-ic"><svg viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></div>
+        <h3>5+ Strategies for Interview Invites</h3>
+        <p>Not just portals. We deploy multi-channel strategies: direct recruiter outreach, hidden job market, referral networks, LinkedIn optimisation, and more all personalised to your profile.</p>
+      </div>
+      <div class="pc fi" style="border-color:#FFE082;background:#FFFDE7">
+        <div class="pc-num" style="color:#FFCC80">06</div>
+        <div class="pc-ic" style="background:#FFF3E0"><svg viewBox="0 0 24 24" style="stroke:#E65100"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+        <h3 style="color:#E65100">Interview Coaching</h3>
+        <p style="color:#795548">Mock interviews, answer frameworks, and confidence coaching to maximise your conversion rate once you're in the room.</p>
+        <div class="cstag">🚀 Coming Soon</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRANSPARENCY -->
+<section id="transparency">
+  <div class="si">
+    <p class="sl fi">Ethical Guidance</p>
+    <h2 class="st fi">Our Ethical Guidance.<br>No Fine Print.</h2>
+    <p class="ss fi">No black boxes. No vague promises. We tell you exactly what we are doing, why we are doing it, and what to realistically expect.</p>
+    <div class="trans-grid" style="margin-top:40px">
+      <div class="trans-items">
+        <div class="trans-item fi">
+          <div class="ti-icon"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <div>
+            <h4>Full Visibility at Every Step</h4>
+            <p>You see every application we submit, every recruiter we contact, and every action taken on your behalf in real time via your tracking dashboard.</p>
+          </div>
+        </div>
+        <div class="trans-item fi">
+          <div class="ti-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+          <div>
+            <h4>Weekly Progress Updates</h4>
+            <p>Every week, you receive a structured update: applications sent, views received, responses, and the next planned actions. No radio silence.</p>
+          </div>
+        </div>
+        <div class="trans-item fi">
+          <div class="ti-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <div>
+            <h4>Market Report Before We Proceed</h4>
+            <p>You review and approve our job market analysis before we start applying. We don't move forward without your sign-off.</p>
+          </div>
+        </div>
+        <div class="trans-item fi">
+          <div class="ti-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <div>
+            <h4>Honest About What We Can't Do</h4>
+            <p>We assure interview invites not job offers. Hiring decisions rest with employers. We tell you this upfront, not in fine print.</p>
+          </div>
+        </div>
+      </div>
+      <div class="ethics-box fi">
+        <h3>🤝 Our Ethical Commitments</h3>
+        <div class="ethics-row">
+          <div class="er-icon g">✓</div>
+          <div>
+            <h5>We only submit to roles you've approved</h5>
+            <p>No applying to random jobs without your knowledge. Every application is reviewed and green-lit by you first.</p>
+          </div>
+        </div>
+        <div class="ethics-row">
+          <div class="er-icon g">✓</div>
+          <div>
+            <h5>No fake experience or inflated CVs</h5>
+            <p>We enhance how your real experience is presented we never fabricate roles, durations, or skills.</p>
+          </div>
+        </div>
+        <div class="ethics-row">
+          <div class="er-icon g">✓</div>
+          <div>
+            <h5>No paid placement deals with employers</h5>
+            <p>We are not paid by hiring companies to place candidates. Our only interest is your outcome.</p>
+          </div>
+        </div>
+        <div class="ethics-row">
+          <div class="er-icon g">✓</div>
+          <div>
+            <h5>Overseas visa support no hidden cost</h5>
+            <p>If an overseas recruiter hires you, visa filing is free. There are no hidden fees added after the fact.</p>
+          </div>
+        </div>
+        <div class="ethics-row">
+          <div class="er-icon r">✗</div>
+          <div>
+            <h5>We will never guarantee a job offer</h5>
+            <p>Anyone who promises you a guaranteed job placement is being dishonest. We promise the work not the outcome that belongs to the employer.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REALTIME TRACKING DASHBOARD -->
+<section class="bg-alt" id="tracking">
+  <div class="si">
+    <p class="sl fi">Candidate Tracking</p>
+    <h2 class="st fi">Your Realtime<br>Progress Dashboard</h2>
+    <p class="ss fi">Every candidate gets access to a live dashboard see exactly where your applications stand, what's been done, and what's coming next. No guessing.</p>
+    <div class="dash-wrap fi">
+      <div class="dash-glow"></div>
+      <div class="dash-header">
+        <div>
+          <div class="dash-title">Candidate Dashboard Rahul Kumar</div>
+          <div class="dash-sub">Active Engagement · Started 12 Apr 2026 · Software Engineer roles</div>
+        </div>
+        <div class="live-pill"><div class="live-dot"></div> Live</div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="dstat">
+          <div class="dstat-l">Applications Sent</div>
+          <div class="dstat-v">24</div>
+          <div class="dstat-s g">↑ 8 this week</div>
+        </div>
+        <div class="dstat">
+          <div class="dstat-l">Profile Views by Recruiters</div>
+          <div class="dstat-v">11</div>
+          <div class="dstat-s b">↑ 3 since yesterday</div>
+        </div>
+        <div class="dstat">
+          <div class="dstat-l">Interview Invites</div>
+          <div class="dstat-v">2</div>
+          <div class="dstat-s g">Confirmed this week</div>
+        </div>
+      </div>
+
+      <div class="dash-inner-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;position:relative;z-index:2">
+        <!-- Timeline -->
+        <div>
+          <div class="timeline">
+            <div class="tl-title">Engagement Progress</div>
+            <div class="tl-track">
+              <div class="tl-item done">
+                <div class="tl-row">
+                  <span class="tl-name">Discovery Call</span>
+                  <span class="tl-badge">Done</span>
+                </div>
+                <div class="tl-date">12 Apr 2026</div>
+              </div>
+              <div class="tl-item done">
+                <div class="tl-row">
+                  <span class="tl-name">Profile Analysis</span>
+                  <span class="tl-badge">Done</span>
+                </div>
+                <div class="tl-date">13 Apr 2026</div>
+              </div>
+              <div class="tl-item done">
+                <div class="tl-row">
+                  <span class="tl-name">Market Report Approved</span>
+                  <span class="tl-badge">Done</span>
+                </div>
+                <div class="tl-date">14 Apr 2026</div>
+              </div>
+              <div class="tl-item done">
+                <div class="tl-row">
+                  <span class="tl-name">ATS CV Delivered</span>
+                  <span class="tl-badge">Done</span>
+                </div>
+                <div class="tl-date">15 Apr 2026</div>
+              </div>
+              <div class="tl-item active">
+                <div class="tl-row">
+                  <span class="tl-name">Application Campaigns Live</span>
+                  <span class="tl-badge">In Progress</span>
+                </div>
+                <div class="tl-date">Active now</div>
+              </div>
+              <div class="tl-item pending">
+                <div class="tl-row">
+                  <span class="tl-name">Interview Coaching</span>
+                  <span class="tl-badge">Coming Soon</span>
+                </div>
+                <div class="tl-date">Unlocks next</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Application log -->
+        <div>
+          <div class="dash-apps">
+            <div class="da-header">
+              <div class="da-title">Recent Applications</div>
+              <div class="da-total">24 total</div>
+            </div>
+            <div class="app-row">
+              <div class="app-co" style="background:#0052CC">T</div>
+              <div>
+                <div class="app-name">Tata Consultancy Services</div>
+                <div class="app-role">Senior Software Engineer</div>
+              </div>
+              <div>
+                <div class="app-status inv">Interview ✓</div>
+                <div class="app-date">15 Apr</div>
+              </div>
+            </div>
+            <div class="app-row">
+              <div class="app-co" style="background:#4A154B">I</div>
+              <div>
+                <div class="app-name">Infosys</div>
+                <div class="app-role">Full Stack Developer</div>
+              </div>
+              <div>
+                <div class="app-status inv">Interview ✓</div>
+                <div class="app-date">14 Apr</div>
+              </div>
+            </div>
+            <div class="app-row">
+              <div class="app-co" style="background:#D62B2B">W</div>
+              <div>
+                <div class="app-name">Wipro Technologies</div>
+                <div class="app-role">React Developer</div>
+              </div>
+              <div>
+                <div class="app-status view">Viewed</div>
+                <div class="app-date">14 Apr</div>
+              </div>
+            </div>
+            <div class="app-row">
+              <div class="app-co" style="background:#00704A">C</div>
+              <div>
+                <div class="app-name">Cognizant</div>
+                <div class="app-role">Software Engineer</div>
+              </div>
+              <div>
+                <div class="app-status view">Viewed</div>
+                <div class="app-date">13 Apr</div>
+              </div>
+            </div>
+            <div class="app-row">
+              <div class="app-co" style="background:#2164F3">H</div>
+              <div>
+                <div class="app-name">HCL Technologies</div>
+                <div class="app-role">Backend Engineer</div>
+              </div>
+              <div>
+                <div class="app-status sent">Sent</div>
+                <div class="app-date">16 Apr</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:rgba(33,100,243,.12);border:1px solid rgba(33,100,243,.25);border-radius:12px;padding:14px 18px;margin-top:16px;position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:8px;height:8px;background:var(--blue);border-radius:50%;animation:pd 1.8s ease-in-out infinite"></div>
+          <span style="color:#7EB3FF;font-size:.8rem;font-weight:600">Every candidate gets this dashboard login link sent after onboarding</span>
+        </div>
+        <a href="#contact" style="background:var(--blue);color:white;padding:8px 18px;border-radius:8px;font-size:.78rem;font-weight:700;text-decoration:none;white-space:nowrap">Get My Dashboard →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROMISE -->
+<section id="promise">
+  <div class="si">
+    <div class="prom-grid">
+      <div>
+        <p class="sl fi">Our Promise</p>
+        <h2 class="st fi">We Assure Interview<br>Invites. Not Job Offers.</h2>
+        <p class="ss fi" style="margin-bottom:24px">Our job is to get you in the room. The offer is yours to close. Here's what we bring to the table.</p>
+        <div class="prom-list">
+          <div class="pi fi">
+            <div class="pi-ic bl"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+            <div><h4>ATS-First CV Strategy</h4><p>Your resume passes automated screening before any recruiter sees it. That's how you enter the pipeline.</p></div>
+          </div>
+          <div class="pi fi">
+            <div class="pi-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div><h4>Hidden Job Market Access</h4><p>70% of roles are never posted publicly. We tap recruiter networks and direct outreach to surface them.</p></div>
+          </div>
+          <div class="pi fi">
+            <div class="pi-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div><h4>Personalised, Not Template</h4><p>No copy-paste CVs. Every candidate gets a custom strategy built around their actual profile and target role.</p></div>
+          </div>
+          <div class="pi fi" style="border-color:var(--green);background:var(--green-l)">
+            <div class="pi-ic"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div><h4>🎁 Overseas Hire? Free Visa Filing</h4><p>If an overseas recruiter hires you through our network, we cover your entire visa filing fee no hidden charges.</p></div>
+          </div>
+        </div>
+        <div class="disc fi">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <p><strong>Important:</strong> We assure interview invites using proven strategies but we do not guarantee job offers. Hiring decisions are made by employers. Our role is to maximise your shortlisting rate.</p>
+        </div>
+      </div>
+      <div class="mpanel fi">
+        <div class="mpg"></div>
+        <div style="color:rgba(255,255,255,.42);font-size:.66rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:18px;position:relative;z-index:1">Performance Snapshot</div>
+        <div class="mc"><div class="mc-l">ATS Score Improvement (Avg)</div><div class="mc-v">+62%</div><div class="mc-s">↑ After CV rebuild</div><div class="mbar"><div class="mfill" style="width:82%"></div></div></div>
+        <div class="mc"><div class="mc-l">Interview Invite Rate</div><div class="mc-v">85%</div><div class="mc-s">Within 4–6 weeks of engagement</div><div class="mbar"><div class="mfill" style="width:85%"></div></div></div>
+        <div class="mc"><div class="mc-l">Candidates Placed Across India</div><div class="mc-v">500+</div><div class="mc-s">IT, Sales, Marketing &amp; more</div><div class="mbar"><div class="mfill" style="width:70%"></div></div></div>
+        <div class="vhl"><div class="vhl-l">✈️ Overseas Hire Bonus</div><div class="vhl-v">Visa Filing Fee ₹0 for You</div><div class="vhl-s">When hired through our overseas recruiter network</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO WE HELP -->
+<section class="bg-alt" id="who-we-help">
+  <div class="si">
+    <p class="sl fi">Who We Serve</p>
+    <h2 class="st fi">Built for Every Stage<br>of Your Career</h2>
+    <p class="ss fi">Fresher or experienced, job seeker or career switcher we have the right strategy for your situation.</p>
+    <div class="agrid">
+      <div class="ac fi"><div class="em">🎓</div><h4>Fresh Graduates</h4><p>No experience? We turn entry-level profiles into shortlist-worthy CVs.</p></div>
+      <div class="ac fi"><div class="em">💼</div><h4>Working Professionals</h4><p>Ready for a better role? We build the strategy to get you there faster.</p></div>
+      <div class="ac fi"><div class="em">🔄</div><h4>Career Switchers</h4><p>Changing domains? We reframe your experience for maximum relevance.</p></div>
+      <div class="ac fi"><div class="em">💻</div><h4>IT Professionals</h4><p>Developers, testers, data analysts we know what tech recruiters want.</p></div>
+      <div class="ac fi"><div class="em">📈</div><h4>Sales &amp; Marketing</h4><p>Growth, performance, brand we position your metrics to stand out.</p></div>
+      <div class="ac fi"><div class="em">✈️</div><h4>Overseas Aspirants</h4><p>If a foreign recruiter picks you, your visa filing is on us.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="si">
+    <p class="sl fi">Reviews</p>
+    <h2 class="st fi">Real People. Real Interview Calls.</h2>
+    <p class="ss fi">What our candidates say after going from zero calls to multiple invites.</p>
+    <div class="tgrid">
+      <div class="tcard fi">
+        <div class="stars">★★★★★</div>
+        <p class="ttxt">"I had sent 200+ applications with zero callbacks. After EtradeIndia rebuilt my CV and gave me a targeted strategy, I had 3 interview calls within 2 weeks. The dashboard kept me updated on every single application complete transparency."</p>
+        <div class="tauth"><div class="tav" style="background:#2164F3">RK</div><div><div class="tname">Rahul Kumar</div><div class="trole">Software Developer · Placed at TCS, Bangalore</div></div></div>
+      </div>
+      <div class="tcard fi">
+        <div class="stars">★★★★★</div>
+        <p class="ttxt">"What I loved most was how ethical they were. No fake promises, no inflated CV just real strategy and real results. The weekly progress updates and live tracker gave me full confidence in what they were doing."</p>
+        <div class="tauth"><div class="tav" style="background:#0DBD6E">PS</div><div><div class="tname">Priya Suresh</div><div class="trole">Marketing Manager · Placed in Hyderabad</div></div></div>
+      </div>
+      <div class="tcard fi">
+        <div class="stars">★★★★★</div>
+        <p class="ttxt">"Switching from finance to product management felt impossible. The job market report was incredibly detailed and they didn't proceed without my approval. Got 4 interview calls and the whole process was 100% above board."</p>
+        <div class="tauth"><div class="tav" style="background:#7C3AED">AM</div><div><div class="tname">Aditya Menon</div><div class="trole">Product Manager · Placed in Chennai</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-sec">
+  <div class="dots" style="opacity:.3"></div>
+  <div class="cta-glow"></div>
+  <div class="si cta-in">
+    <p class="sl" style="color:#7EB3FF;text-align:center">Free 30-Min Call</p>
+    <h2>Stop Sending CVs<br>into the Void.</h2>
+    <p>Book a free 30-minute discovery call. We'll tell you exactly what's wrong with your current approach and how to fix it. Honest. No pressure.</p>
+    <div class="cta-acts">
+      <a href="tel:+919980291663" class="btn-wh">📞 Call +91 99802 91663</a>
+      <a href="https://wa.me/919980291663" class="btn-wa" target="_blank">
+        <svg style="width:17px;height:17px;fill:white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884"/></svg>
+        WhatsApp Us
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="si">
+    <p class="sl fi">Get In Touch</p>
+    <h2 class="st fi">Book Your Free<br>Discovery Call</h2>
+    <div class="cgrid">
+      <div class="ci-inf fi">
+        <h3>We're Ready When You Are</h3>
+        <p>Fill in your details or call/WhatsApp directly. We'll get back to you within a few hours with an honest assessment of how we can help.</p>
+        <div class="cits">
+          <a href="tel:+919980291663" class="cit">
+            <div class="cit-ic"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.81 19.79 19.79 0 01.1 2.18 2 2 0 012.1 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.06 6.06l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div>
+            <div><div class="cit-l">Call / WhatsApp</div><div class="cit-v">+91 99802 91663</div></div>
+          </a>
+          <a href="https://wa.me/919980291663" class="cit" target="_blank">
+            <div class="cit-ic" style="background:#E8F9EF"><svg viewBox="0 0 24 24" style="stroke:#0DBD6E"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+            <div><div class="cit-l">WhatsApp</div><div class="cit-v">Chat with us instantly</div></div>
+          </a>
+          <div class="cit" style="cursor:default">
+            <div class="cit-ic"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+            <div><div class="cit-l">Location</div><div class="cit-v">India Serving PAN India</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="cform fi">
+        <h3>Tell Us About Yourself</h3>
+        <div class="fr">
+          <div class="fg"><label>First Name</label><input id="f_fname" type="text" placeholder="Rahul"></div>
+          <div class="fg"><label>Last Name</label><input id="f_lname" type="text" placeholder="Kumar"></div>
+        </div>
+        <div class="fg"><label>Phone / WhatsApp *</label><input id="f_phone" type="tel" placeholder="+91 XXXXX XXXXX" required></div>
+        <div class="fg"><label>Email Address</label><input id="f_email" type="email" placeholder="rahul@email.com"></div>
+        <div class="fg">
+          <label>I Am A</label>
+          <select id="f_profile">
+            <option value="">Select your profile</option>
+            <option>Fresh Graduate</option>
+            <option>Working Professional (Looking to Switch)</option>
+            <option>Career Switcher (Changing Domain)</option>
+            <option>IT Professional</option>
+            <option>Sales / Marketing Professional</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>My Current Situation</label>
+          <select id="f_situation">
+            <option value="">Select the scenario that fits you best</option>
+            <option>I am a fresher with no work experience and struggling to get my first job interview</option>
+            <option>I have been applying to 50+ jobs for months but getting zero interview calls</option>
+            <option>I am currently employed but want to switch to a better role or higher pay</option>
+            <option>I want to change my career domain completely and do not know how to reposition myself</option>
+            <option>I have an overseas job opportunity and need help with the process and visa filing</option>
+          </select>
+        </div>
+        <button class="fsub" onclick="handleSubmit(this)">Book My Free Discovery Call</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft">
+    <div class="ft-top">
+      <div class="ft-brand">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px">
+          <div style="width:32px;height:32px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center"><svg style="width:18px;height:18px;fill:white" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+          <div class="ft-brand-name">EtradeIndia Job Placement</div>
+        </div>
+        <p class="ft-brand-desc">India's job placement partner. Transparent. Ethical. Realtime tracking. We get you interview invites you close the offer.</p>
+        <p style="margin-top:10px;font-size:.75rem;color:rgba(255,255,255,.48)">📞 <a href="tel:+919980291663" style="color:rgba(255,255,255,.6);text-decoration:none">+91 99802 91663</a></p>
+      </div>
+      <div class="ft-links">
+        <div class="fc">
+          <h5>Services</h5>
+          <ul>
+            <li><a href="#process">Discovery Call</a></li>
+            <li><a href="#process">Profile Analysis</a></li>
+            <li><a href="#process">CV Enhancement</a></li>
+            <li><a href="#process">Job Strategies</a></li>
+            <li><a href="#process">Interview Coaching (Soon)</a></li>
+          </ul>
+        </div>
+        <div class="fc">
+          <h5>Company</h5>
+          <ul>
+            <li><a href="#transparency">Ethical Guidance</a></li>
+            <li><a href="#tracking">Live Tracking</a></li>
+            <li><a href="#promise">Our Promise</a></li>
+            <li><a href="#testimonials">Reviews</a></li>
+            <li><a href="#contact">Contact Us</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="ft-bot">
+      <span>© 2026 EtradeIndia Job Placement Services. All rights reserved.</span>
+      <div style="display:flex;gap:18px"><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div>
+    </div>
+  </div>
+</footer>
+
+<a href="https://wa.me/919980291663" class="waf" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884"/></svg>
+</a>
+
+<script>
+function toggleNav(){document.getElementById('mnav').classList.toggle('open')}
+function closeNav(){document.getElementById('mnav').classList.remove('open')}
+const obs=new IntersectionObserver((entries)=>{entries.forEach((e,i)=>{if(e.isIntersecting)setTimeout(()=>e.target.classList.add('vis'),i*65)})},{threshold:.1});
+document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
+
+function handleSubmit(btn) {
+  const phone = document.getElementById('f_phone').value.trim();
+  if (!phone) {
+    document.getElementById('f_phone').focus();
+    document.getElementById('f_phone').style.borderColor = '#E65100';
+    return;
+  }
+  btn.textContent = 'Submitting...';
+  btn.disabled = true;
+
+  const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSf_etradeindia_placeholder/formResponse';
+  // Entry ID mapping (in order: FirstName, LastName, Phone, Email, Profile, Situation)
+  const data = new FormData();
+  data.append('entry.57553000',    document.getElementById('f_fname').value);
+  data.append('entry.201510226',   document.getElementById('f_lname').value);
+  data.append('entry.723918717',   document.getElementById('f_phone').value);
+  data.append('entry.920695701',   document.getElementById('f_email').value);
+  data.append('entry.65541856',    document.getElementById('f_profile').value);
+  data.append('entry.1628514649',  document.getElementById('f_situation').value);
+
+  fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body: data })
+    .finally(() => {
+      btn.textContent = 'Submitted! We will call you within a few hours.';
+      btn.style.background = '#0DBD6E';
+    });
+}
+</script>
+</body>
+</html>
