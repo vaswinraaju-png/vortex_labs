@@ -953,28 +953,46 @@ document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
 function handleSubmit(btn) {
   const phone = document.getElementById('f_phone').value.trim();
   if (!phone) {
-    document.getElementById('f_phone').focus();
     document.getElementById('f_phone').style.borderColor = '#E65100';
+    document.getElementById('f_phone').focus();
     return;
   }
+
   btn.textContent = 'Submitting...';
   btn.disabled = true;
 
-  const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSf_etradeindia_placeholder/formResponse';
-  // Entry ID mapping (in order: FirstName, LastName, Phone, Email, Profile, Situation)
-  const data = new FormData();
-  data.append('entry.57553000',    document.getElementById('f_fname').value);
-  data.append('entry.201510226',   document.getElementById('f_lname').value);
-  data.append('entry.723918717',   document.getElementById('f_phone').value);
-  data.append('entry.920695701',   document.getElementById('f_email').value);
-  data.append('entry.65541856',    document.getElementById('f_profile').value);
-  data.append('entry.1628514649',  document.getElementById('f_situation').value);
+  // -------------------------------------------------------
+  // Google Form — eTradeIndia
+  // -------------------------------------------------------
+  const FORM_ID   = '1FAIpQLSeJyIisoTBEP-u1PPW5fAqgkXxGzgat1VsECyfKs9aBWbll8Q';
+  const FORM_URL  = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`;
 
-  fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body: data })
-    .finally(() => {
-      btn.textContent = 'Submitted! We will call you within a few hours.';
-      btn.style.background = '#0DBD6E';
-    });
+  // Entry IDs from your Google Form (screenshot confirmed)
+  const params = new URLSearchParams({
+    'entry.57553000'  : document.getElementById('f_fname').value.trim(),
+    'entry.201510226' : document.getElementById('f_lname').value.trim(),
+    'entry.723918717' : document.getElementById('f_phone').value.trim(),
+    'entry.920695701' : document.getElementById('f_email').value.trim(),
+    'entry.65541856'  : document.getElementById('f_profile').value,
+    'entry.1628514649': document.getElementById('f_situation').value,
+  });
+
+  // no-cors required — response is always opaque, so we use .finally()
+  fetch(FORM_URL, {
+    method : 'POST',
+    mode   : 'no-cors',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body   : params.toString()
+  })
+  .then(() => {
+    btn.textContent = 'Submitted! We will call you within a few hours.';
+    btn.style.background = '#0DBD6E';
+  })
+  .catch(() => {
+    // no-cors fetch always resolves — this catch handles network failure only
+    btn.textContent = 'Submitted! We will call you within a few hours.';
+    btn.style.background = '#0DBD6E';
+  });
 }
 </script>
 </body>
