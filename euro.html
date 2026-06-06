@@ -205,7 +205,7 @@ tbody tr:last-child td{border-bottom:none;}
   <div class="stat-row" id="stat-row">
     <div class="stat"><div class="sl">Total Breaks</div><div class="sv" id="s-trades">—</div><div class="ss" id="s-bal">R1/S1 breaks found</div></div>
     <div class="stat green"><div class="sl">Target Hit Rate</div><div class="sv" id="s-wr">—</div><div class="wr-bar"><div class="wr-fill" id="s-wr-bar" style="width:0%"></div></div></div>
-    <div class="stat orange"><div class="sl">Net P&L</div><div class="sv" id="s-pnl">—</div><div class="ss" id="s-bal">Balance: $100</div></div>
+    <div class="stat orange"><div class="sl">Net P&L</div><div class="sv" id="s-pnl">—</div><div class="ss" id="s-bal2">Balance: $100</div></div>
     <div class="stat blue"><div class="sl">R2/S2 Hits</div><div class="sv" id="s-tp1">—</div><div class="ss" id="s-tp2">TP2: —</div></div>
     <div class="stat purple"><div class="sl">Hit / Total</div><div class="sv" id="s-rr">—</div><div class="ss" id="s-days">Days scanned: 0</div></div>
   </div>
@@ -240,7 +240,7 @@ tbody tr:last-child td{border-bottom:none;}
             </tr>
           </thead>
           <tbody id="trade-tbody">
-            <tr><td colspan="20" class="empty">Run the scanner to see trades</td></tr>
+            <tr><td colspan="11" class="empty">Run the scanner to see trades</td></tr>
           </tbody>
         </table>
       </div>
@@ -264,6 +264,7 @@ let config = { deltaKey:'', deltaSecret:'', pair:'', interval:'15m', lookback:90
 let scanning = false;
 let allTrades = [];
 let runningBal = 100;
+let breakFired = null;
 
 window.onload = () => {
   try {
@@ -277,7 +278,7 @@ window.onload = () => {
 function saveConfig() {
   config.deltaKey = document.getElementById('key-delta').value.trim();
   config.deltaSecret = document.getElementById('key-secret').value.trim();
-  localStorage.setItem('cpr_scan_keys', JSON.stringify({key:config.deltaKey,secret:config.deltaSecret}));
+  localStorage.setItem('cpr_scan_keys', JSON.stringify({key:config.deltaKey, secret:config.deltaSecret}));
   log('info','Keys saved.');
 }
 
@@ -291,7 +292,6 @@ async function loadPairs() {
     const pairs = (data.result||[]).sort((a,b)=>a.symbol.localeCompare(b.symbol));
     const sel = document.getElementById('btc-pair');
     sel.innerHTML = '<option value="">— Select —</option>';
-    // Group by underlying
     const btc = pairs.filter(p=>p.symbol?.includes('BTC'));
     const others = pairs.filter(p=>!p.symbol?.includes('BTC'));
     const addGroup = (label, items) => {
@@ -340,6 +340,7 @@ async function startScan() {
 
   scanning = true;
   allTrades = [];
+  breakFired = null;
   runningBal = config.bal;
   document.getElementById('scan-btn').disabled = true;
   document.getElementById('prog-wrap').style.display = 'block';
@@ -357,7 +358,6 @@ async function startScan() {
   const periodStart = Math.floor(days[0].getTime()/1000) - 86400;
   const periodEnd   = Math.floor(today.getTime()/1000);
 
-  // ── SINGLE BULK FETCH: daily candles + all intraday candles in ONE call each ──
   let dailyCandles = [], intradayAll = [];
   try {
     document.getElementById('prog-txt').textContent = 'Fetching daily candles...';
@@ -366,12 +366,27 @@ async function startScan() {
       fetch(`${DELTA}/v2/history/candles?symbol=${sym}&resolution=1d&start=${periodStart}&end=${periodEnd}`).then(r=>r.json()),
       fetch(`${DELTA}/v2/history/candles?symbol=${sym}&resolution=${config.interval}&start=${periodStart}&end=${periodEnd}`).then(r=>r.json()),
     ]);
-    if (!rd.result || rd.result.length < 2) { log('error','Not enough daily candles.'); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
-    if (!ri.result || ri.result.length === 0) { log('error','No intraday candles returned.'); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
-    dailyCandles  = rd.result.sort((a,b)=>a.time-b.time);
-    intradayAll   = ri.result.sort((a,b)=>a.time-b.time);
+    if (!rd.result || rd.result.length < 2) {
+      log('error','Not enough daily candles.');
+      setStatus('','Error');
+      document.getElementById('scan-btn').disabled = false;
+      return;
+    }
+    if (!ri.result || ri.result.length === 0) {
+      log('error','No intraday candles returned.');
+      setStatus('','Error');
+      document.getElementById('scan-btn').disabled = false;
+      return;
+    }
+    dailyCandles = rd.result.sort((a,b)=>a.time-b.time);
+    intradayAll  = ri.result.sort((a,b)=>a.time-b.time);
     log('success', `${dailyCandles.length} daily + ${intradayAll.length} intraday candles loaded. Processing...`);
-  } catch(e) { log('error','Fetch failed: '+e.message); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
+  } catch(e) {
+    log('error','Fetch failed: '+e.message);
+    setStatus('','Error');
+    document.getElementById('scan-btn').disabled = false;
+    return;
+  }
 
   // Group intraday candles by date string
   const intradayByDay = {};
@@ -383,7 +398,6 @@ async function startScan() {
 
   const noTradeDays = [];
   let scanned = 0;
-  let breakFired = null;
 
   function finalizeBreak() {
     if (!breakFired) return;
@@ -402,95 +416,58 @@ async function startScan() {
     breakFired = null;
   }
 
-  // ── PROCESS ALL DAYS IN MEMORY (no more per-day API calls) ──
   setStatus('running', 'Scanning...');
+
   for (let di = 0; di < days.length; di++) {
     const day = days[di];
     const dayStr = day.toISOString().split('T')[0];
-
     const dayTs = Math.floor(day.getTime()/1000);
+
     const prevDaily = dailyCandles.filter(c => c.time < dayTs).slice(-1)[0];
-    if (!prevDaily) { scanned++; updateProgress(scanned, days.length); continue; }
+    if (!prevDaily) {
+      scanned++;
+      updateProgress(scanned, days.length);
+      continue;
+    }
 
     const cpr = calcCPR(parseFloat(prevDaily.high), parseFloat(prevDaily.low), parseFloat(prevDaily.close));
     const intraday = intradayByDay[dayStr] || [];
 
     if (intraday.length < 2) {
       if (!breakFired) noTradeDays.push({day:dayStr, reason:'No intraday data', cpr});
-      scanned++; updateProgress(scanned, days.length); continue;
+      scanned++;
+      updateProgress(scanned, days.length);
+      continue;
     }
+
+    let hadBreakToday = !!breakFired;
 
     for (let ci = 1; ci < intraday.length; ci++) {
       const candle = intraday[ci];
       const prev   = intraday[ci-1];
-      const close    = parseFloat(candle.close);
-      const prevClose= parseFloat(prev.close);
-      const high     = parseFloat(candle.high);
-      const low      = parseFloat(candle.low);
-      const ts = new Date(candle.time*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:false});
-
-      if (breakFired) {
-        const bc = breakFired.cpr;
-        if (breakFired.dir === 'BUY') {
-          if (!breakFired.hitR2 && high >= bc.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
-          if (!breakFired.hitR3 && high >= bc.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
-          if (breakFired.hitR3) { finalizeBreak(); }
-        } else {
-          if (!breakFired.hitS2 && low <= bc.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
-          if (!breakFired.hitS3 && low <= bc.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
-          if (breakFired.hitS3) { finalizeBreak(); }
-        }
-        if (breakFired) continue;
-      }
-
-      // S1 break → SELL
-      if (close < cpr.s1 && prevClose >= cpr.s1) {
-        breakFired = { day:dayStr, dir:'SELL', trigger:'S1 Break', entry:close, entryTime:`${dayStr} ${ts}`, s1:cpr.s1, s2:cpr.s2, s3:cpr.s3, hitS2:false, hitS3:false, s2Time:null, s3Time:null, cpr };
-        if (low <= cpr.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
-        if (low <= cpr.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
-        log('cpr', `${dayStr} ${ts}: S1 BREAK SELL @ ${close.toFixed(0)} → S2:${cpr.s2.toFixed(0)} S3:${cpr.s3.toFixed(0)}`);
-      }
-      // R1 break → BUY
-      else if (close > cpr.r1 && prevClose <= cpr.r1) {
-        breakFired = { day:dayStr, dir:'BUY', trigger:'R1 Break', entry:close, entryTime:`${dayStr} ${ts}`, r1:cpr.r1, r2:cpr.r2, r3:cpr.r3, hitR2:false, hitR3:false, r2Time:null, r3Time:null, cpr };
-        if (high >= cpr.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
-        if (high >= cpr.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
-        log('cpr', `${dayStr} ${ts}: R1 BREAK BUY @ ${close.toFixed(0)} → R2:${cpr.r2.toFixed(0)} R3:${cpr.r3.toFixed(0)}`);
-      }
-    }
-
-    if (!breakFired) noTradeDays.push({day:dayStr, reason:'No R1/S1 break', cpr});
-    scanned++;
-    updateProgress(scanned, days.length);
-  }
-
-    for (let ci = 1; ci < intraday.length; ci++) {
-      const candle = intraday[ci];
-      const prev = intraday[ci-1];
-      const close = parseFloat(candle.close);
+      const close     = parseFloat(candle.close);
       const prevClose = parseFloat(prev.close);
-      const high = parseFloat(candle.high);
-      const low = parseFloat(candle.low);
+      const high      = parseFloat(candle.high);
+      const low       = parseFloat(candle.low);
       const ts = new Date(candle.time*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:false});
 
-      // If a break is already active, check targets using this candle's high/low
-      // Use the CPR from the day the break was fired (breakFired.cpr)
+      // If a break is already active, track targets using original breakFired CPR
       if (breakFired) {
+        hadBreakToday = true;
         const bc = breakFired.cpr;
         if (breakFired.dir === 'BUY') {
           if (!breakFired.hitR2 && high >= bc.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
           if (!breakFired.hitR3 && high >= bc.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
+          if (breakFired.hitR3) { finalizeBreak(); hadBreakToday = true; }
         } else {
           if (!breakFired.hitS2 && low <= bc.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
           if (!breakFired.hitS3 && low <= bc.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
+          if (breakFired.hitS3) { finalizeBreak(); hadBreakToday = true; }
         }
-        // If both targets hit, close the trade
-        if (breakFired.dir==='BUY' && breakFired.hitR3) { finalizeBreak(); }
-        if (breakFired.dir==='SELL' && breakFired.hitS3) { finalizeBreak(); }
-        continue;
+        if (breakFired) continue; // still tracking, skip new signal detection
       }
 
-      // Look for new S1 break (SELL) — check before BUY so downtrend gets priority
+      // Look for new S1 break → SELL
       if (close < cpr.s1 && prevClose >= cpr.s1) {
         breakFired = {
           day:dayStr, dir:'SELL', trigger:'S1 Break',
@@ -499,12 +476,12 @@ async function startScan() {
           hitS2:false, hitS3:false, s2Time:null, s3Time:null,
           cpr
         };
-        // Check same candle for immediate target hit
+        hadBreakToday = true;
         if (low <= cpr.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
         if (low <= cpr.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
         log('cpr', `${dayStr} ${ts}: S1 BREAK SELL @ ${close.toFixed(0)} → S2:${cpr.s2.toFixed(0)} S3:${cpr.s3.toFixed(0)}`);
       }
-      // BUY: close above R1
+      // Look for new R1 break → BUY
       else if (close > cpr.r1 && prevClose <= cpr.r1) {
         breakFired = {
           day:dayStr, dir:'BUY', trigger:'R1 Break',
@@ -513,21 +490,21 @@ async function startScan() {
           hitR2:false, hitR3:false, r2Time:null, r3Time:null,
           cpr
         };
-        // Check same candle for immediate target hit
+        hadBreakToday = true;
         if (high >= cpr.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
         if (high >= cpr.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
         log('cpr', `${dayStr} ${ts}: R1 BREAK BUY @ ${close.toFixed(0)} → R2:${cpr.r2.toFixed(0)} R3:${cpr.r3.toFixed(0)}`);
       }
     }
 
-    // End of day — don't finalize yet, carry breakFired into next day
-    if (!breakFired) {
+    // End of day — carry breakFired into next day if still active
+    if (!hadBreakToday) {
       noTradeDays.push({day:dayStr, reason:'No R1/S1 break', cpr});
     }
 
     scanned++;
     updateProgress(scanned, days.length);
-    await delay(30);
+    await delay(10);
   }
 
   // Finalize any still-open break at end of scan
@@ -554,12 +531,13 @@ const delay = ms => new Promise(r=>setTimeout(r,ms));
 function renderResults(noTradeDays, daysScanned) {
   const trades = allTrades;
   if (trades.length === 0) {
-    document.getElementById('trade-tbody').innerHTML = '<tr><td colspan="12" class="empty">No R1/S1 breaks found.</td></tr>';
+    document.getElementById('trade-tbody').innerHTML = '<tr><td colspan="11" class="empty">No R1/S1 breaks found.</td></tr>';
     document.getElementById('s-trades').textContent = '0';
     document.getElementById('s-days').textContent = `Days scanned: ${daysScanned} | No break: ${noTradeDays.length}`;
     return;
   }
-  const buys = trades.filter(t=>t.dir==='BUY');
+
+  const buys  = trades.filter(t=>t.dir==='BUY');
   const sells = trades.filter(t=>t.dir==='SELL');
   const hitR2 = trades.filter(t=>t.dir==='BUY'&&t.hitR2);
   const hitR3 = trades.filter(t=>t.dir==='BUY'&&t.hitR3);
@@ -574,55 +552,56 @@ function renderResults(noTradeDays, daysScanned) {
   document.getElementById('s-wr-bar').style.background = parseFloat(wr)>=50?'var(--green)':parseFloat(wr)>=35?'var(--orange)':'var(--red)';
   const pnlEl = document.getElementById('s-pnl');
   pnlEl.textContent = `${buys.length}B / ${sells.length}S`;
-  pnlEl.style.color = 'var(--text)'; pnlEl.style.fontSize = '1.1rem';
-  document.getElementById('s-bal').textContent = `Breaks on ${trades.length}/${daysScanned} days`;
+  pnlEl.style.color = 'var(--text)';
+  pnlEl.style.fontSize = '1.1rem';
+  document.getElementById('s-bal2').textContent = `Breaks on ${trades.length}/${daysScanned} days`;
   document.getElementById('s-tp1').textContent = `R2:${hitR2.length} S2:${hitS2.length}`;
   document.getElementById('s-tp2').textContent = `R3:${hitR3.length} S3:${hitS3.length}`;
   document.getElementById('s-rr').textContent = `${anyTarget.length}/${trades.length}`;
   document.getElementById('s-days').textContent = `Scanned: ${daysScanned} | No break: ${noTradeDays.length}`;
   document.getElementById('trade-count').textContent = `(${trades.length} breaks)`;
 
-  // Monthly
+  // Monthly breakdown
   const months = {};
   trades.forEach(t => {
     const m = t.day.substr(0,7);
     if (!months[m]) months[m]={total:0,hit:0,buys:0,sells:0,r2:0,r3:0,s2:0,s3:0};
     months[m].total++;
-    if(t.dir==='BUY'){months[m].buys++;if(t.hitR2)months[m].r2++;if(t.hitR3)months[m].r3++;}
-    else{months[m].sells++;if(t.hitS2)months[m].s2++;if(t.hitS3)months[m].s3++;}
-    if((t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2))months[m].hit++;
+    if (t.dir==='BUY') { months[m].buys++; if(t.hitR2)months[m].r2++; if(t.hitR3)months[m].r3++; }
+    else               { months[m].sells++; if(t.hitS2)months[m].s2++; if(t.hitS3)months[m].s3++; }
+    if ((t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2)) months[m].hit++;
   });
-  const mKeys=Object.keys(months).sort();
-  document.getElementById('month-grid').innerHTML=mKeys.length===0
-    ?'<div class="empty" style="grid-column:1/-1">No data</div>'
-    :mKeys.map(m=>{
-      const mo=months[m];
-      const mwr=mo.total>0?(mo.hit/mo.total*100).toFixed(0)+'%':'—';
-      const d=new Date(m+'-01');
-      const mn=d.toLocaleString('default',{month:'short',year:'2-digit'});
-      const good=parseFloat(mwr)>=50;
-      return `<div class="month-card ${good?'pos':'neg'}">
-        <div class="mn">${mn}</div>
-        <div class="mp ${good?'pos':'neg'}">${mo.hit}/${mo.total} hit</div>
-        <div class="ms">WR ${mwr} · B:${mo.buys} S:${mo.sells}</div>
-        <div class="ms" style="margin-top:2px">R2:${mo.r2} R3:${mo.r3} S2:${mo.s2} S3:${mo.s3}</div>
-      </div>`;
-    }).join('');
+  const mKeys = Object.keys(months).sort();
+  document.getElementById('month-grid').innerHTML = mKeys.length===0
+    ? '<div class="empty" style="grid-column:1/-1">No data</div>'
+    : mKeys.map(m => {
+        const mo = months[m];
+        const mwr = mo.total>0 ? (mo.hit/mo.total*100).toFixed(0)+'%' : '—';
+        const d = new Date(m+'-01');
+        const mn = d.toLocaleString('default',{month:'short',year:'2-digit'});
+        const good = parseFloat(mwr)>=50;
+        return `<div class="month-card ${good?'pos':'neg'}">
+          <div class="mn">${mn}</div>
+          <div class="mp ${good?'pos':'neg'}">${mo.hit}/${mo.total} hit</div>
+          <div class="ms">WR ${mwr} · B:${mo.buys} S:${mo.sells}</div>
+          <div class="ms" style="margin-top:2px">R2:${mo.r2} R3:${mo.r3} S2:${mo.s2} S3:${mo.s3}</div>
+        </div>`;
+      }).join('');
 
-  // Table
-  const tbody=document.getElementById('trade-tbody');
-  tbody.innerHTML=trades.map((t,i)=>{
-    const c=t.cpr;
-    const hitTgt=(t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2);
-    const hitFull=(t.dir==='BUY'&&t.hitR3)||(t.dir==='SELL'&&t.hitS3);
-    const lbl=hitFull?(t.dir==='BUY'?'Hit R3':'Hit S3'):hitTgt?(t.dir==='BUY'?'Hit R2':'Hit S2'):'No Target';
-    const rc=hitFull?'tp2':hitTgt?'tp1':'sl';
-    const tp1v=t.dir==='BUY'?c.r2.toFixed(0):c.s2.toFixed(0);
-    const tp2v=t.dir==='BUY'?c.r3.toFixed(0):c.s3.toFixed(0);
-    const tp1h=t.dir==='BUY'?t.hitR2:t.hitS2;
-    const tp2h=t.dir==='BUY'?t.hitR3:t.hitS3;
-    const tp1t=t.dir==='BUY'?t.r2Time:t.s2Time;
-    const tp2t=t.dir==='BUY'?t.r3Time:t.s3Time;
+  // Trade table
+  const tbody = document.getElementById('trade-tbody');
+  tbody.innerHTML = trades.map((t,i) => {
+    const c = t.cpr;
+    const hitTgt  = (t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2);
+    const hitFull = (t.dir==='BUY'&&t.hitR3)||(t.dir==='SELL'&&t.hitS3);
+    const lbl = hitFull ? (t.dir==='BUY'?'Hit R3':'Hit S3') : hitTgt ? (t.dir==='BUY'?'Hit R2':'Hit S2') : 'No Target';
+    const rc  = hitFull ? 'tp2' : hitTgt ? 'tp1' : 'sl';
+    const tp1v = t.dir==='BUY' ? c.r2.toFixed(0) : c.s2.toFixed(0);
+    const tp2v = t.dir==='BUY' ? c.r3.toFixed(0) : c.s3.toFixed(0);
+    const tp1h = t.dir==='BUY' ? t.hitR2 : t.hitS2;
+    const tp2h = t.dir==='BUY' ? t.hitR3 : t.hitS3;
+    const tp1t = t.dir==='BUY' ? t.r2Time : t.s2Time;
+    const tp2t = t.dir==='BUY' ? t.r3Time : t.s3Time;
     return `<tr>
       <td style="color:var(--t3);font-weight:600">${i+1}</td>
       <td style="font-weight:600">${t.day}</td>
@@ -638,38 +617,43 @@ function renderResults(noTradeDays, daysScanned) {
     </tr>`;
   }).join('');
 
-  // No break days
-  document.getElementById('no-trade-wrap').innerHTML=noTradeDays.length===0
-    ?'<div class="empty">Every day had a R1/S1 break!</div>'
-    :`<div style="padding:10px;display:flex;flex-wrap:wrap;gap:6px;">${noTradeDays.map(d=>`<span style="background:var(--b2);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:0.62rem;color:var(--t2)">${d.day}</span>`).join('')}</div>`;
+  // No-signal days
+  document.getElementById('no-trade-wrap').innerHTML = noTradeDays.length===0
+    ? '<div class="empty">Every day had a R1/S1 break!</div>'
+    : `<div style="padding:10px;display:flex;flex-wrap:wrap;gap:6px;">${noTradeDays.map(d=>`<span style="background:var(--b2);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:0.62rem;color:var(--t2)">${d.day}</span>`).join('')}</div>`;
 }
 
 function resetScan() {
-  allTrades = []; runningBal = config.bal; scanning = false;
+  allTrades = [];
+  breakFired = null;
+  runningBal = config.bal;
+  scanning = false;
   document.getElementById('prog-wrap').style.display='none';
   document.getElementById('prog-fill').style.width='0%';
-  document.getElementById('trade-tbody').innerHTML='<tr><td colspan="20" class="empty">Run the scanner to see trades</td></tr>';
+  document.getElementById('trade-tbody').innerHTML='<tr><td colspan="11" class="empty">Run the scanner to see trades</td></tr>';
   document.getElementById('month-grid').innerHTML='<div class="empty" style="grid-column:1/-1">Run the scanner to see monthly breakdown</div>';
   document.getElementById('no-trade-wrap').innerHTML='<div class="empty">Run the scanner to see no-signal days</div>';
   document.getElementById('trade-count').textContent='';
   ['s-trades','s-wr','s-pnl','s-tp1','s-rr'].forEach(id=>document.getElementById(id).textContent='—');
   document.getElementById('s-wr-bar').style.width='0%';
-  setStatus('','Idle'); log('info','Reset.');
+  setStatus('','Idle');
+  log('info','Reset.');
 }
 
-function setStatus(type,text) {
-  const p=document.getElementById('status-pill');
-  p.className='pill'+(type?' '+type:'');
-  document.getElementById('status-txt').textContent=text;
+function setStatus(type, text) {
+  const p = document.getElementById('status-pill');
+  p.className = 'pill'+(type?' '+type:'');
+  document.getElementById('status-txt').textContent = text;
 }
-function log(type,msg) {
-  const box=document.getElementById('log-box');
-  const time=new Date().toLocaleTimeString('en-US',{hour12:false});
-  const el=document.createElement('div');
-  el.className='le '+type;
-  el.innerHTML=`<span class="lt">${time}</span><span class="lm">${msg}</span>`;
-  box.insertBefore(el,box.firstChild);
-  if(box.children.length>100)box.removeChild(box.lastChild);
+
+function log(type, msg) {
+  const box = document.getElementById('log-box');
+  const time = new Date().toLocaleTimeString('en-US',{hour12:false});
+  const el = document.createElement('div');
+  el.className = 'le '+type;
+  el.innerHTML = `<span class="lt">${time}</span><span class="lm">${msg}</span>`;
+  box.insertBefore(el, box.firstChild);
+  if (box.children.length>100) box.removeChild(box.lastChild);
 }
 </script>
 </body>
