@@ -596,34 +596,28 @@ async function startScan() {
       // SELL: close below S1
       if (close < cpr.s1 && prevClose >= cpr.s1) {
         const entry = close;
-        const sl    = parseFloat((entry * 1.05).toFixed(2)); // 5% above entry
-        const tp    = parseFloat(cpr.s2.toFixed(2));
-        breakFired = {
-          day:dayStr, dir:'SELL', trigger:'S1 Break',
-          entry, sl, tp1:tp, cpr,
-          entryTime:`${dayStr} ${ts}`,
-          hitTP:false, tpTime:null
-        };
+        const slPct  = parseFloat((entry * 0.05).toFixed(2));   // 5% distance
+        const slCap  = 10 / config.lot;                          // $10 max loss in price terms
+        const slDist = Math.min(slPct, slCap);
+        const sl     = parseFloat((entry + slDist).toFixed(2));  // SL above entry for SELL
+        const tp     = parseFloat(cpr.s2.toFixed(2));
+        breakFired = { day:dayStr, dir:'SELL', trigger:'S1 Break', entry, sl, tp1:tp, cpr, entryTime:`${dayStr} ${ts}`, hitTP:false, tpTime:null };
         hadBreakToday = true;
-        // Check same candle
         if (low <= tp) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; finalizeBreak(); }
-        else log('cpr',`${dayStr} ${ts}: SELL @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} TP:${tp.toFixed(0)}`);
+        else log('cpr',`${dayStr} ${ts}: SELL @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} (${slDist===slCap?'$10 cap':'5%'}) TP:${tp.toFixed(0)}`);
       }
       // BUY: close above R1
       else if (close > cpr.r1 && prevClose <= cpr.r1) {
         const entry = close;
-        const sl    = parseFloat((entry * 0.95).toFixed(2)); // 5% below entry
-        const tp    = parseFloat(cpr.r2.toFixed(2));
-        breakFired = {
-          day:dayStr, dir:'BUY', trigger:'R1 Break',
-          entry, sl, tp1:tp, cpr,
-          entryTime:`${dayStr} ${ts}`,
-          hitTP:false, tpTime:null
-        };
+        const slPct  = parseFloat((entry * 0.05).toFixed(2));   // 5% distance
+        const slCap  = 10 / config.lot;                          // $10 max loss in price terms
+        const slDist = Math.min(slPct, slCap);
+        const sl     = parseFloat((entry - slDist).toFixed(2));  // SL below entry for BUY
+        const tp     = parseFloat(cpr.r2.toFixed(2));
+        breakFired = { day:dayStr, dir:'BUY', trigger:'R1 Break', entry, sl, tp1:tp, cpr, entryTime:`${dayStr} ${ts}`, hitTP:false, tpTime:null };
         hadBreakToday = true;
-        // Check same candle
         if (high >= tp) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; finalizeBreak(); }
-        else log('cpr',`${dayStr} ${ts}: BUY @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} TP:${tp.toFixed(0)}`);
+        else log('cpr',`${dayStr} ${ts}: BUY @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} (${slDist===slCap?'$10 cap':'5%'}) TP:${tp.toFixed(0)}`);
       }
     }
 
