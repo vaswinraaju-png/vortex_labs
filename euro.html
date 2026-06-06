@@ -343,34 +343,47 @@ async function startScan() {
   runningBal = config.bal;
   document.getElementById('scan-btn').disabled = true;
   document.getElementById('prog-wrap').style.display = 'block';
-  setStatus('running', 'Scanning...');
-  log('info', `Starting ${config.lookback}-day CPR scan on ${sym} (${config.interval})...`);
+  setStatus('running', 'Fetching...');
+  log('info', `Fetching all data for ${sym} (${config.interval}, ${config.lookback} days)...`);
 
-  // Build list of trading days (skip weekends — crypto trades 24/7 so include all)
-  const days = [];
   const today = new Date();
+  const days = [];
   for (let i = config.lookback; i >= 1; i--) {
     const d = new Date(today);
     d.setDate(today.getDate()-i);
     days.push(d);
   }
 
-  // Fetch daily candles for the entire period (for CPR calc)
   const periodStart = Math.floor(days[0].getTime()/1000) - 86400;
-  const periodEnd = Math.floor(today.getTime()/1000);
-  let dailyCandles = [];
-  try {
-    const r = await fetch(`${DELTA}/v2/history/candles?symbol=${sym}&resolution=1d&start=${periodStart}&end=${periodEnd}`);
-    const d = await r.json();
-    dailyCandles = (d.result||[]).sort((a,b)=>a.time-b.time);
-    log('success', `${dailyCandles.length} daily candles loaded.`);
-  } catch(e) { log('error','Daily candle fetch failed: '+e.message); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
+  const periodEnd   = Math.floor(today.getTime()/1000);
 
-  if (dailyCandles.length < 2) { log('error','Not enough daily candles.'); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
+  // ── SINGLE BULK FETCH: daily candles + all intraday candles in ONE call each ──
+  let dailyCandles = [], intradayAll = [];
+  try {
+    document.getElementById('prog-txt').textContent = 'Fetching daily candles...';
+    document.getElementById('prog-pct').textContent = '0%';
+    const [rd, ri] = await Promise.all([
+      fetch(`${DELTA}/v2/history/candles?symbol=${sym}&resolution=1d&start=${periodStart}&end=${periodEnd}`).then(r=>r.json()),
+      fetch(`${DELTA}/v2/history/candles?symbol=${sym}&resolution=${config.interval}&start=${periodStart}&end=${periodEnd}`).then(r=>r.json()),
+    ]);
+    if (!rd.result || rd.result.length < 2) { log('error','Not enough daily candles.'); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
+    if (!ri.result || ri.result.length === 0) { log('error','No intraday candles returned.'); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
+    dailyCandles  = rd.result.sort((a,b)=>a.time-b.time);
+    intradayAll   = ri.result.sort((a,b)=>a.time-b.time);
+    log('success', `${dailyCandles.length} daily + ${intradayAll.length} intraday candles loaded. Processing...`);
+  } catch(e) { log('error','Fetch failed: '+e.message); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
+
+  // Group intraday candles by date string
+  const intradayByDay = {};
+  intradayAll.forEach(c => {
+    const dateStr = new Date(c.time*1000).toISOString().split('T')[0];
+    if (!intradayByDay[dateStr]) intradayByDay[dateStr] = [];
+    intradayByDay[dateStr].push(c);
+  });
 
   const noTradeDays = [];
   let scanned = 0;
-  let breakFired = null; // persists across days until targets hit
+  let breakFired = null;
 
   function finalizeBreak() {
     if (!breakFired) return;
@@ -389,32 +402,67 @@ async function startScan() {
     breakFired = null;
   }
 
+  // ── PROCESS ALL DAYS IN MEMORY (no more per-day API calls) ──
+  setStatus('running', 'Scanning...');
   for (let di = 0; di < days.length; di++) {
     const day = days[di];
     const dayStr = day.toISOString().split('T')[0];
 
-    // Find previous day's daily candle for CPR
     const dayTs = Math.floor(day.getTime()/1000);
     const prevDaily = dailyCandles.filter(c => c.time < dayTs).slice(-1)[0];
-    if (!prevDaily) { log('warn', `${dayStr}: no prev daily candle, skip`); scanned++; continue; }
+    if (!prevDaily) { scanned++; updateProgress(scanned, days.length); continue; }
 
     const cpr = calcCPR(parseFloat(prevDaily.high), parseFloat(prevDaily.low), parseFloat(prevDaily.close));
+    const intraday = intradayByDay[dayStr] || [];
 
-    // Log CPR levels for this day
-    log('cpr', `${dayStr} CPR — Pvt:${cpr.pivot.toFixed(0)} TC:${cpr.tc.toFixed(0)} BC:${cpr.bc.toFixed(0)} R1:${cpr.r1.toFixed(0)} S1:${cpr.s1.toFixed(0)}`);
+    if (intraday.length < 2) {
+      if (!breakFired) noTradeDays.push({day:dayStr, reason:'No intraday data', cpr});
+      scanned++; updateProgress(scanned, days.length); continue;
+    }
 
-    // Fetch intraday candles for this day
-    const dayStart = Math.floor(new Date(dayStr+'T00:00:00Z').getTime()/1000);
-    const dayEnd = Math.floor(new Date(dayStr+'T23:59:59Z').getTime()/1000);
+    for (let ci = 1; ci < intraday.length; ci++) {
+      const candle = intraday[ci];
+      const prev   = intraday[ci-1];
+      const close    = parseFloat(candle.close);
+      const prevClose= parseFloat(prev.close);
+      const high     = parseFloat(candle.high);
+      const low      = parseFloat(candle.low);
+      const ts = new Date(candle.time*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:false});
 
-    let intraday = [];
-    try {
-      const r = await fetch(`${DELTA}/v2/history/candles?symbol=${sym}&resolution=${config.interval}&start=${dayStart}&end=${dayEnd}`);
-      const d = await r.json();
-      intraday = (d.result||[]).sort((a,b)=>a.time-b.time);
-    } catch(e) { log('warn',`${dayStr}: fetch error`); scanned++; updateProgress(scanned,days.length); continue; }
+      if (breakFired) {
+        const bc = breakFired.cpr;
+        if (breakFired.dir === 'BUY') {
+          if (!breakFired.hitR2 && high >= bc.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
+          if (!breakFired.hitR3 && high >= bc.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
+          if (breakFired.hitR3) { finalizeBreak(); }
+        } else {
+          if (!breakFired.hitS2 && low <= bc.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
+          if (!breakFired.hitS3 && low <= bc.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
+          if (breakFired.hitS3) { finalizeBreak(); }
+        }
+        if (breakFired) continue;
+      }
 
-    if (intraday.length < 2) { noTradeDays.push({day:dayStr,reason:'No intraday data',cpr}); scanned++; updateProgress(scanned,days.length); continue; }
+      // S1 break → SELL
+      if (close < cpr.s1 && prevClose >= cpr.s1) {
+        breakFired = { day:dayStr, dir:'SELL', trigger:'S1 Break', entry:close, entryTime:`${dayStr} ${ts}`, s1:cpr.s1, s2:cpr.s2, s3:cpr.s3, hitS2:false, hitS3:false, s2Time:null, s3Time:null, cpr };
+        if (low <= cpr.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
+        if (low <= cpr.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
+        log('cpr', `${dayStr} ${ts}: S1 BREAK SELL @ ${close.toFixed(0)} → S2:${cpr.s2.toFixed(0)} S3:${cpr.s3.toFixed(0)}`);
+      }
+      // R1 break → BUY
+      else if (close > cpr.r1 && prevClose <= cpr.r1) {
+        breakFired = { day:dayStr, dir:'BUY', trigger:'R1 Break', entry:close, entryTime:`${dayStr} ${ts}`, r1:cpr.r1, r2:cpr.r2, r3:cpr.r3, hitR2:false, hitR3:false, r2Time:null, r3Time:null, cpr };
+        if (high >= cpr.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
+        if (high >= cpr.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
+        log('cpr', `${dayStr} ${ts}: R1 BREAK BUY @ ${close.toFixed(0)} → R2:${cpr.r2.toFixed(0)} R3:${cpr.r3.toFixed(0)}`);
+      }
+    }
+
+    if (!breakFired) noTradeDays.push({day:dayStr, reason:'No R1/S1 break', cpr});
+    scanned++;
+    updateProgress(scanned, days.length);
+  }
 
     for (let ci = 1; ci < intraday.length; ci++) {
       const candle = intraday[ci];
