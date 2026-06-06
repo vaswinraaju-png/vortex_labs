@@ -597,8 +597,8 @@ async function startScan() {
       if (hadBreakToday) continue;
       if (!inSession(candle.time)) continue;
 
-      // Calculate lot size based on current balance × leverage / BTC price
-      const effectiveLot = parseFloat(((runningBal * config.leverage) / close).toFixed(6));
+      // Fixed lot size 0.01
+      const effectiveLot = 0.01;
 
       // SELL: close below S1
       if (close < cpr.s1 && prevClose >= cpr.s1) {
