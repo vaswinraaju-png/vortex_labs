@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Paper Trader — storiesbyachu</title>
+<title>AI Battle Trader — storiesbyachu</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -11,159 +11,175 @@
     --surface: #0d1117;
     --surface2: #131b24;
     --border: #1e2d3d;
-    --accent: #00e5ff;
-    --accent2: #ff6b35;
-    --green: #00ff88;
+    --claude: #00e5ff;
+    --openai: #00ff88;
+    --gemini: #ffd600;
     --red: #ff3366;
-    --yellow: #ffd600;
     --text: #e8f4f8;
     --muted: #4a6572;
     --font-mono: 'JetBrains Mono', monospace;
     --font-display: 'Syne', sans-serif;
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--bg); color: var(--text); font-family: var(--font-mono); min-height: 100vh; overflow-x: hidden; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font-mono); min-height:100vh; overflow-x:hidden; }
   body::before {
-    content: ''; position: fixed; inset: 0;
-    background-image: linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px; pointer-events: none; z-index: 0;
+    content:''; position:fixed; inset:0;
+    background-image: linear-gradient(rgba(0,229,255,0.03) 1px,transparent 1px), linear-gradient(90deg,rgba(0,229,255,0.03) 1px,transparent 1px);
+    background-size:40px 40px; pointer-events:none; z-index:0;
   }
   header {
-    position: relative; z-index: 10; display: flex; align-items: center;
-    justify-content: space-between; padding: 16px 28px;
-    border-bottom: 1px solid var(--border); background: rgba(8,12,16,0.95); backdrop-filter: blur(12px);
+    position:relative; z-index:10; display:flex; align-items:center;
+    justify-content:space-between; padding:14px 24px;
+    border-bottom:1px solid var(--border); background:rgba(8,12,16,0.97); backdrop-filter:blur(12px);
   }
-  .logo { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; letter-spacing: -0.02em; }
-  .logo span { color: var(--accent); }
-  .logo small { display: block; font-family: var(--font-mono); font-size: 0.58rem; color: var(--muted); font-weight: 400; letter-spacing: 0.15em; text-transform: uppercase; }
-  .header-right { display: flex; align-items: center; gap: 14px; }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transition: background 0.3s; }
-  .status-dot.active { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
-  .status-dot.thinking { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); animation: pulse 0.6s infinite; }
-  .status-dot.replay { background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse 1s infinite; }
+  .logo { font-family:var(--font-display); font-weight:800; font-size:1rem; letter-spacing:-0.02em; }
+  .logo span { color:var(--claude); }
+  .logo small { display:block; font-family:var(--font-mono); font-size:0.56rem; color:var(--muted); font-weight:400; letter-spacing:0.15em; text-transform:uppercase; }
+  .header-right { display:flex; align-items:center; gap:12px; }
+  .status-dot { width:7px; height:7px; border-radius:50%; background:var(--muted); }
+  .status-dot.active { background:var(--openai); box-shadow:0 0 8px var(--openai); animation:pulse 2s infinite; }
+  .status-dot.thinking { background:var(--gemini); box-shadow:0 0 8px var(--gemini); animation:pulse 0.6s infinite; }
+  .status-dot.replay { background:var(--claude); box-shadow:0 0 8px var(--claude); animation:pulse 1s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  #status-text { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  #status-text { font-size:0.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.1em; }
 
-  .app {
-    position: relative; z-index: 1; display: grid;
-    grid-template-columns: 290px 1fr; height: calc(100vh - 57px);
-  }
-  .sidebar {
-    border-right: 1px solid var(--border); display: flex; flex-direction: column;
-    overflow-y: auto; background: var(--surface);
-  }
-  .sidebar-section { padding: 16px 18px; border-bottom: 1px solid var(--border); }
-  .sidebar-section h3 { font-family: var(--font-display); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 12px; }
-  .form-group { margin-bottom: 10px; }
-  .form-group label { display: block; font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+  .app { position:relative; z-index:1; display:grid; grid-template-columns:270px 1fr; height:calc(100vh - 53px); }
+
+  /* SIDEBAR */
+  .sidebar { border-right:1px solid var(--border); display:flex; flex-direction:column; overflow-y:auto; background:var(--surface); }
+  .sidebar-section { padding:14px 16px; border-bottom:1px solid var(--border); }
+  .sidebar-section h3 { font-family:var(--font-display); font-size:0.62rem; text-transform:uppercase; letter-spacing:0.2em; color:var(--muted); margin-bottom:10px; }
+  .form-group { margin-bottom:9px; }
+  .form-group label { display:block; font-size:0.6rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:3px; }
   .form-group input, .form-group select {
-    width: 100%; background: var(--bg); border: 1px solid var(--border);
-    color: var(--text); padding: 7px 9px; font-family: var(--font-mono);
-    font-size: 0.72rem; border-radius: 4px; outline: none; transition: border-color 0.2s;
+    width:100%; background:var(--bg); border:1px solid var(--border);
+    color:var(--text); padding:6px 8px; font-family:var(--font-mono);
+    font-size:0.7rem; border-radius:4px; outline:none; transition:border-color 0.2s;
   }
-  .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
-  .btn { width: 100%; padding: 9px; border: none; border-radius: 4px; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; transition: all 0.2s; }
-  .btn-primary { background: var(--accent); color: var(--bg); }
-  .btn-primary:hover { background: #33eaff; box-shadow: 0 0 18px rgba(0,229,255,0.3); }
-  .btn-primary:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; box-shadow: none; }
-  .btn-danger { background: transparent; color: var(--red); border: 1px solid var(--red); margin-top: 7px; }
-  .btn-danger:hover { background: rgba(255,51,102,0.1); }
-  .btn-danger:disabled { opacity: 0.3; cursor: not-allowed; }
-  .btn-secondary { background: transparent; color: var(--accent); border: 1px solid var(--border); margin-top: 7px; }
-  .btn-secondary:hover { border-color: var(--accent); }
-  .btn-secondary:disabled { opacity: 0.3; cursor: not-allowed; }
+  .form-group input:focus, .form-group select:focus { border-color:var(--claude); }
+  .key-label { display:flex; align-items:center; gap:5px; margin-bottom:3px; }
+  .key-label .dot { width:6px; height:6px; border-radius:50%; }
+  .key-label .dot.claude { background:var(--claude); }
+  .key-label .dot.openai { background:var(--openai); }
+  .key-label .dot.gemini { background:var(--gemini); }
+  .key-label span { font-size:0.6rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.1em; }
 
-  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
-  .stat-card { background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 9px; }
-  .stat-card .label { font-size: 0.52rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; }
-  .stat-card .value { font-size: 0.9rem; font-weight: 700; color: var(--text); }
-  .stat-card .value.green { color: var(--green); }
-  .stat-card .value.red { color: var(--red); }
-  .stat-card .value.yellow { color: var(--yellow); }
+  .btn { width:100%; padding:8px; border:none; border-radius:4px; font-family:var(--font-mono); font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; cursor:pointer; transition:all 0.2s; }
+  .btn-primary { background:var(--claude); color:var(--bg); }
+  .btn-primary:hover { background:#33eaff; box-shadow:0 0 16px rgba(0,229,255,0.3); }
+  .btn-primary:disabled { background:var(--border); color:var(--muted); cursor:not-allowed; box-shadow:none; }
+  .btn-danger { background:transparent; color:var(--red); border:1px solid var(--red); margin-top:6px; }
+  .btn-danger:hover { background:rgba(255,51,102,0.1); }
+  .btn-danger:disabled { opacity:0.3; cursor:not-allowed; }
+  .btn-secondary { background:transparent; color:var(--claude); border:1px solid var(--border); margin-top:6px; }
+  .btn-secondary:hover { border-color:var(--claude); }
 
-  /* REPLAY PROGRESS */
-  .replay-bar-wrap { margin-top: 10px; }
-  .replay-bar-track { background: var(--bg); border: 1px solid var(--border); border-radius: 3px; height: 6px; overflow: hidden; margin-bottom: 5px; }
-  .replay-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s; width: 0%; }
-  .replay-info { display: flex; justify-content: space-between; font-size: 0.58rem; color: var(--muted); }
-  .replay-info span { color: var(--accent); }
+  /* LEADERBOARD */
+  .leaderboard { display:flex; flex-direction:column; gap:6px; }
+  .lb-row {
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--bg); border:1px solid var(--border); border-radius:5px; padding:8px 10px;
+    transition:border-color 0.3s;
+  }
+  .lb-row.leader { border-color:var(--gemini); box-shadow:0 0 12px rgba(255,214,0,0.1); }
+  .lb-left { display:flex; align-items:center; gap:8px; }
+  .lb-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .lb-name { font-family:var(--font-display); font-weight:700; font-size:0.75rem; }
+  .lb-model { font-size:0.55rem; color:var(--muted); margin-top:1px; }
+  .lb-right { text-align:right; }
+  .lb-bal { font-size:0.85rem; font-weight:700; }
+  .lb-stats { font-size:0.55rem; color:var(--muted); margin-top:1px; }
+  .lb-crown { font-size:0.7rem; margin-left:4px; }
+  .green { color:var(--openai); }
+  .red { color:var(--red); }
+  .yellow { color:var(--gemini); }
 
-  /* CANDLE TIME */
-  .candle-time { font-size: 0.62rem; color: var(--muted); text-align: center; padding: 6px 0 0; }
-  .candle-time b { color: var(--yellow); }
+  /* REPLAY */
+  .speed-btns { display:flex; gap:5px; margin-top:7px; }
+  .speed-btn { flex:1; padding:5px; border:1px solid var(--border); background:var(--bg); color:var(--muted); font-family:var(--font-mono); font-size:0.6rem; border-radius:3px; cursor:pointer; transition:all 0.15s; text-align:center; }
+  .speed-btn:hover { border-color:var(--claude); color:var(--claude); }
+  .speed-btn.active { background:var(--claude); color:var(--bg); border-color:var(--claude); font-weight:700; }
+  .replay-bar-track { background:var(--bg); border:1px solid var(--border); border-radius:3px; height:5px; overflow:hidden; margin:8px 0 4px; }
+  .replay-bar-fill { height:100%; background:var(--claude); border-radius:3px; transition:width 0.3s; width:0%; }
+  .replay-info { display:flex; justify-content:space-between; font-size:0.56rem; color:var(--muted); }
+  .candle-time { font-size:0.6rem; color:var(--muted); text-align:center; padding-top:4px; }
+  .candle-time b { color:var(--gemini); }
+  .mode-badge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:0.56rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; background:rgba(255,214,0,0.1); color:var(--gemini); border:1px solid rgba(255,214,0,0.25); }
+
+  /* LOG */
+  .log-box { background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:8px; max-height:120px; overflow-y:auto; font-size:0.6rem; line-height:1.8; }
+  .log-entry .time { color:var(--border); margin-right:5px; }
+  .log-entry.info .msg { color:var(--text); }
+  .log-entry.success .msg { color:var(--openai); }
+  .log-entry.error .msg { color:var(--red); }
+  .log-entry.warn .msg { color:var(--gemini); }
+  .log-entry.claude .msg { color:var(--claude); }
+  .log-entry.openai .msg { color:var(--openai); }
+  .log-entry.gemini .msg { color:var(--gemini); }
 
   /* MAIN */
-  .main-wrap { display: flex; flex-direction: column; overflow: hidden; }
-  .main-top {
-    padding: 16px 22px; border-bottom: 1px solid var(--border);
-    display: flex; gap: 14px; align-items: flex-start; flex-shrink: 0;
-  }
-  .ticker-cards { display: flex; gap: 10px; }
-  .ticker-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 12px 16px; min-width: 160px; }
-  .ticker-card .pair { font-family: var(--font-display); font-weight: 800; font-size: 0.8rem; letter-spacing: 0.05em; color: var(--accent); margin-bottom: 3px; }
-  .ticker-card .price { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; }
-  .ticker-card .ohlc { font-size: 0.55rem; color: var(--muted); margin-top: 4px; line-height: 1.6; }
-  .ticker-card .ohlc .up { color: var(--green); }
-  .ticker-card .ohlc .dn { color: var(--red); }
-  .ai-reasoning {
-    flex: 1; background: var(--surface2); border: 1px solid var(--border);
-    border-left: 2px solid var(--accent); border-radius: 7px; padding: 12px;
-    min-height: 80px; max-height: 115px; overflow-y: auto; font-size: 0.68rem; line-height: 1.7; color: var(--muted);
-  }
-  .ai-reasoning .ai-label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--accent); margin-bottom: 5px; font-weight: 700; }
+  .main-wrap { display:flex; flex-direction:column; overflow:hidden; }
+  .main-top { padding:14px 20px; border-bottom:1px solid var(--border); display:flex; gap:12px; align-items:flex-start; flex-shrink:0; }
+  .ticker-cards { display:flex; gap:8px; }
+  .ticker-card { background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:10px 14px; min-width:150px; }
+  .ticker-card .pair { font-family:var(--font-display); font-weight:800; font-size:0.78rem; color:var(--claude); margin-bottom:2px; }
+  .ticker-card .price { font-size:1.3rem; font-weight:700; letter-spacing:-0.02em; }
+  .ticker-card .ohlc { font-size:0.52rem; color:var(--muted); margin-top:3px; line-height:1.6; }
+  .ticker-card .ohlc .up { color:var(--openai); }
+  .ticker-card .ohlc .dn { color:var(--red); }
 
-  .main-body { padding: 18px 22px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; }
-  .section-title { font-family: var(--font-display); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-  .badge { background: var(--accent); color: var(--bg); font-size: 0.52rem; padding: 2px 6px; border-radius: 10px; font-weight: 700; }
+  /* AI REASONING TABS */
+  .reasoning-panel { flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:6px; overflow:hidden; min-height:80px; }
+  .reasoning-tabs { display:flex; border-bottom:1px solid var(--border); }
+  .reasoning-tab { flex:1; padding:6px; font-size:0.58rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; text-align:center; transition:all 0.2s; color:var(--muted); border-bottom:2px solid transparent; }
+  .reasoning-tab.claude.active { color:var(--claude); border-color:var(--claude); }
+  .reasoning-tab.openai.active { color:var(--openai); border-color:var(--openai); }
+  .reasoning-tab.gemini.active { color:var(--gemini); border-color:var(--gemini); }
+  .reasoning-tab:hover { color:var(--text); }
+  .reasoning-body { padding:10px; font-size:0.67rem; line-height:1.7; color:var(--muted); max-height:80px; overflow-y:auto; }
 
-  .trades-table { width: 100%; border-collapse: collapse; font-size: 0.7rem; }
-  .trades-table th { text-align: left; font-size: 0.57rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 5px 9px; border-bottom: 1px solid var(--border); }
-  .trades-table td { padding: 9px 9px; border-bottom: 1px solid rgba(30,45,61,0.5); vertical-align: middle; }
-  .trades-table tr:last-child td { border-bottom: none; }
-  .trades-table tr.open-row:hover td { background: rgba(0,229,255,0.02); }
+  /* MAIN BODY */
+  .main-body { padding:16px 20px; overflow-y:auto; display:flex; flex-direction:column; gap:16px; }
+  .section-title { font-family:var(--font-display); font-size:0.62rem; text-transform:uppercase; letter-spacing:0.2em; color:var(--muted); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+  .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+  .badge { background:var(--claude); color:var(--bg); font-size:0.5rem; padding:1px 5px; border-radius:10px; font-weight:700; }
 
-  .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
-  .tag.buy { background: rgba(0,255,136,0.12); color: var(--green); }
-  .tag.sell { background: rgba(255,51,102,0.12); color: var(--red); }
-  .tag.win { background: rgba(0,255,136,0.12); color: var(--green); }
-  .tag.loss { background: rgba(255,51,102,0.12); color: var(--red); }
-  .tag.open { background: rgba(0,229,255,0.12); color: var(--accent); }
-  .pnl-positive { color: var(--green); font-weight: 600; }
-  .pnl-negative { color: var(--red); font-weight: 600; }
-  .strategy-pill { display: inline-block; padding: 2px 7px; border-radius: 20px; font-size: 0.56rem; font-weight: 600; background: rgba(255,107,53,0.12); color: var(--accent2); border: 1px solid rgba(255,107,53,0.25); }
-  .empty-state { text-align: center; padding: 30px; color: var(--muted); font-size: 0.72rem; }
-  .empty-state .icon { font-size: 1.8rem; margin-bottom: 8px; opacity: 0.25; }
+  /* AI TRADE COLUMNS */
+  .ai-columns { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+  .ai-col { background:var(--surface2); border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+  .ai-col-header { padding:8px 12px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); }
+  .ai-col-header .ai-name { font-family:var(--font-display); font-weight:800; font-size:0.75rem; }
+  .ai-col-header .ai-name.claude { color:var(--claude); }
+  .ai-col-header .ai-name.openai { color:var(--openai); }
+  .ai-col-header .ai-name.gemini { color:var(--gemini); }
+  .ai-col-header .ai-bal { font-size:0.7rem; font-weight:700; }
+  .ai-col-header .ai-wr { font-size:0.56rem; color:var(--muted); }
+  .trade-list { padding:8px; display:flex; flex-direction:column; gap:5px; min-height:60px; }
+  .trade-card { background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:7px 9px; font-size:0.62rem; }
+  .trade-card .tc-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:3px; }
+  .trade-card .tc-pair { font-weight:700; font-size:0.68rem; }
+  .trade-card .tc-dir { padding:1px 5px; border-radius:2px; font-size:0.56rem; font-weight:700; }
+  .trade-card .tc-dir.buy { background:rgba(0,255,136,0.12); color:var(--openai); }
+  .trade-card .tc-dir.sell { background:rgba(255,51,102,0.12); color:var(--red); }
+  .trade-card .tc-meta { color:var(--muted); font-size:0.58rem; line-height:1.6; }
+  .trade-card .tc-pnl { font-weight:700; font-size:0.68rem; margin-top:3px; }
+  .trade-card.closed-card { opacity:0.7; }
+  .trade-card .tc-result { display:inline-block; padding:1px 5px; border-radius:2px; font-size:0.54rem; font-weight:700; }
+  .tc-result.win { background:rgba(0,255,136,0.12); color:var(--openai); }
+  .tc-result.loss { background:rgba(255,51,102,0.12); color:var(--red); }
+  .tc-result.eod { background:rgba(0,229,255,0.12); color:var(--claude); }
+  .strategy-tag { display:inline-block; padding:1px 5px; border-radius:10px; font-size:0.52rem; background:rgba(255,107,53,0.1); color:#ff6b35; border:1px solid rgba(255,107,53,0.2); }
+  .empty-col { text-align:center; padding:20px 10px; color:var(--muted); font-size:0.65rem; opacity:0.5; }
 
-  .log-box { background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 10px; max-height: 130px; overflow-y: auto; font-size: 0.63rem; line-height: 1.8; }
-  .log-entry .time { color: var(--border); margin-right: 5px; }
-  .log-entry.info .msg { color: var(--text); }
-  .log-entry.success .msg { color: var(--green); }
-  .log-entry.error .msg { color: var(--red); }
-  .log-entry.warn .msg { color: var(--yellow); }
-  .log-entry.ai .msg { color: var(--accent); }
+  ::-webkit-scrollbar { width:3px; height:3px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
 
-  ::-webkit-scrollbar { width: 3px; height: 3px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  .speed-btns { display: flex; gap: 6px; margin-top: 8px; }
-  .speed-btn { flex: 1; padding: 5px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); font-family: var(--font-mono); font-size: 0.62rem; border-radius: 3px; cursor: pointer; transition: all 0.15s; text-align: center; }
-  .speed-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .speed-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
-
-  .mode-badge {
-    display: inline-block; padding: 3px 10px; border-radius: 20px;
-    font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
-    background: rgba(255,214,0,0.12); color: var(--yellow); border: 1px solid rgba(255,214,0,0.3);
-    margin-left: 10px;
-  }
-
-  @media (max-width: 768px) {
-    .app { grid-template-columns: 1fr; height: auto; }
-    .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
-    .main-top { flex-direction: column; }
-    .ticker-cards { flex-wrap: wrap; }
+  @media (max-width:900px) {
+    .app { grid-template-columns:1fr; height:auto; }
+    .sidebar { border-right:none; border-bottom:1px solid var(--border); }
+    .ai-columns { grid-template-columns:1fr; }
+    .main-top { flex-direction:column; }
   }
 </style>
 </head>
@@ -171,8 +187,8 @@
 
 <header>
   <div class="logo">
-    AI Paper Trader <span>●</span>
-    <small>storiesbyachu · Historical Replay Mode</small>
+    AI Battle Trader <span>●</span>
+    <small>storiesbyachu · Claude vs OpenAI vs Gemini</small>
   </div>
   <div class="header-right">
     <div class="status-dot" id="status-dot"></div>
@@ -183,18 +199,32 @@
 <div class="app">
   <!-- SIDEBAR -->
   <aside class="sidebar">
+
     <div class="sidebar-section">
-      <h3>Claude API Key</h3>
+      <h3>API Keys</h3>
       <div class="form-group">
-        <input type="password" id="gemini-key" placeholder="sk-ant-..." />
+        <div class="key-label"><div class="dot claude"></div><span>Claude (sk-ant-...)</span></div>
+        <input type="password" id="key-claude" placeholder="sk-ant-..." />
       </div>
       <div class="form-group">
-        <label>Starting Balance (USD)</label>
+        <div class="key-label"><div class="dot openai"></div><span>OpenAI (sk-...)</span></div>
+        <input type="password" id="key-openai" placeholder="sk-..." />
+      </div>
+      <div class="form-group">
+        <div class="key-label"><div class="dot gemini"></div><span>Gemini (AIza...)</span></div>
+        <input type="password" id="key-gemini" placeholder="AIza..." />
+      </div>
+      <div class="form-group">
+        <label>Balance (USD)</label>
         <input type="number" id="balance-input" value="100" min="10" step="10" />
       </div>
       <div class="form-group">
         <label>Lot Size</label>
         <input type="number" id="lot-size" value="0.01" min="0.01" step="0.01" />
+      </div>
+      <div class="form-group">
+        <label>Spread — pips (both pairs)</label>
+        <input type="number" id="spread-pips" value="1.0" min="0" step="0.1" />
       </div>
       <button class="btn btn-primary" onclick="saveConfig()">Save Config</button>
     </div>
@@ -202,11 +232,11 @@
     <div class="sidebar-section">
       <h3>Replay Controls <span class="mode-badge">Backtest</span></h3>
       <div class="form-group">
-        <label>Date (default: last Friday)</label>
+        <label>Date</label>
         <input type="date" id="replay-date" />
       </div>
       <div class="form-group">
-        <label>Candle Interval</label>
+        <label>Interval</label>
         <select id="replay-interval">
           <option value="1min">1 Minute</option>
           <option value="5min" selected>5 Minutes</option>
@@ -214,7 +244,7 @@
         </select>
       </div>
       <div class="form-group">
-        <label>Claude analyses every N candles</label>
+        <label>AI analyses every N candles</label>
         <select id="analyze-every">
           <option value="1">Every candle</option>
           <option value="3" selected>Every 3 candles</option>
@@ -223,40 +253,40 @@
         </select>
       </div>
       <button class="btn btn-primary" id="fetch-btn" onclick="fetchHistoricalData()">⬇ Fetch Data</button>
-      <button class="btn btn-primary" id="start-btn" onclick="startReplay()" disabled style="margin-top:7px">▶ Start Replay</button>
+      <button class="btn btn-primary" id="start-btn" onclick="startReplay()" disabled style="margin-top:6px">▶ Start Replay</button>
       <button class="btn btn-danger" id="stop-btn" onclick="stopReplay()" disabled>■ Stop</button>
-      <button class="btn btn-secondary" id="reset-btn" onclick="resetAll()">↺ Reset</button>
-
-      <div style="margin-top:10px;">
-        <div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;">Replay Speed</div>
+      <button class="btn btn-secondary" onclick="resetAll()">↺ Reset</button>
+      <div style="margin-top:8px;">
+        <div style="font-size:0.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Speed</div>
         <div class="speed-btns">
-          <div class="speed-btn" onclick="setSpeed(500)">1x</div>
-          <div class="speed-btn active" onclick="setSpeed(200)">3x</div>
-          <div class="speed-btn" onclick="setSpeed(80)">10x</div>
-          <div class="speed-btn" onclick="setSpeed(20)">50x</div>
+          <div class="speed-btn" onclick="setSpeed(500,this)">1x</div>
+          <div class="speed-btn active" onclick="setSpeed(200,this)">3x</div>
+          <div class="speed-btn" onclick="setSpeed(80,this)">10x</div>
+          <div class="speed-btn" onclick="setSpeed(20,this)">50x</div>
         </div>
       </div>
-
-      <div class="replay-bar-wrap" id="replay-bar-wrap" style="display:none">
+      <div id="replay-bar-wrap" style="display:none">
         <div class="replay-bar-track"><div class="replay-bar-fill" id="replay-bar"></div></div>
-        <div class="replay-info">
-          <span id="candle-idx">0</span> / <span id="candle-total">0</span> candles
-        </div>
+        <div class="replay-info"><span id="candle-idx">0</span> / <span id="candle-total">0</span> candles</div>
         <div class="candle-time" id="candle-time-display"></div>
       </div>
     </div>
 
     <div class="sidebar-section">
-      <h3>Performance</h3>
-      <div class="stat-grid">
-        <div class="stat-card"><div class="label">Balance</div><div class="value" id="stat-balance">$10,000</div></div>
-        <div class="stat-card"><div class="label">Total P&L</div><div class="value" id="stat-pnl">$0.00</div></div>
-        <div class="stat-card"><div class="label">Win Rate</div><div class="value yellow" id="stat-winrate">—</div></div>
-        <div class="stat-card"><div class="label">Trades</div><div class="value" id="stat-trades">0</div></div>
-        <div class="stat-card"><div class="label">Wins</div><div class="value green" id="stat-wins">0</div></div>
-        <div class="stat-card"><div class="label">Losses</div><div class="value red" id="stat-losses">0</div></div>
-        <div class="stat-card"><div class="label">Open</div><div class="value" id="stat-open">0</div></div>
-        <div class="stat-card"><div class="label">Expectancy</div><div class="value" id="stat-expectancy">—</div></div>
+      <h3>Leaderboard</h3>
+      <div class="leaderboard" id="leaderboard">
+        <div class="lb-row" id="lb-claude">
+          <div class="lb-left"><div class="lb-dot" style="background:var(--claude)"></div><div><div class="lb-name claude">Claude</div><div class="lb-model">claude-sonnet-4-6</div></div></div>
+          <div class="lb-right"><div class="lb-bal" id="lb-bal-claude">$100.00</div><div class="lb-stats" id="lb-stats-claude">0W / 0L</div></div>
+        </div>
+        <div class="lb-row" id="lb-openai">
+          <div class="lb-left"><div class="lb-dot" style="background:var(--openai)"></div><div><div class="lb-name openai">OpenAI</div><div class="lb-model">gpt-4o</div></div></div>
+          <div class="lb-right"><div class="lb-bal" id="lb-bal-openai">$100.00</div><div class="lb-stats" id="lb-stats-openai">0W / 0L</div></div>
+        </div>
+        <div class="lb-row" id="lb-gemini">
+          <div class="lb-left"><div class="lb-dot" style="background:var(--gemini)"></div><div><div class="lb-name gemini">Gemini</div><div class="lb-model">gemini-2.5-flash</div></div></div>
+          <div class="lb-right"><div class="lb-bal" id="lb-bal-gemini">$100.00</div><div class="lb-stats" id="lb-stats-gemini">0W / 0L</div></div>
+        </div>
       </div>
     </div>
 
@@ -264,6 +294,7 @@
       <h3>Activity Log</h3>
       <div class="log-box" id="log-box"></div>
     </div>
+
   </aside>
 
   <!-- MAIN -->
@@ -273,55 +304,79 @@
         <div class="ticker-card">
           <div class="pair">USD/JPY</div>
           <div class="price" id="price-usdjpy">—</div>
-          <div class="ohlc" id="ohlc-usdjpy">Waiting for data...</div>
+          <div class="ohlc" id="ohlc-usdjpy">Waiting...</div>
         </div>
         <div class="ticker-card">
           <div class="pair">EUR/USD</div>
           <div class="price" id="price-eurusd">—</div>
-          <div class="ohlc" id="ohlc-eurusd">Waiting for data...</div>
+          <div class="ohlc" id="ohlc-eurusd">Waiting...</div>
         </div>
       </div>
-      <div class="ai-reasoning">
-        <div class="ai-label">🤖 Claude Reasoning</div>
-        <div id="ai-reasoning-text">Fetch data and start replay to begin analysis...</div>
+      <div class="reasoning-panel">
+        <div class="reasoning-tabs">
+          <div class="reasoning-tab claude active" onclick="switchTab('claude',this)">🔵 Claude</div>
+          <div class="reasoning-tab openai" onclick="switchTab('openai',this)">🟢 OpenAI</div>
+          <div class="reasoning-tab gemini" onclick="switchTab('gemini',this)">🟡 Gemini</div>
+        </div>
+        <div class="reasoning-body" id="reasoning-claude">Waiting for analysis...</div>
+        <div class="reasoning-body" id="reasoning-openai" style="display:none">Waiting for analysis...</div>
+        <div class="reasoning-body" id="reasoning-gemini" style="display:none">Waiting for analysis...</div>
       </div>
     </div>
 
     <div class="main-body">
+      <!-- OPEN POSITIONS -->
       <div>
-        <div class="section-title">Open Positions <span class="badge" id="open-badge">0</span></div>
-        <table class="trades-table">
-          <thead>
-            <tr>
-              <th>Pair</th><th>Dir</th><th>Strategy</th><th>Entry</th>
-              <th>SL</th><th>TP</th><th>R:R</th><th>Lot</th><th>Unrealized P&L</th><th>Candle</th>
-            </tr>
-          </thead>
-          <tbody id="open-tbody">
-            <tr><td colspan="10" class="empty-state"><div class="icon">📊</div>No open positions</td></tr>
-          </tbody>
-        </table>
+        <div class="section-title">Open Positions</div>
+        <div class="ai-columns">
+          <div class="ai-col">
+            <div class="ai-col-header">
+              <div><div class="ai-name claude">Claude</div><div class="ai-wr" id="wr-claude">Win rate: —</div></div>
+              <div class="ai-bal green" id="bal-claude">$100.00</div>
+            </div>
+            <div class="trade-list" id="open-claude"><div class="empty-col">No open trades</div></div>
+          </div>
+          <div class="ai-col">
+            <div class="ai-col-header">
+              <div><div class="ai-name openai">OpenAI</div><div class="ai-wr" id="wr-openai">Win rate: —</div></div>
+              <div class="ai-bal green" id="bal-openai">$100.00</div>
+            </div>
+            <div class="trade-list" id="open-openai"><div class="empty-col">No open trades</div></div>
+          </div>
+          <div class="ai-col">
+            <div class="ai-col-header">
+              <div><div class="ai-name gemini">Gemini</div><div class="ai-wr" id="wr-gemini">Win rate: —</div></div>
+              <div class="ai-bal green" id="bal-gemini">$100.00</div>
+            </div>
+            <div class="trade-list" id="open-gemini"><div class="empty-col">No open trades</div></div>
+          </div>
+        </div>
       </div>
+
+      <!-- CLOSED TRADES -->
       <div>
-        <div class="section-title">Closed Trades <span class="badge" id="closed-badge">0</span></div>
-        <table class="trades-table">
-          <thead>
-            <tr>
-              <th>Pair</th><th>Dir</th><th>Strategy</th><th>Entry</th>
-              <th>Exit</th><th>R:R</th><th>Result</th><th>P&L</th><th>Exit Reason</th><th>Duration</th>
-            </tr>
-          </thead>
-          <tbody id="closed-tbody">
-            <tr><td colspan="10" class="empty-state"><div class="icon">📋</div>No closed trades yet</td></tr>
-          </tbody>
-        </table>
+        <div class="section-title">Closed Trades</div>
+        <div class="ai-columns">
+          <div class="ai-col">
+            <div class="ai-col-header"><div class="ai-name claude">Claude</div><div class="ai-wr" id="closed-count-claude">0 trades</div></div>
+            <div class="trade-list" id="closed-claude"><div class="empty-col">No closed trades</div></div>
+          </div>
+          <div class="ai-col">
+            <div class="ai-col-header"><div class="ai-name openai">OpenAI</div><div class="ai-wr" id="closed-count-openai">0 trades</div></div>
+            <div class="trade-list" id="closed-openai"><div class="empty-col">No closed trades</div></div>
+          </div>
+          <div class="ai-col">
+            <div class="ai-col-header"><div class="ai-name gemini">Gemini</div><div class="ai-wr" id="closed-count-gemini">0 trades</div></div>
+            <div class="trade-list" id="closed-gemini"><div class="empty-col">No closed trades</div></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-// ─── TWELVE DATA KEYS (rotating) ─────────────────────────────
+// ─── TWELVE DATA KEYS ─────────────────────────────────────────
 const TD_KEYS = [
   'f13c82ea98f947b48b9453b15a732cf1',
   '58079bffb91347f08f3be1bcb901f856',
@@ -332,103 +387,118 @@ const TD_KEYS = [
 let tdIdx = 0;
 const getTDKey = () => TD_KEYS[tdIdx++ % TD_KEYS.length];
 
-// ─── STATE ───────────────────────────────────────────────────
+// ─── AI CONFIGS ───────────────────────────────────────────────
+const AI = {
+  claude: { name:'Claude', model:'claude-sonnet-4-6', color:'var(--claude)' },
+  openai: { name:'OpenAI', model:'gpt-4o', color:'var(--openai)' },
+  gemini: { name:'Gemini', model:'gemini-2.5-flash', color:'var(--gemini)' },
+};
+
+// ─── STATE ────────────────────────────────────────────────────
 const state = {
-  geminiKey: '',
-  balance: 100,
+  keys: { claude:'', openai:'', gemini:'' },
   startBalance: 100,
   lotSize: 0.01,
-  candles: { USDJPY: [], EURUSD: [] },
-  cursor: 0,          // current candle index
+  spreadPips: 1.0,
+  candles: { USDJPY:[], EURUSD:[] },
+  cursor: 0,
   totalCandles: 0,
   running: false,
   replayTimer: null,
-  replaySpeed: 200,   // ms per candle
+  replaySpeed: 200,
   analyzeEvery: 3,
-  openTrades: [],
-  closedTrades: [],
+  agents: {
+    claude: { balance:100, openTrades:[], closedTrades:[], reasoning:'Waiting...' },
+    openai: { balance:100, openTrades:[], closedTrades:[], reasoning:'Waiting...' },
+    gemini: { balance:100, openTrades:[], closedTrades:[], reasoning:'Waiting...' },
+  }
 };
 
 // ─── INIT ─────────────────────────────────────────────────────
 window.onload = () => {
   loadConfig();
-  // Default date = last Friday
   const d = new Date();
   d.setDate(d.getDate() - ((d.getDay() + 1) % 7 + 1));
   document.getElementById('replay-date').value = d.toISOString().split('T')[0];
-  updateStats();
+  updateLeaderboard();
 };
 
-// ─── CONFIG ──────────────────────────────────────────────────
+// ─── CONFIG ───────────────────────────────────────────────────
 function saveConfig() {
-  state.geminiKey = document.getElementById('gemini-key').value.trim();
-  state.startBalance = parseFloat(document.getElementById('balance-input').value);
-  state.balance = state.startBalance;
-  state.lotSize = parseFloat(document.getElementById('lot-size').value);
-  localStorage.setItem('pt_gemini', state.geminiKey);
-  localStorage.setItem('pt_balance', state.startBalance);
-  localStorage.setItem('pt_lot', state.lotSize);
+  state.keys.claude = document.getElementById('key-claude').value.trim();
+  state.keys.openai = document.getElementById('key-openai').value.trim();
+  state.keys.gemini = document.getElementById('key-gemini').value.trim();
+  const bal = parseFloat(document.getElementById('balance-input').value) || 100;
+  const lot = parseFloat(document.getElementById('lot-size').value) || 0.01;
+  const spread = parseFloat(document.getElementById('spread-pips').value) || 1.0;
+  state.startBalance = bal;
+  state.lotSize = lot;
+  state.spreadPips = spread;
+  Object.keys(state.agents).forEach(a => state.agents[a].balance = bal);
+  localStorage.setItem('pt_claude', state.keys.claude);
+  localStorage.setItem('pt_openai', state.keys.openai);
+  localStorage.setItem('pt_gemini', state.keys.gemini);
+  localStorage.setItem('pt_balance2', bal);
+  localStorage.setItem('pt_lot2', lot);
+  localStorage.setItem('pt_spread', spread);
   log('info', 'Config saved.');
-  updateStats();
-}
-function loadConfig() {
-  state.geminiKey = localStorage.getItem('pt_gemini') || '';
-  // Force correct defaults — ignore stale localStorage values
-  const savedBalance = parseFloat(localStorage.getItem('pt_balance') || '100');
-  const savedLot = parseFloat(localStorage.getItem('pt_lot') || '0.01');
-  state.startBalance = savedBalance > 1000 ? 100 : savedBalance;
-  state.balance = state.startBalance;
-  state.lotSize = savedLot >= 1000 ? 0.01 : savedLot;
-  document.getElementById('gemini-key').value = state.geminiKey;
-  document.getElementById('balance-input').value = state.startBalance;
-  document.getElementById('lot-size').value = state.lotSize;
+  updateLeaderboard();
 }
 
-// ─── FETCH HISTORICAL DATA ───────────────────────────────────
+function loadConfig() {
+  state.keys.claude = localStorage.getItem('pt_claude') || '';
+  state.keys.openai = localStorage.getItem('pt_openai') || '';
+  state.keys.gemini = localStorage.getItem('pt_gemini') || '';
+  const bal = parseFloat(localStorage.getItem('pt_balance2') || '100');
+  const lot = parseFloat(localStorage.getItem('pt_lot2') || '0.01');
+  const spread = parseFloat(localStorage.getItem('pt_spread') || '1.0');
+  state.startBalance = bal > 1000 ? 100 : bal;
+  state.lotSize = lot >= 1000 ? 0.01 : lot;
+  state.spreadPips = spread;
+  Object.keys(state.agents).forEach(a => state.agents[a].balance = state.startBalance);
+  document.getElementById('key-claude').value = state.keys.claude;
+  document.getElementById('key-openai').value = state.keys.openai;
+  document.getElementById('key-gemini').value = state.keys.gemini;
+  document.getElementById('balance-input').value = state.startBalance;
+  document.getElementById('lot-size').value = state.lotSize;
+  document.getElementById('spread-pips').value = state.spreadPips;
+}
+
+// ─── FETCH DATA ───────────────────────────────────────────────
 async function fetchHistoricalData() {
-  if (!state.geminiKey) { log('error', 'Set Gemini API key first!'); return; }
   const dateVal = document.getElementById('replay-date').value;
   const interval = document.getElementById('replay-interval').value;
   if (!dateVal) { log('error', 'Select a date.'); return; }
-
   setStatus('thinking', 'Fetching...');
   log('info', `Fetching ${interval} candles for ${dateVal}...`);
   document.getElementById('fetch-btn').disabled = true;
-
   try {
-    const pairs = ['USD/JPY', 'EUR/USD'];
-    const keys = ['USDJPY', 'EURUSD'];
-    const results = await Promise.all(pairs.map((p, i) =>
+    const pairs = ['USD/JPY','EUR/USD'];
+    const keys = ['USDJPY','EURUSD'];
+    const results = await Promise.all(pairs.map(p =>
       fetch(`https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(p)}&interval=${interval}&date=${dateVal}&outputsize=500&apikey=${getTDKey()}`)
         .then(r => r.json())
     ));
-
     for (let i = 0; i < 2; i++) {
       const data = results[i];
       if (data.status === 'error' || !data.values) {
-        log('error', `${keys[i]}: ${data.message || 'No data returned'}`);
+        log('error', `${keys[i]}: ${data.message || 'No data'}`);
         document.getElementById('fetch-btn').disabled = false;
-        setStatus('', 'Idle');
-        return;
+        setStatus('', 'Idle'); return;
       }
-      // Twelve Data returns newest first — reverse to get chronological
       state.candles[keys[i]] = data.values.reverse();
-      log('success', `${keys[i]}: ${state.candles[keys[i]].length} candles loaded`);
+      log('success', `${keys[i]}: ${state.candles[keys[i]].length} candles`);
     }
-
-    // Align candles by timestamp intersection
     alignCandles();
-
     state.totalCandles = state.candles.USDJPY.length;
     state.cursor = 0;
-
     document.getElementById('candle-total').textContent = state.totalCandles;
     document.getElementById('candle-idx').textContent = 0;
     document.getElementById('replay-bar-wrap').style.display = 'block';
     document.getElementById('start-btn').disabled = false;
     document.getElementById('fetch-btn').disabled = false;
     setStatus('', 'Ready');
-    log('success', `Data ready. ${state.totalCandles} aligned candles. Click Start Replay.`);
+    log('success', `${state.totalCandles} aligned candles ready.`);
   } catch(e) {
     log('error', 'Fetch error: ' + e.message);
     document.getElementById('fetch-btn').disabled = false;
@@ -437,7 +507,6 @@ async function fetchHistoricalData() {
 }
 
 function alignCandles() {
-  // Get common timestamps between both pairs
   const ujTimes = new Set(state.candles.USDJPY.map(c => c.datetime));
   const euTimes = new Set(state.candles.EURUSD.map(c => c.datetime));
   const common = [...ujTimes].filter(t => euTimes.has(t));
@@ -445,7 +514,7 @@ function alignCandles() {
   state.candles.EURUSD = state.candles.EURUSD.filter(c => common.includes(c.datetime));
 }
 
-// ─── REPLAY ENGINE ───────────────────────────────────────────
+// ─── REPLAY ───────────────────────────────────────────────────
 function startReplay() {
   if (state.totalCandles === 0) { log('error', 'No data loaded.'); return; }
   state.analyzeEvery = parseInt(document.getElementById('analyze-every').value);
@@ -454,7 +523,7 @@ function startReplay() {
   document.getElementById('stop-btn').disabled = false;
   document.getElementById('fetch-btn').disabled = true;
   setStatus('replay', 'Replaying');
-  log('success', 'Replay started.');
+  log('success', 'Replay started — all 3 AIs competing.');
   tickReplay();
 }
 
@@ -471,76 +540,89 @@ function stopReplay() {
 function resetAll() {
   stopReplay();
   state.cursor = 0;
-  state.openTrades = [];
-  state.closedTrades = [];
-  state.balance = state.startBalance;
+  state.totalCandles = 0;
+  state.candles = { USDJPY:[], EURUSD:[] };
+  Object.keys(state.agents).forEach(a => {
+    state.agents[a].balance = state.startBalance;
+    state.agents[a].openTrades = [];
+    state.agents[a].closedTrades = [];
+    state.agents[a].reasoning = 'Waiting...';
+  });
   document.getElementById('candle-idx').textContent = 0;
   document.getElementById('replay-bar').style.width = '0%';
   document.getElementById('candle-time-display').textContent = '';
-  document.getElementById('ai-reasoning-text').textContent = 'Fetch data and start replay to begin analysis...';
+  document.getElementById('replay-bar-wrap').style.display = 'none';
+  document.getElementById('start-btn').disabled = true;
+  ['claude','openai','gemini'].forEach(a => {
+    document.getElementById(`reasoning-${a}`).textContent = 'Waiting for analysis...';
+  });
   document.getElementById('price-usdjpy').textContent = '—';
   document.getElementById('price-eurusd').textContent = '—';
-  document.getElementById('ohlc-usdjpy').textContent = 'Waiting for data...';
-  document.getElementById('ohlc-eurusd').textContent = 'Waiting for data...';
-  document.getElementById('start-btn').disabled = state.totalCandles === 0;
   setStatus('', 'Reset');
-  renderTrades();
-  updateStats();
+  renderAll();
+  updateLeaderboard();
   log('info', 'Reset complete.');
 }
 
 async function tickReplay() {
   if (!state.running) return;
   if (state.cursor >= state.totalCandles) {
-    // Force-close all open trades at last candle close
+    // EOD — force close all open trades
     const lastUJ = state.candles.USDJPY[state.totalCandles - 1];
     const lastEU = state.candles.EURUSD[state.totalCandles - 1];
-    [...state.openTrades].forEach(t => {
-      const exitPrice = t.pair === 'USDJPY' ? parseFloat(lastUJ.close) : parseFloat(lastEU.close);
-      closeTrade(t, exitPrice, 'EOD');
+    Object.keys(state.agents).forEach(agent => {
+      [...state.agents[agent].openTrades].forEach(t => {
+        const ep = t.pair === 'USDJPY' ? parseFloat(lastUJ.close) : parseFloat(lastEU.close);
+        closeTrade(agent, t, ep, 'EOD');
+      });
+      state.agents[agent].openTrades = [];
     });
-    state.openTrades = [];
-    renderTrades();
-    updateStats();
+    renderAll();
+    updateLeaderboard();
     setStatus('active', 'Complete');
     document.getElementById('stop-btn').disabled = true;
     document.getElementById('fetch-btn').disabled = false;
-    log('success', `Replay complete. ${state.closedTrades.length} trades closed.`);
+    log('success', 'Replay complete!');
     return;
   }
 
-  const ujCandle = state.candles.USDJPY[state.cursor];
-  const euCandle = state.candles.EURUSD[state.cursor];
+  const ujC = state.candles.USDJPY[state.cursor];
+  const euC = state.candles.EURUSD[state.cursor];
 
-  // Update tickers
-  updateTicker('usdjpy', ujCandle, 3);
-  updateTicker('eurusd', euCandle, 5);
+  updateTicker('usdjpy', ujC, 3);
+  updateTicker('eurusd', euC, 5);
 
-  // Update progress
   const pct = ((state.cursor + 1) / state.totalCandles * 100).toFixed(1);
   document.getElementById('replay-bar').style.width = pct + '%';
   document.getElementById('candle-idx').textContent = state.cursor + 1;
-  document.getElementById('candle-time-display').innerHTML = `<b>${ujCandle.datetime}</b>`;
+  document.getElementById('candle-time-display').innerHTML = `<b>${ujC.datetime}</b>`;
 
-  // Check SL/TP against this candle's HIGH and LOW (realistic)
-  checkSLTP(ujCandle, euCandle);
+  // Check SL/TP for all agents
+  Object.keys(state.agents).forEach(agent => checkSLTP(agent, ujC, euC));
 
-  // Analyze with Gemini every N candles
-  if (state.cursor % state.analyzeEvery === 0 && state.cursor >= 5) {
-    await analyzeWithGemini(state.cursor);
+  // Analyze with all 3 AIs every N candles (staggered 400ms apart)
+  if (state.cursor % state.analyzeEvery === 0 && state.cursor >= 10) {
+    setStatus('thinking', 'Analyzing...');
+    await analyzeAgent('claude', state.cursor);
+    await delay(400);
+    await analyzeAgent('openai', state.cursor);
+    await delay(400);
+    await analyzeAgent('gemini', state.cursor);
+    if (state.running) setStatus('replay', 'Replaying');
   }
 
-  renderTrades();
-  updateStats();
+  renderAll();
+  updateLeaderboard();
 
   state.cursor++;
   state.replayTimer = setTimeout(tickReplay, state.replaySpeed);
 }
 
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
 function updateTicker(pair, candle, dp) {
   const close = parseFloat(candle.close);
-  const open = parseFloat(candle.open);
-  const diff = close - open;
+  const diff = close - parseFloat(candle.open);
   document.getElementById(`price-${pair}`).textContent = close.toFixed(dp);
   document.getElementById(`ohlc-${pair}`).innerHTML =
     `O:<span class="${diff>=0?'up':'dn'}">${parseFloat(candle.open).toFixed(dp)}</span> ` +
@@ -549,294 +631,260 @@ function updateTicker(pair, candle, dp) {
     `C:<span class="${diff>=0?'up':'dn'}">${close.toFixed(dp)}</span>`;
 }
 
-// ─── SL/TP CHECK (uses candle HIGH/LOW) ──────────────────────
-function checkSLTP(ujCandle, euCandle) {
-  state.openTrades = state.openTrades.filter(trade => {
-    const candle = trade.pair === 'USDJPY' ? ujCandle : euCandle;
+// ─── SL/TP CHECK ──────────────────────────────────────────────
+function checkSLTP(agent, ujC, euC) {
+  state.agents[agent].openTrades = state.agents[agent].openTrades.filter(trade => {
+    const candle = trade.pair === 'USDJPY' ? ujC : euC;
     const high = parseFloat(candle.high);
     const low = parseFloat(candle.low);
-
     let hitSL = false, hitTP = false;
-    if (trade.dir === 'BUY') {
-      hitSL = low <= trade.sl;
-      hitTP = high >= trade.tp;
-    } else {
-      hitSL = high >= trade.sl;
-      hitTP = low <= trade.tp;
-    }
-
+    if (trade.dir === 'BUY') { hitSL = low <= trade.sl; hitTP = high >= trade.tp; }
+    else { hitSL = high >= trade.sl; hitTP = low <= trade.tp; }
     if (hitSL || hitTP) {
-      // If both hit in same candle, assume SL (conservative)
       const reason = (hitSL && hitTP) ? 'SL' : hitTP ? 'TP' : 'SL';
-      const exitPrice = reason === 'TP' ? trade.tp : trade.sl;
-      closeTrade(trade, exitPrice, reason);
+      closeTrade(agent, trade, reason === 'TP' ? trade.tp : trade.sl, reason);
       return false;
     }
     return true;
   });
 }
 
-// ─── GEMINI ANALYSIS ─────────────────────────────────────────
-async function analyzeWithGemini(cursorIdx) {
-  if (!state.geminiKey) return;
-  setStatus('thinking', 'Analyzing...');
-
-  // Build last 10 candles context for each pair
-  const lookback = 10;
+// ─── AI ANALYSIS ──────────────────────────────────────────────
+function buildPrompt(agentId, cursorIdx) {
+  const lookback = 12;
   const start = Math.max(0, cursorIdx - lookback);
   const ujSlice = state.candles.USDJPY.slice(start, cursorIdx + 1);
   const euSlice = state.candles.EURUSD.slice(start, cursorIdx + 1);
-
-  const fmtCandles = (arr, dp) => arr.map(c =>
+  const fmtC = (arr, dp) => arr.map(c =>
     `${c.datetime} O:${parseFloat(c.open).toFixed(dp)} H:${parseFloat(c.high).toFixed(dp)} L:${parseFloat(c.low).toFixed(dp)} C:${parseFloat(c.close).toFixed(dp)}`
   ).join('\n');
+  const agent = state.agents[agentId];
+  const openSummary = agent.openTrades.map(t => `${t.pair} ${t.dir} @ ${t.entry} SL:${t.sl} TP:${t.tp}`).join('; ') || 'None';
+  const curUJ = parseFloat(state.candles.USDJPY[cursorIdx].close);
+  const curEU = parseFloat(state.candles.EURUSD[cursorIdx].close);
 
-  const currentUJ = parseFloat(state.candles.USDJPY[cursorIdx].close);
-  const currentEU = parseFloat(state.candles.EURUSD[cursorIdx].close);
+  return `You are a professional forex trader doing historical paper trading analysis.
 
-  const openSummary = state.openTrades.map(t =>
-    `${t.pair} ${t.dir} @ ${t.entry}, SL=${t.sl}, TP=${t.tp}`
-  ).join('; ') || 'None';
+USD/JPY CANDLES (1 pip = 0.01):
+${fmtC(ujSlice, 3)}
 
-  const prompt = `You are a professional forex trader AI doing historical backtesting. Analyze the candle data and generate paper trade signals.
+EUR/USD CANDLES (1 pip = 0.0001):
+${fmtC(euSlice, 5)}
 
-USD/JPY CANDLES (last ${ujSlice.length}, 1 pip = 0.01):
-${fmtCandles(ujSlice, 3)}
-
-EUR/USD CANDLES (last ${euSlice.length}, 1 pip = 0.0001):
-${fmtCandles(euSlice, 5)}
-
-CURRENT PRICES: USD/JPY=${currentUJ.toFixed(3)}, EUR/USD=${currentEU.toFixed(5)}
+CURRENT: USD/JPY=${curUJ.toFixed(3)}, EUR/USD=${curEU.toFixed(5)}
 OPEN POSITIONS: ${openSummary}
-BALANCE: $${state.balance.toFixed(2)}
-CANDLE: ${cursorIdx + 1} of ${state.totalCandles}
+BALANCE: $${agent.balance.toFixed(2)}
+CANDLE: ${cursorIdx + 1}/${state.totalCandles}
 
-TASK: Analyze price action from the candles above. Look for:
-- Momentum: consecutive candles in one direction
-- Breakouts: close above/below recent high/low
-- Mean reversion: extended moves followed by reversal signals
-- Key levels: round numbers, recent highs/lows
+Analyze price action. Look for momentum, breakouts, mean reversion, key levels.
+RULES: confidence >= 7 to trade | max 2 open trades | skip if pair already open | R:R >= 1.5 | SL/TP in pips
 
-RULES:
-- Only trade if confidence >= 7
-- Max 2 open trades; skip if pair already open
-- R:R must be >= 1.5
-- SL and TP in PIPS (USD/JPY: 1 pip = 0.01; EUR/USD: 1 pip = 0.0001)
-- Be selective — skipping is fine
-
-Respond ONLY in valid JSON, no markdown fences:
-{
-  "reasoning": "1-2 sentence analysis of what you see in the candles",
-  "signal": {
-    "pair": "USDJPY" or "EURUSD" or null,
-    "direction": "BUY" or "SELL",
-    "strategy": "momentum_breakout" or "mean_reversion" or "trend_follow" or "range_fade",
-    "entry": number,
-    "sl_pips": number,
-    "tp_pips": number,
-    "rr": number,
-    "confidence": number,
-    "skip_reason": "reason if pair is null"
-  }
-}`;
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': state.geminiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5',
-        max_tokens: 512,
-        temperature: 0.25,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const data = await res.json();
-    if (data.error) { log('error', 'Claude: ' + data.error.message); setStatus('replay', 'Replaying'); return; }
-    const raw = data.content?.[0]?.text || '';
-    const cleaned = raw.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(cleaned);
-
-    document.getElementById('ai-reasoning-text').textContent = parsed.reasoning || '—';
-
-    const sig = parsed.signal;
-    if (!sig || !sig.pair) {
-      log('ai', `Skip: ${sig?.skip_reason || 'No setup'}`);
-      setStatus('replay', 'Replaying');
-      return;
-    }
-    if (sig.confidence < 7) {
-      log('warn', `Conf ${sig.confidence}/10 — skip ${sig.pair}`);
-      setStatus('replay', 'Replaying');
-      return;
-    }
-    if (state.openTrades.find(t => t.pair === sig.pair)) {
-      log('warn', `${sig.pair} already open — skip`);
-      setStatus('replay', 'Replaying');
-      return;
-    }
-    if (state.openTrades.length >= 2) {
-      log('warn', 'Max 2 open trades — skip');
-      setStatus('replay', 'Replaying');
-      return;
-    }
-    openTrade(sig, cursorIdx);
-  } catch(e) {
-    log('error', 'Claude error: ' + e.message);
-  }
-  setStatus('replay', 'Replaying');
+Respond ONLY in valid JSON (no markdown):
+{"reasoning":"1-2 sentence analysis","signal":{"pair":"USDJPY" or "EURUSD" or null,"direction":"BUY" or "SELL","strategy":"momentum_breakout" or "mean_reversion" or "trend_follow" or "range_fade","entry":number,"sl_pips":number,"tp_pips":number,"rr":number,"confidence":number,"skip_reason":"if pair null"}}`;
 }
 
-// ─── TRADE MANAGEMENT ─────────────────────────────────────────
-function openTrade(sig, candleIdx) {
+async function analyzeAgent(agentId, cursorIdx) {
+  const key = state.keys[agentId];
+  if (!key) { log('warn', `${AI[agentId].name}: No API key`); return; }
+  const agent = state.agents[agentId];
+  if (agent.openTrades.length >= 2) return;
+
+  const prompt = buildPrompt(agentId, cursorIdx);
+
+  try {
+    let raw = '';
+    if (agentId === 'claude') {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'x-api-key':key, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+        body:JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:512, temperature:0.25, messages:[{role:'user',content:prompt}] })
+      });
+      const data = await res.json();
+      if (data.error) { log('error', `Claude: ${data.error.message}`); return; }
+      raw = data.content?.[0]?.text || '';
+    } else if (agentId === 'openai') {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${key}` },
+        body:JSON.stringify({ model:'gpt-4o', max_tokens:512, temperature:0.25, messages:[{role:'user',content:prompt}] })
+      });
+      const data = await res.json();
+      if (data.error) { log('error', `OpenAI: ${data.error.message}`); return; }
+      raw = data.choices?.[0]?.message?.content || '';
+    } else if (agentId === 'gemini') {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body:JSON.stringify({ contents:[{parts:[{text:prompt}]}], generationConfig:{ temperature:0.25, maxOutputTokens:512 } })
+      });
+      const data = await res.json();
+      if (data.error) { log('error', `Gemini: ${data.error.message}`); return; }
+      raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    }
+
+    const cleaned = raw.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(cleaned);
+    agent.reasoning = parsed.reasoning || '—';
+    document.getElementById(`reasoning-${agentId}`).textContent = agent.reasoning;
+
+    const sig = parsed.signal;
+    if (!sig || !sig.pair) { log(agentId, `${AI[agentId].name} skip: ${sig?.skip_reason || 'no setup'}`); return; }
+    if (sig.confidence < 7) { log(agentId, `${AI[agentId].name} conf ${sig.confidence}/10 — skip`); return; }
+    if (agent.openTrades.find(t => t.pair === sig.pair)) { log(agentId, `${AI[agentId].name}: ${sig.pair} already open`); return; }
+    if (agent.openTrades.length >= 2) { log(agentId, `${AI[agentId].name}: max trades`); return; }
+    openTrade(agentId, sig, cursorIdx);
+  } catch(e) {
+    log('error', `${AI[agentId].name} error: ${e.message}`);
+  }
+}
+
+// ─── TRADE OPEN/CLOSE ─────────────────────────────────────────
+function openTrade(agentId, sig, candleIdx) {
   const pipVal = sig.pair === 'USDJPY' ? 0.01 : 0.0001;
   const dp = sig.pair === 'USDJPY' ? 3 : 5;
+  const spreadVal = state.spreadPips * pipVal;
+
+  // Apply spread: BUY fills at Ask (entry + spread), SELL fills at Bid (entry - spread)
+  const fillPrice = sig.direction === 'BUY'
+    ? parseFloat((sig.entry + spreadVal).toFixed(dp))
+    : parseFloat((sig.entry - spreadVal).toFixed(dp));
+
   const sl = sig.direction === 'BUY'
-    ? parseFloat((sig.entry - sig.sl_pips * pipVal).toFixed(dp))
-    : parseFloat((sig.entry + sig.sl_pips * pipVal).toFixed(dp));
+    ? parseFloat((fillPrice - sig.sl_pips * pipVal).toFixed(dp))
+    : parseFloat((fillPrice + sig.sl_pips * pipVal).toFixed(dp));
   const tp = sig.direction === 'BUY'
-    ? parseFloat((sig.entry + sig.tp_pips * pipVal).toFixed(dp))
-    : parseFloat((sig.entry - sig.tp_pips * pipVal).toFixed(dp));
+    ? parseFloat((fillPrice + sig.tp_pips * pipVal).toFixed(dp))
+    : parseFloat((fillPrice - sig.tp_pips * pipVal).toFixed(dp));
 
   const trade = {
-    id: Date.now(),
-    pair: sig.pair,
-    dir: sig.direction,
-    strategy: sig.strategy,
-    entry: sig.entry,
-    sl, tp,
-    rr: sig.rr,
-    lotSize: state.lotSize,
-    confidence: sig.confidence,
+    id: Date.now() + Math.random(),
+    pair: sig.pair, dir: sig.direction, strategy: sig.strategy,
+    entry: fillPrice, sl, tp, rr: sig.rr,
+    lotSize: state.lotSize, confidence: sig.confidence,
+    spreadPips: state.spreadPips,
     openCandleIdx: candleIdx,
     openTime: state.candles[sig.pair][candleIdx]?.datetime || '—',
   };
-  state.openTrades.push(trade);
-  log('success', `OPEN ${trade.dir} ${trade.pair} @ ${trade.entry} SL:${trade.sl} TP:${trade.tp} R:R ${trade.rr} [${trade.strategy.replace(/_/g,' ')}]`);
+  state.agents[agentId].openTrades.push(trade);
+  log(agentId, `${AI[agentId].name} OPEN ${trade.dir} ${trade.pair} @ ${trade.entry} (spread ${state.spreadPips}p) | R:R ${trade.rr} | ${trade.strategy.replace(/_/g,' ')}`);
 }
 
-function closeTrade(trade, exitPrice, reason) {
+function closeTrade(agentId, trade, exitPrice, reason) {
   const pipVal = trade.pair === 'USDJPY' ? 0.01 : 0.0001;
   const pips = trade.dir === 'BUY'
     ? (exitPrice - trade.entry) / pipVal
     : (trade.entry - exitPrice) / pipVal;
+  const units = trade.lotSize * 100000;
+  const pnl = trade.pair === 'USDJPY'
+    ? pips * (pipVal / exitPrice) * units
+    : pips * pipVal * units;
 
-  // 0.01 lot = 1,000 units
-  // EURUSD: $0.10 per pip per 0.01 lot
-  // USDJPY: (0.01 / exitPrice) * 1000 per pip per 0.01 lot
-  const units = trade.lotSize * 100000; // lots to units
-  let pnl;
-  if (trade.pair === 'USDJPY') {
-    pnl = pips * (pipVal / exitPrice) * units;
-  } else {
-    pnl = pips * pipVal * units;
-  }
-
-  state.balance += pnl;
+  state.agents[agentId].balance += pnl;
   const result = pnl > 0 ? 'win' : 'loss';
   const duration = state.cursor - trade.openCandleIdx;
-
-  state.closedTrades.unshift({ ...trade, exit: exitPrice, pnl, result, reason, duration });
-  log(result === 'win' ? 'success' : 'error',
-    `CLOSE ${trade.pair} [${reason}] P&L: ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(4)} (${pips.toFixed(1)} pips)`);
+  state.agents[agentId].closedTrades.unshift({ ...trade, exit:exitPrice, pnl, result, reason, duration });
+  log(agentId, `${AI[agentId].name} CLOSE ${trade.pair} [${reason}] ${pnl>=0?'+':''}$${pnl.toFixed(4)} (${pips.toFixed(1)}p)`);
 }
 
 // ─── RENDER ───────────────────────────────────────────────────
-function renderTrades() {
-  // Open trades
-  const ob = document.getElementById('open-tbody');
-  if (state.openTrades.length === 0) {
-    ob.innerHTML = '<tr><td colspan="10" class="empty-state"><div class="icon">📊</div>No open positions</td></tr>';
-  } else {
-    const ujCandle = state.candles.USDJPY[state.cursor] || state.candles.USDJPY[state.cursor - 1];
-    const euCandle = state.candles.EURUSD[state.cursor] || state.candles.EURUSD[state.cursor - 1];
-    ob.innerHTML = state.openTrades.map(t => {
-      const curClose = t.pair === 'USDJPY'
-        ? parseFloat(ujCandle?.close || t.entry)
-        : parseFloat(euCandle?.close || t.entry);
-      const pipVal = t.pair === 'USDJPY' ? 0.01 : 0.0001;
-      const pips = t.dir === 'BUY' ? (curClose - t.entry) / pipVal : (t.entry - curClose) / pipVal;
-      const units = t.lotSize * 100000;
-      const upnl = t.pair === 'USDJPY' ? pips * (pipVal / curClose) * units : pips * pipVal * units;
-      const dp = t.pair === 'USDJPY' ? 3 : 5;
-      return `<tr class="open-row">
-        <td>${t.pair}</td>
-        <td><span class="tag ${t.dir.toLowerCase()}">${t.dir}</span></td>
-        <td><span class="strategy-pill">${t.strategy.replace(/_/g,' ')}</span></td>
-        <td>${t.entry.toFixed(dp)}</td>
-        <td>${t.sl.toFixed(dp)}</td>
-        <td>${t.tp.toFixed(dp)}</td>
-        <td style="color:var(--yellow);font-weight:700">${t.rr}</td>
-        <td>${t.lotSize}</td>
-        <td class="${upnl>=0?'pnl-positive':'pnl-negative'}">${upnl>=0?'+':''}$${upnl.toFixed(4)}</td>
-        <td style="color:var(--muted);font-size:0.65rem">${t.openTime.split(' ')[1]||'—'}</td>
-      </tr>`;
-    }).join('');
-  }
-  document.getElementById('open-badge').textContent = state.openTrades.length;
+function renderAll() {
+  ['claude','openai','gemini'].forEach(agentId => {
+    const agent = state.agents[agentId];
+    const ujC = state.candles.USDJPY[state.cursor] || state.candles.USDJPY[Math.max(0, state.cursor-1)];
+    const euC = state.candles.EURUSD[state.cursor] || state.candles.EURUSD[Math.max(0, state.cursor-1)];
 
-  // Closed trades
-  const cb = document.getElementById('closed-tbody');
-  if (state.closedTrades.length === 0) {
-    cb.innerHTML = '<tr><td colspan="10" class="empty-state"><div class="icon">📋</div>No closed trades yet</td></tr>';
-  } else {
-    cb.innerHTML = state.closedTrades.slice(0, 60).map(t => {
-      const dp = t.pair === 'USDJPY' ? 3 : 5;
-      return `<tr class="closed-row">
-        <td>${t.pair}</td>
-        <td><span class="tag ${t.dir.toLowerCase()}">${t.dir}</span></td>
-        <td><span class="strategy-pill">${t.strategy.replace(/_/g,' ')}</span></td>
-        <td>${t.entry.toFixed(dp)}</td>
-        <td>${t.exit.toFixed(dp)}</td>
-        <td style="color:var(--yellow);font-weight:700">${t.rr}</td>
-        <td><span class="tag ${t.result}">${t.result}</span></td>
-        <td class="${t.pnl>=0?'pnl-positive':'pnl-negative'}">${t.pnl>=0?'+':''}$${t.pnl.toFixed(4)}</td>
-        <td><span class="tag ${t.reason==='TP'?'win':t.reason==='SL'?'loss':'open'}">${t.reason}</span></td>
-        <td style="color:var(--muted)">${t.duration}c</td>
-      </tr>`;
-    }).join('');
-  }
-  document.getElementById('closed-badge').textContent = state.closedTrades.length;
+    // Open trades
+    const openEl = document.getElementById(`open-${agentId}`);
+    if (agent.openTrades.length === 0) {
+      openEl.innerHTML = '<div class="empty-col">No open trades</div>';
+    } else {
+      openEl.innerHTML = agent.openTrades.map(t => {
+        const curClose = t.pair === 'USDJPY' ? parseFloat(ujC?.close || t.entry) : parseFloat(euC?.close || t.entry);
+        const pipVal = t.pair === 'USDJPY' ? 0.01 : 0.0001;
+        const pips = t.dir === 'BUY' ? (curClose - t.entry)/pipVal : (t.entry - curClose)/pipVal;
+        const units = t.lotSize * 100000;
+        const upnl = t.pair === 'USDJPY' ? pips*(pipVal/curClose)*units : pips*pipVal*units;
+        const dp = t.pair === 'USDJPY' ? 3 : 5;
+        return `<div class="trade-card">
+          <div class="tc-top">
+            <span class="tc-pair">${t.pair}</span>
+            <span class="tc-dir ${t.dir.toLowerCase()}">${t.dir}</span>
+          </div>
+          <div class="tc-meta">
+            Entry: ${t.entry.toFixed(dp)} | SL: ${t.sl.toFixed(dp)} | TP: ${t.tp.toFixed(dp)}<br>
+            R:R ${t.rr} | <span class="strategy-tag">${t.strategy.replace(/_/g,' ')}</span>
+          </div>
+          <div class="tc-pnl ${upnl>=0?'green':'red'}">${upnl>=0?'+':''}$${upnl.toFixed(4)}</div>
+        </div>`;
+      }).join('');
+    }
+
+    // Closed trades
+    const closedEl = document.getElementById(`closed-${agentId}`);
+    if (agent.closedTrades.length === 0) {
+      closedEl.innerHTML = '<div class="empty-col">No closed trades</div>';
+    } else {
+      closedEl.innerHTML = agent.closedTrades.slice(0,20).map(t => {
+        const dp = t.pair === 'USDJPY' ? 3 : 5;
+        return `<div class="trade-card closed-card">
+          <div class="tc-top">
+            <span class="tc-pair">${t.pair}</span>
+            <span class="tc-dir ${t.dir.toLowerCase()}">${t.dir}</span>
+            <span class="tc-result ${t.reason==='TP'?'win':t.reason==='EOD'?'eod':'loss'}">${t.reason}</span>
+          </div>
+          <div class="tc-meta">${t.entry.toFixed(dp)} → ${t.exit.toFixed(dp)} | ${t.duration}c | sprd:${t.spreadPips||1}p</div>
+          <div class="tc-pnl ${t.pnl>=0?'green':'red'}">${t.pnl>=0?'+':''}$${t.pnl.toFixed(4)}</div>
+        </div>`;
+      }).join('');
+    }
+
+    document.getElementById(`closed-count-${agentId}`).textContent = `${agent.closedTrades.length} trades`;
+  });
 }
 
-function updateStats() {
-  const closed = state.closedTrades;
-  const wins = closed.filter(t => t.result === 'win');
-  const losses = closed.filter(t => t.result === 'loss');
-  const totalPnl = state.balance - state.startBalance;
-  const winRate = closed.length > 0 ? (wins.length / closed.length * 100).toFixed(1) : null;
-  const avgWin = wins.length > 0 ? wins.reduce((s,t) => s+t.pnl, 0) / wins.length : 0;
-  const avgLoss = losses.length > 0 ? Math.abs(losses.reduce((s,t) => s+t.pnl, 0) / losses.length) : 0;
-  const expectancy = closed.length > 0
-    ? ((wins.length/closed.length)*avgWin - (losses.length/closed.length)*avgLoss).toFixed(2)
-    : null;
+function updateLeaderboard() {
+  const results = ['claude','openai','gemini'].map(agentId => {
+    const agent = state.agents[agentId];
+    const wins = agent.closedTrades.filter(t => t.result === 'win').length;
+    const losses = agent.closedTrades.filter(t => t.result === 'loss').length;
+    const total = wins + losses;
+    const wr = total > 0 ? (wins/total*100).toFixed(0)+'%' : '—';
+    const pnl = agent.balance - state.startBalance;
+    return { agentId, balance:agent.balance, pnl, wins, losses, wr };
+  });
 
-  document.getElementById('stat-balance').textContent = '$' + state.balance.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',');
-  const pEl = document.getElementById('stat-pnl');
-  pEl.textContent = (totalPnl>=0?'+$':'-$') + Math.abs(totalPnl).toFixed(2);
-  pEl.className = 'value ' + (totalPnl>=0?'green':'red');
-  const wrEl = document.getElementById('stat-winrate');
-  wrEl.textContent = winRate ? winRate+'%' : '—';
-  wrEl.className = 'value ' + (winRate>=85?'green':winRate>=60?'yellow':winRate?'red':'yellow');
-  document.getElementById('stat-trades').textContent = closed.length;
-  document.getElementById('stat-wins').textContent = wins.length;
-  document.getElementById('stat-losses').textContent = losses.length;
-  document.getElementById('stat-open').textContent = state.openTrades.length;
-  const eEl = document.getElementById('stat-expectancy');
-  eEl.textContent = expectancy ? (expectancy>=0?'+$':'-$')+Math.abs(expectancy) : '—';
-  if (expectancy) eEl.className = 'value ' + (expectancy>=0?'green':'red');
+  // Sort by balance desc
+  results.sort((a,b) => b.balance - a.balance);
+  const leaderId = results[0].agentId;
+
+  results.forEach(r => {
+    const pnlClass = r.pnl >= 0 ? 'green' : 'red';
+    document.getElementById(`lb-bal-${r.agentId}`).textContent = `$${r.balance.toFixed(2)}`;
+    document.getElementById(`lb-bal-${r.agentId}`).className = `lb-bal ${pnlClass}`;
+    document.getElementById(`lb-stats-${r.agentId}`).textContent = `${r.wins}W / ${r.losses}L | WR: ${r.wr}`;
+    document.getElementById(`wr-${r.agentId}`).textContent = `Win rate: ${r.wr}`;
+    document.getElementById(`bal-${r.agentId}`).textContent = `$${r.balance.toFixed(2)}`;
+    document.getElementById(`bal-${r.agentId}`).className = `ai-bal ${pnlClass}`;
+    const row = document.getElementById(`lb-${r.agentId}`);
+    row.className = r.agentId === leaderId && r.pnl !== 0 ? 'lb-row leader' : 'lb-row';
+  });
 }
 
-// ─── SPEED CONTROL ───────────────────────────────────────────
-function setSpeed(ms) {
+// ─── REASONING TABS ───────────────────────────────────────────
+function switchTab(agentId, el) {
+  ['claude','openai','gemini'].forEach(a => {
+    document.getElementById(`reasoning-${a}`).style.display = 'none';
+    document.querySelectorAll('.reasoning-tab').forEach(t => t.classList.remove('active'));
+  });
+  document.getElementById(`reasoning-${agentId}`).style.display = 'block';
+  el.classList.add('active');
+}
+
+// ─── SPEED ────────────────────────────────────────────────────
+function setSpeed(ms, el) {
   state.replaySpeed = ms;
   document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+  el.classList.add('active');
 }
 
 // ─── STATUS / LOG ─────────────────────────────────────────────
@@ -846,12 +894,12 @@ function setStatus(type, text) {
 }
 function log(type, msg) {
   const box = document.getElementById('log-box');
-  const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+  const time = new Date().toLocaleTimeString('en-US',{hour12:false});
   const el = document.createElement('div');
   el.className = 'log-entry ' + type;
   el.innerHTML = `<span class="time">${time}</span><span class="msg">${msg}</span>`;
   box.insertBefore(el, box.firstChild);
-  if (box.children.length > 120) box.removeChild(box.lastChild);
+  if (box.children.length > 150) box.removeChild(box.lastChild);
 }
 </script>
 </body>
