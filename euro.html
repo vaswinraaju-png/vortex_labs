@@ -479,7 +479,7 @@ async function startScan() {
 
     scanned++;
     updateProgress(scanned, days.length);
-    await delay(120);
+    await delay(30);
   }
 
   // Finalize any still-open break at end of scan
@@ -495,7 +495,8 @@ async function startScan() {
 function updateProgress(done, total) {
   const pct = Math.round(done/total*100);
   document.getElementById('prog-fill').style.width = pct+'%';
-  document.getElementById('prog-txt').textContent = `Day ${done} of ${total}`;
+  const activeMsg = breakFired ? ` [tracking ${breakFired.dir}]` : '';
+  document.getElementById('prog-txt').textContent = `Day ${done} of ${total}${activeMsg}`;
   document.getElementById('prog-pct').textContent = pct+'%';
 }
 
