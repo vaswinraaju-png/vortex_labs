@@ -399,7 +399,7 @@ async function startScan() {
   const noTradeDays = [];
   let scanned = 0;
 
-  function finalizeBreak() {
+  function finalizeBreak(eodPrice, eodTimeStr) {
     if (!breakFired) return;
     let result = 'No Target';
     if (breakFired.dir === 'BUY') {
@@ -409,10 +409,16 @@ async function startScan() {
       if (breakFired.hitS3) result = 'Hit S3';
       else if (breakFired.hitS2) result = 'Hit S2';
     }
+    // If no target was hit and we have an EOD close price, mark as EOD Close
+    if (result === 'No Target' && eodPrice != null) {
+      result = 'EOD Close';
+      breakFired.eodClose = eodPrice;
+      breakFired.eodTime  = eodTimeStr;
+    }
     breakFired.result = result;
     allTrades.push({...breakFired});
-    log(result.startsWith('Hit') ? 'success' : 'warn',
-      `${breakFired.day} ${breakFired.dir} → ${result} (entry:${breakFired.entry.toFixed(0)})`);
+    const logType = result.startsWith('Hit') ? 'success' : result === 'EOD Close' ? 'info' : 'warn';
+    log(logType, `${breakFired.day} ${breakFired.dir} → ${result} (entry:${breakFired.entry.toFixed(0)}${eodPrice!=null?' exit:'+eodPrice.toFixed(0):''})`);
     breakFired = null;
   }
 
@@ -497,7 +503,14 @@ async function startScan() {
       }
     }
 
-    // End of day — carry breakFired into next day if still active
+    // End of day — EOD close any active trade at last candle's close
+    if (breakFired) {
+      const lastCandle = intraday[intraday.length - 1];
+      const eodPrice = parseFloat(lastCandle.close);
+      const eodTs = new Date(lastCandle.time*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:false});
+      finalizeBreak(eodPrice, `${dayStr} ${eodTs}`);
+    }
+
     if (!hadBreakToday) {
       noTradeDays.push({day:dayStr, reason:'No R1/S1 break', cpr});
     }
@@ -507,7 +520,7 @@ async function startScan() {
     await delay(10);
   }
 
-  // Finalize any still-open break at end of scan
+  // Finalize any remaining open trade at end of scan
   if (breakFired) finalizeBreak();
 
   scanning = false;
@@ -543,6 +556,7 @@ function renderResults(noTradeDays, daysScanned) {
   const hitR3 = trades.filter(t=>t.dir==='BUY'&&t.hitR3);
   const hitS2 = trades.filter(t=>t.dir==='SELL'&&t.hitS2);
   const hitS3 = trades.filter(t=>t.dir==='SELL'&&t.hitS3);
+  const eodClosed = trades.filter(t=>t.result==='EOD Close');
   const anyTarget = trades.filter(t=>(t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2));
   const wr = (anyTarget.length/trades.length*100).toFixed(1);
 
@@ -556,7 +570,7 @@ function renderResults(noTradeDays, daysScanned) {
   pnlEl.style.fontSize = '1.1rem';
   document.getElementById('s-bal2').textContent = `Breaks on ${trades.length}/${daysScanned} days`;
   document.getElementById('s-tp1').textContent = `R2:${hitR2.length} S2:${hitS2.length}`;
-  document.getElementById('s-tp2').textContent = `R3:${hitR3.length} S3:${hitS3.length}`;
+  document.getElementById('s-tp2').textContent = `R3:${hitR3.length} S3:${hitS3.length} EOD:${eodClosed.length}`;
   document.getElementById('s-rr').textContent = `${anyTarget.length}/${trades.length}`;
   document.getElementById('s-days').textContent = `Scanned: ${daysScanned} | No break: ${noTradeDays.length}`;
   document.getElementById('trade-count').textContent = `(${trades.length} breaks)`;
@@ -594,8 +608,12 @@ function renderResults(noTradeDays, daysScanned) {
     const c = t.cpr;
     const hitTgt  = (t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2);
     const hitFull = (t.dir==='BUY'&&t.hitR3)||(t.dir==='SELL'&&t.hitS3);
-    const lbl = hitFull ? (t.dir==='BUY'?'Hit R3':'Hit S3') : hitTgt ? (t.dir==='BUY'?'Hit R2':'Hit S2') : 'No Target';
-    const rc  = hitFull ? 'tp2' : hitTgt ? 'tp1' : 'sl';
+    const isEOD   = t.result === 'EOD Close';
+    const lbl = hitFull ? (t.dir==='BUY'?'Hit R3':'Hit S3')
+              : hitTgt  ? (t.dir==='BUY'?'Hit R2':'Hit S2')
+              : isEOD   ? `EOD ${t.eodClose!=null?t.eodClose.toFixed(0):''}`
+              : 'No Target';
+    const rc  = hitFull ? 'tp2' : hitTgt ? 'tp1' : isEOD ? 'eod' : 'sl';
     const tp1v = t.dir==='BUY' ? c.r2.toFixed(0) : c.s2.toFixed(0);
     const tp2v = t.dir==='BUY' ? c.r3.toFixed(0) : c.s3.toFixed(0);
     const tp1h = t.dir==='BUY' ? t.hitR2 : t.hitS2;
