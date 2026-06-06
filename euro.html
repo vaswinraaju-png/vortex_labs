@@ -345,14 +345,17 @@ function saveConfig() {
 // ─── LOAD PAIRS ──────────────────────────────────────────────
 async function loadPairs() {
   document.getElementById('load-btn').disabled = true;
-  log('info','Loading BTC pairs...');
+  log('info','Loading pairs...');
   try {
-    const res = await fetch(`${DELTA}/v2/products?contract_types=perpetual_futures,futures&states=live`);
+    const url = `${DELTA}/v2/products?contract_types=perpetual_futures,futures&states=live`;
+    log('info', 'Fetching: ' + url);
+    const res = await fetch(url);
+    if (!res.ok) { throw new Error(`HTTP ${res.status}: ${res.statusText}`); }
     const data = await res.json();
+    if (data.error) { throw new Error(JSON.stringify(data.error)); }
     const pairs = (data.result||[]).sort((a,b)=>a.symbol.localeCompare(b.symbol));
     const sel = document.getElementById('btc-pair');
     sel.innerHTML = '<option value="">— Select —</option>';
-    // Group by underlying
     const btc = pairs.filter(p=>p.symbol?.includes('BTC'));
     const others = pairs.filter(p=>!p.symbol?.includes('BTC'));
     const addGroup = (label, items) => {
@@ -371,7 +374,10 @@ async function loadPairs() {
     addGroup('Others', others);
     document.getElementById('scan-btn').disabled = false;
     log('success', `${pairs.length} pairs loaded (${btc.length} BTC + ${others.length} others).`);
-  } catch(e) { log('error','Load pairs failed: '+e.message); }
+  } catch(e) {
+    log('error', 'Load pairs failed: ' + e.message);
+    alert('Load Pairs Error: ' + e.message);
+  }
   document.getElementById('load-btn').disabled = false;
 }
 
@@ -389,6 +395,67 @@ function calcCPR(H, L, C) {
   return {pivot,bc,tc,r1,r2,r3,s1,s2,s3};
 }
 
+// ─── FILTER HELPERS ──────────────────────────────────────────
+let breakFired = null;
+
+function finalizeBreak(exitPrice, exitTimeStr, reason) {
+  if (!breakFired) return;
+  let result = 'No Target';
+  if (breakFired.dir === 'BUY') {
+    if (breakFired.hitR3) result = 'Hit R3';
+    else if (breakFired.hitR2) result = 'Hit R2';
+  } else {
+    if (breakFired.hitS3) result = 'Hit S3';
+    else if (breakFired.hitS2) result = 'Hit S2';
+  }
+  if (result === 'No Target' && exitPrice != null) {
+    result = reason === 'timeexit' ? 'Time Exit' : 'EOD Close';
+    breakFired.eodClose = exitPrice;
+    breakFired.eodTime  = exitTimeStr;
+  }
+  breakFired.result = result;
+  const exitPx = result.startsWith('Hit')
+    ? (breakFired.dir==='BUY' ? (breakFired.hitR3?breakFired.cpr.r3:breakFired.cpr.r2) : (breakFired.hitS3?breakFired.cpr.s3:breakFired.cpr.s2))
+    : (breakFired.eodClose || breakFired.entry);
+  const priceDiff = breakFired.dir==='BUY' ? exitPx-breakFired.entry : breakFired.entry-exitPx;
+  breakFired.pnl = priceDiff * config.lot;
+  allTrades.push({...breakFired});
+  const logType = result.startsWith('Hit') ? 'success' : result==='Time Exit' ? 'warn' : 'info';
+  log(logType, `${breakFired.day} ${breakFired.dir} → ${result} (entry:${breakFired.entry.toFixed(0)}${exitPrice!=null?' exit:'+exitPrice.toFixed(0):''})`);
+  breakFired = null;
+}
+
+function activeFilters() {
+  const f = [];
+  if (config.filterSession)  f.push(`Session ${config.sessionFrom}-${config.sessionTo}`);
+  if (config.filterCPRWidth) f.push(`CPR≥${config.cprMinPct}%`);
+  if (config.filterExitTime) f.push(`Exit@${config.exitAt}`);
+  return f.join(' · ') || 'None';
+}
+
+function timeToMins(hhmm) {
+  const [h,m] = hhmm.split(':').map(Number);
+  return h*60+m;
+}
+function utcMins(ts) {
+  const d = new Date(ts*1000);
+  return d.getUTCHours()*60 + d.getUTCMinutes();
+}
+function inSession(ts) {
+  if (!config.filterSession) return true;
+  const m = utcMins(ts);
+  return m >= timeToMins(config.sessionFrom) && m < timeToMins(config.sessionTo);
+}
+function cprWideEnough(cpr, price) {
+  if (!config.filterCPRWidth) return true;
+  const width = Math.abs(cpr.tc - cpr.bc);
+  return (width / price) * 100 >= config.cprMinPct;
+}
+function pastExitTime(ts) {
+  if (!config.filterExitTime) return false;
+  return utcMins(ts) >= timeToMins(config.exitAt);
+}
+
 // ─── SCAN ────────────────────────────────────────────────────
 async function startScan() {
   const sym = document.getElementById('btc-pair').value;
@@ -396,9 +463,8 @@ async function startScan() {
   config.pair     = sym;
   config.interval = document.getElementById('interval').value;
   config.lookback = parseInt(document.getElementById('lookback').value);
-  config.bal      = parseFloat(document.getElementById('bal').value)||100;
+  config.bal      = parseFloat(document.getElementById('bal-input')?.value || document.getElementById('bal').value)||100;
   config.lot      = parseFloat(document.getElementById('lot').value)||0.01;
-  // Filters
   config.filterSession  = document.getElementById('f-session').checked;
   config.sessionFrom    = document.getElementById('f-session-from').value;
   config.sessionTo      = document.getElementById('f-session-to').value;
@@ -409,178 +475,83 @@ async function startScan() {
 
   scanning = true;
   allTrades = [];
+  breakFired = null;
   runningBal = config.bal;
   document.getElementById('scan-btn').disabled = true;
   document.getElementById('prog-wrap').style.display = 'block';
-  setStatus('running', 'Fetching...');
-  log('info', `Fetching all data for ${sym} (${config.interval}, ${config.lookback} days)...`);
+  setStatus('running','Fetching...');
+  log('info',`Fetching data for ${sym} (${config.interval}, ${config.lookback} days)...`);
 
-  const today = new Date();
+  const todayUTC = new Date();
   const days = [];
   for (let i = config.lookback; i >= 1; i--) {
-    const d = new Date(today);
-    d.setDate(today.getDate()-i);
+    const d = new Date(Date.UTC(todayUTC.getUTCFullYear(), todayUTC.getUTCMonth(), todayUTC.getUTCDate()-i));
     days.push(d);
   }
-
   const periodStart = Math.floor(days[0].getTime()/1000) - 86400;
-  const periodEnd   = Math.floor(today.getTime()/1000);
+  const periodEnd   = Math.floor(todayUTC.getTime()/1000);
 
-  // ── SINGLE BULK FETCH: daily candles + all intraday candles in ONE call each ──
-  let dailyCandles = [], intradayAll = [];
+  async function fetchAllCandles(symbol, resolution, start, end, label) {
+    const resSeconds = {'5m':300,'15m':900,'30m':1800,'1h':3600,'1d':86400}[resolution]||900;
+    const chunkSize  = resSeconds * 480;
+    const chunks = [];
+    for (let s = start; s < end; s += chunkSize) chunks.push({s, e:Math.min(s+chunkSize,end)});
+    const seen = new Set(); let all = [];
+    for (let i = 0; i < chunks.length; i++) {
+      const {s,e} = chunks[i];
+      document.getElementById('prog-txt').textContent = `${label} chunk ${i+1}/${chunks.length}...`;
+      document.getElementById('prog-pct').textContent = Math.round((i+1)/chunks.length*100)+'%';
+      try {
+        const r = await fetch(`${DELTA}/v2/history/candles?symbol=${symbol}&resolution=${resolution}&start=${s}&end=${e}`);
+        const d = await r.json();
+        if (d.result) d.result.forEach(c=>{ if(!seen.has(c.time)){seen.add(c.time);all.push(c);} });
+      } catch(e) { log('warn',`Chunk ${i+1} failed`); }
+      await new Promise(r=>setTimeout(r,100));
+    }
+    return all.sort((a,b)=>a.time-b.time);
+  }
+
+  let dailyCandles=[], intradayAll=[];
   try {
-    document.getElementById('prog-txt').textContent = 'Fetching daily candles...';
-    document.getElementById('prog-pct').textContent = '0%';
-    const [rd, ri] = await Promise.all([
-      fetch(`${DELTA}/v2/history/candles?symbol=${sym}&resolution=1d&start=${periodStart}&end=${periodEnd}`).then(r=>r.json()),
-      fetch(`${DELTA}/v2/history/candles?symbol=${sym}&resolution=${config.interval}&start=${periodStart}&end=${periodEnd}`).then(r=>r.json()),
-    ]);
-    if (!rd.result || rd.result.length < 2) { log('error','Not enough daily candles.'); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
-    if (!ri.result || ri.result.length === 0) { log('error','No intraday candles returned.'); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
-    dailyCandles  = rd.result.sort((a,b)=>a.time-b.time);
-    intradayAll   = ri.result.sort((a,b)=>a.time-b.time);
-    log('success', `${dailyCandles.length} daily + ${intradayAll.length} intraday candles loaded. Processing...`);
+    dailyCandles  = await fetchAllCandles(sym,'1d',periodStart,periodEnd,'Daily');
+    if (dailyCandles.length < 2) { log('error','Not enough daily candles.'); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
+    intradayAll   = await fetchAllCandles(sym,config.interval,periodStart,periodEnd,`${config.interval} candles`);
+    if (intradayAll.length === 0) { log('error','No intraday candles.'); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
+    log('success',`${dailyCandles.length} daily + ${intradayAll.length} intraday candles. Processing...`);
   } catch(e) { log('error','Fetch failed: '+e.message); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
 
-  // Group intraday candles by date string
   const intradayByDay = {};
   intradayAll.forEach(c => {
-    const dateStr = new Date(c.time*1000).toISOString().split('T')[0];
-    if (!intradayByDay[dateStr]) intradayByDay[dateStr] = [];
-    intradayByDay[dateStr].push(c);
+    const d = new Date(c.time*1000);
+    const ds = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+    if (!intradayByDay[ds]) intradayByDay[ds]=[];
+    intradayByDay[ds].push(c);
   });
 
   const noTradeDays = [];
   let scanned = 0;
-  let breakFired = null;
+  setStatus('running','Scanning...');
 
-  function finalizeBreak(exitPrice, exitTimeStr, reason) {
-    if (!breakFired) return;
-    let result = 'No Target';
-    if (breakFired.dir === 'BUY') {
-      if (breakFired.hitR3) result = 'Hit R3';
-      else if (breakFired.hitR2) result = 'Hit R2';
-    } else {
-      if (breakFired.hitS3) result = 'Hit S3';
-      else if (breakFired.hitS2) result = 'Hit S2';
-    }
-    if (result === 'No Target' && exitPrice != null) {
-      result = reason === 'timeexit' ? 'Time Exit' : 'EOD Close';
-      breakFired.eodClose = exitPrice;
-      breakFired.eodTime  = exitTimeStr;
-    }
-    breakFired.result = result;
-    const exitPx = result.startsWith('Hit')
-      ? (breakFired.dir==='BUY' ? (breakFired.hitR3?breakFired.cpr.r3:breakFired.cpr.r2) : (breakFired.hitS3?breakFired.cpr.s3:breakFired.cpr.s2))
-      : (breakFired.eodClose || breakFired.entry);
-    const priceDiff = breakFired.dir==='BUY' ? exitPx-breakFired.entry : breakFired.entry-exitPx;
-    breakFired.pnl = priceDiff * config.lot;
-    allTrades.push({...breakFired});
-    const logType = result.startsWith('Hit') ? 'success' : result==='Time Exit' ? 'warn' : 'info';
-    log(logType, `${breakFired.day} ${breakFired.dir} → ${result} (entry:${breakFired.entry.toFixed(0)}${exitPrice!=null?' exit:'+exitPrice.toFixed(0):''})`);
-    breakFired = null;
-  }
-
-  function activeFilters() {
-    const f = [];
-    if (config.filterSession)  f.push(`Session ${config.sessionFrom}-${config.sessionTo}`);
-    if (config.filterCPRWidth) f.push(`CPR≥${config.cprMinPct}%`);
-    if (config.filterExitTime) f.push(`Exit@${config.exitAt}`);
-    return f.join(' · ') || 'None';
-  }
-
-  // ── PROCESS ALL DAYS IN MEMORY (no more per-day API calls) ──
-  // ── FILTER HELPERS ──────────────────────────────────────────
-  function timeToMins(hhmm) {
-    const [h,m] = hhmm.split(':').map(Number);
-    return h*60+m;
-  }
-  function utcMins(ts) {
-    const d = new Date(ts*1000);
-    return d.getUTCHours()*60 + d.getUTCMinutes();
-  }
-  function inSession(ts) {
-    if (!config.filterSession) return true;
-    const m = utcMins(ts);
-    return m >= timeToMins(config.sessionFrom) && m < timeToMins(config.sessionTo);
-  }
-  function cprWideEnough(cpr, price) {
-    if (!config.filterCPRWidth) return true;
-    const width = Math.abs(cpr.tc - cpr.bc);
-    return (width / price) * 100 >= config.cprMinPct;
-  }
-  function pastExitTime(ts) {
-    if (!config.filterExitTime) return false;
-    return utcMins(ts) >= timeToMins(config.exitAt);
-  }
-
-  setStatus('running', 'Scanning...');
   for (let di = 0; di < days.length; di++) {
     const day = days[di];
-    const dayStr = day.toISOString().split('T')[0];
+    const dayStr = `${day.getUTCFullYear()}-${String(day.getUTCMonth()+1).padStart(2,'0')}-${String(day.getUTCDate()).padStart(2,'0')}`;
+    const dayTs  = Math.floor(day.getTime()/1000);
 
-    const dayTs = Math.floor(day.getTime()/1000);
-    const prevDaily = dailyCandles.filter(c => c.time < dayTs).slice(-1)[0];
-    if (!prevDaily) { scanned++; updateProgress(scanned, days.length); continue; }
+    const prevDaily = dailyCandles.filter(c=>c.time<dayTs).slice(-1)[0];
+    if (!prevDaily) { scanned++; updateProgress(scanned,days.length); continue; }
 
-    const cpr = calcCPR(parseFloat(prevDaily.high), parseFloat(prevDaily.low), parseFloat(prevDaily.close));
-    const intraday = intradayByDay[dayStr] || [];
-
-    // Filter 2: CPR width — skip narrow/ranging days
+    const cpr      = calcCPR(parseFloat(prevDaily.high),parseFloat(prevDaily.low),parseFloat(prevDaily.close));
     const refPrice = parseFloat(prevDaily.close);
-    if (!breakFired && !cprWideEnough(cpr, refPrice)) {
-      noTradeDays.push({day:dayStr, reason:`CPR too narrow (${((Math.abs(cpr.tc-cpr.bc)/refPrice)*100).toFixed(2)}% < ${config.cprMinPct}%)`, cpr, filtered:'cpr'});
-      scanned++; updateProgress(scanned, days.length); continue;
-    }
+    const intraday = intradayByDay[dayStr]||[];
 
+    if (!breakFired && !cprWideEnough(cpr,refPrice)) {
+      noTradeDays.push({day:dayStr, reason:`CPR too narrow`, cpr, filtered:'cpr'});
+      scanned++; updateProgress(scanned,days.length); continue;
+    }
     if (intraday.length < 2) {
       if (!breakFired) noTradeDays.push({day:dayStr, reason:'No intraday data', cpr});
-      scanned++; updateProgress(scanned, days.length); continue;
+      scanned++; updateProgress(scanned,days.length); continue;
     }
-
-    for (let ci = 1; ci < intraday.length; ci++) {
-      const candle = intraday[ci];
-      const prev   = intraday[ci-1];
-      const close    = parseFloat(candle.close);
-      const prevClose= parseFloat(prev.close);
-      const high     = parseFloat(candle.high);
-      const low      = parseFloat(candle.low);
-      const ts = new Date(candle.time*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:false});
-
-      if (breakFired) {
-        const bc = breakFired.cpr;
-        if (breakFired.dir === 'BUY') {
-          if (!breakFired.hitR2 && high >= bc.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
-          if (!breakFired.hitR3 && high >= bc.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
-          if (breakFired.hitR3) { finalizeBreak(); }
-        } else {
-          if (!breakFired.hitS2 && low <= bc.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
-          if (!breakFired.hitS3 && low <= bc.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
-          if (breakFired.hitS3) { finalizeBreak(); }
-        }
-        if (breakFired) continue;
-      }
-
-      // S1 break → SELL
-      if (close < cpr.s1 && prevClose >= cpr.s1) {
-        breakFired = { day:dayStr, dir:'SELL', trigger:'S1 Break', entry:close, entryTime:`${dayStr} ${ts}`, s1:cpr.s1, s2:cpr.s2, s3:cpr.s3, hitS2:false, hitS3:false, s2Time:null, s3Time:null, cpr };
-        if (low <= cpr.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
-        if (low <= cpr.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
-        log('cpr', `${dayStr} ${ts}: S1 BREAK SELL @ ${close.toFixed(0)} → S2:${cpr.s2.toFixed(0)} S3:${cpr.s3.toFixed(0)}`);
-      }
-      // R1 break → BUY
-      else if (close > cpr.r1 && prevClose <= cpr.r1) {
-        breakFired = { day:dayStr, dir:'BUY', trigger:'R1 Break', entry:close, entryTime:`${dayStr} ${ts}`, r1:cpr.r1, r2:cpr.r2, r3:cpr.r3, hitR2:false, hitR3:false, r2Time:null, r3Time:null, cpr };
-        if (high >= cpr.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
-        if (high >= cpr.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
-        log('cpr', `${dayStr} ${ts}: R1 BREAK BUY @ ${close.toFixed(0)} → R2:${cpr.r2.toFixed(0)} R3:${cpr.r3.toFixed(0)}`);
-      }
-    }
-
-    if (!breakFired) noTradeDays.push({day:dayStr, reason:'No R1/S1 break', cpr});
-    scanned++;
-    updateProgress(scanned, days.length);
-  }
 
     let hadBreakToday = !!breakFired;
 
@@ -591,78 +562,67 @@ async function startScan() {
       const prevClose = parseFloat(prev.close);
       const high      = parseFloat(candle.high);
       const low       = parseFloat(candle.low);
-      const _ct = new Date(candle.time*1000);
-      const ts = `${String(_ct.getUTCHours()).padStart(2,'0')}:${String(_ct.getUTCMinutes()).padStart(2,'0')}`;
+      const _d = new Date(candle.time*1000);
+      const ts = `${String(_d.getUTCHours()).padStart(2,'0')}:${String(_d.getUTCMinutes()).padStart(2,'0')}`;
 
       if (breakFired) {
         hadBreakToday = true;
-
-        // Filter 3: time-based exit
         if (config.filterExitTime && pastExitTime(candle.time)) {
-          const exitPrice = close;
-          finalizeBreak(exitPrice, `${dayStr} ${ts}`, 'timeexit');
-          if (!breakFired) continue;
+          finalizeBreak(close, `${dayStr} ${ts}`, 'timeexit');
+          continue;
         }
-
         if (breakFired) {
           const bc = breakFired.cpr;
-          if (breakFired.dir === 'BUY') {
-            if (!breakFired.hitR2 && high >= bc.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
-            if (!breakFired.hitR3 && high >= bc.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
+          if (breakFired.dir==='BUY') {
+            if (!breakFired.hitR2 && high>=bc.r2) { breakFired.hitR2=true; breakFired.r2Time=`${dayStr} ${ts}`; }
+            if (!breakFired.hitR3 && high>=bc.r3) { breakFired.hitR3=true; breakFired.r3Time=`${dayStr} ${ts}`; }
             if (breakFired.hitR2) { finalizeBreak(); }
           } else {
-            if (!breakFired.hitS2 && low <= bc.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
-            if (!breakFired.hitS3 && low <= bc.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
+            if (!breakFired.hitS2 && low<=bc.s2) { breakFired.hitS2=true; breakFired.s2Time=`${dayStr} ${ts}`; }
+            if (!breakFired.hitS3 && low<=bc.s3) { breakFired.hitS3=true; breakFired.s3Time=`${dayStr} ${ts}`; }
             if (breakFired.hitS2) { finalizeBreak(); }
           }
         }
         if (breakFired) continue;
       }
 
-      // Filter 1: session time — only look for new breaks during session window
-      if (!hadBreakToday && !inSession(candle.time)) continue;
+      if (hadBreakToday) continue;
+      if (!inSession(candle.time)) continue;
 
-      // S1 break → SELL
-      if (!hadBreakToday && close < cpr.s1 && prevClose >= cpr.s1) {
-        breakFired = { day:dayStr, dir:'SELL', trigger:'S1 Break', entry:close, entryTime:`${dayStr} ${ts}`, s1:cpr.s1, s2:cpr.s2, s3:cpr.s3, hitS2:false, hitS3:false, s2Time:null, s3Time:null, cpr, filters:activeFilters() };
+      if (close < cpr.s1 && prevClose >= cpr.s1) {
+        breakFired = {day:dayStr,dir:'SELL',trigger:'S1 Break',entry:close,entryTime:`${dayStr} ${ts}`,s1:cpr.s1,s2:cpr.s2,s3:cpr.s3,hitS2:false,hitS3:false,s2Time:null,s3Time:null,cpr};
         hadBreakToday = true;
-        if (low <= cpr.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
-        if (low <= cpr.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
-        if (breakFired.hitS2) { finalizeBreak(); }
-        else log('cpr', `${dayStr} ${ts}: S1 BREAK SELL @ ${close.toFixed(0)} → S2:${cpr.s2.toFixed(0)} S3:${cpr.s3.toFixed(0)}`);
-      }
-      // R1 break → BUY
-      else if (!hadBreakToday && close > cpr.r1 && prevClose <= cpr.r1) {
-        breakFired = { day:dayStr, dir:'BUY', trigger:'R1 Break', entry:close, entryTime:`${dayStr} ${ts}`, r1:cpr.r1, r2:cpr.r2, r3:cpr.r3, hitR2:false, hitR3:false, r2Time:null, r3Time:null, cpr, filters:activeFilters() };
+        if (low<=cpr.s2) { breakFired.hitS2=true; breakFired.s2Time=`${dayStr} ${ts}`; }
+        if (low<=cpr.s3) { breakFired.hitS3=true; breakFired.s3Time=`${dayStr} ${ts}`; }
+        if (breakFired.hitS2) finalizeBreak();
+        else log('cpr',`${dayStr} ${ts}: S1 BREAK SELL @ ${close.toFixed(0)} S2:${cpr.s2.toFixed(0)} S3:${cpr.s3.toFixed(0)}`);
+      } else if (close > cpr.r1 && prevClose <= cpr.r1) {
+        breakFired = {day:dayStr,dir:'BUY',trigger:'R1 Break',entry:close,entryTime:`${dayStr} ${ts}`,r1:cpr.r1,r2:cpr.r2,r3:cpr.r3,hitR2:false,hitR3:false,r2Time:null,r3Time:null,cpr};
         hadBreakToday = true;
-        if (high >= cpr.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
-        if (high >= cpr.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
-        if (breakFired.hitR2) { finalizeBreak(); }
-        else log('cpr', `${dayStr} ${ts}: R1 BREAK BUY @ ${close.toFixed(0)} → R2:${cpr.r2.toFixed(0)} R3:${cpr.r3.toFixed(0)}`);
+        if (high>=cpr.r2) { breakFired.hitR2=true; breakFired.r2Time=`${dayStr} ${ts}`; }
+        if (high>=cpr.r3) { breakFired.hitR3=true; breakFired.r3Time=`${dayStr} ${ts}`; }
+        if (breakFired.hitR2) finalizeBreak();
+        else log('cpr',`${dayStr} ${ts}: R1 BREAK BUY @ ${close.toFixed(0)} R2:${cpr.r2.toFixed(0)} R3:${cpr.r3.toFixed(0)}`);
       }
     }
 
-    // EOD close if still open
     if (breakFired) {
       const last = intraday[intraday.length-1];
-      finalizeBreak(parseFloat(last.close), `${dayStr} EOD`, 'eod');
+      finalizeBreak(parseFloat(last.close),`${dayStr} EOD`,'eod');
     }
-
-    if (!hadBreakToday) noTradeDays.push({day:dayStr, reason:'No R1/S1 break in session', cpr});
+    if (!hadBreakToday) noTradeDays.push({day:dayStr,reason:'No R1/S1 break in session',cpr});
     scanned++;
-    updateProgress(scanned, days.length);
+    updateProgress(scanned,days.length);
     await delay(10);
   }
 
   if (breakFired) finalizeBreak();
-
   scanning = false;
   setStatus('done','Complete');
   document.getElementById('scan-btn').disabled = false;
-  log('success', `Scan complete. ${allTrades.length} trades found across ${scanned} days.`);
+  log('success',`Scan complete. ${allTrades.length} trades found across ${scanned} days.`);
   renderResults(noTradeDays, scanned);
 }
-
 function updateProgress(done, total) {
   const pct = Math.round(done/total*100);
   document.getElementById('prog-fill').style.width = pct+'%';
