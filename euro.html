@@ -245,13 +245,19 @@ tbody tr:last-child td{border-bottom:none;}
               <th>R:R</th>
               <th>Exit</th>
               <th>Result</th>
-              <th>Pips</th>
               <th>P&L</th>
               <th>Balance</th>
+              <th style="background:#f5f3ff;color:#7c3aed">Pivot</th>
+              <th style="background:#f5f3ff;color:#d97706">TC</th>
+              <th style="background:#f5f3ff;color:#0891b2">BC</th>
+              <th style="background:#f5f3ff;color:var(--red)">R1</th>
+              <th style="background:#f5f3ff;color:var(--red)">R2</th>
+              <th style="background:#f5f3ff;color:var(--blue)">S1</th>
+              <th style="background:#f5f3ff;color:var(--blue)">S2</th>
             </tr>
           </thead>
           <tbody id="trade-tbody">
-            <tr><td colspan="14" class="empty">Run the scanner to see trades</td></tr>
+            <tr><td colspan="20" class="empty">Run the scanner to see trades</td></tr>
           </tbody>
         </table>
       </div>
@@ -383,6 +389,9 @@ async function startScan() {
 
     const cpr = calcCPR(parseFloat(prevDaily.high), parseFloat(prevDaily.low), parseFloat(prevDaily.close));
 
+    // Log CPR levels for this day
+    log('cpr', `${dayStr} CPR — Pvt:${cpr.pivot.toFixed(0)} TC:${cpr.tc.toFixed(0)} BC:${cpr.bc.toFixed(0)} R1:${cpr.r1.toFixed(0)} S1:${cpr.s1.toFixed(0)}`);
+
     // Fetch intraday candles for this day
     const dayStart = Math.floor(new Date(dayStr+'T00:00:00Z').getTime()/1000);
     const dayEnd = Math.floor(new Date(dayStr+'T23:59:59Z').getTime()/1000);
@@ -450,38 +459,36 @@ async function startScan() {
       // Check for new signal (only 1 trade per day)
       if (dayTrades.length > 0) continue;
 
-      // BUY: close above R1, prev close at or below R1
-      if (close > cpr.r1 && prevClose <= cpr.r1) {
+      // BUY: candle closes above R1 AND previous candle closed at or below R1
+      const buyBreak = close > cpr.r1 && prevClose <= cpr.r1;
+      // SELL: candle closes below S1 AND previous candle closed at or above S1
+      const sellBreak = close < cpr.s1 && prevClose >= cpr.s1;
+
+      if (buyBreak) {
         const entry = close;
         const sl = cpr.bc;
         const tp1 = cpr.r2;
         const tp2 = cpr.r3;
         const risk = entry - sl;
         const reward1 = tp1 - entry;
-        if (risk > 0 && reward1/risk >= config.minRR) {
-          openTrade = {
-            day:dayStr, dir:'BUY', trigger:'R1 Break',
-            entry, sl, tp1, tp2,
-            rr: parseFloat((reward1/risk).toFixed(2)),
-            cpr, entryTime:ts
-          };
+        if (risk <= 0) { log('warn', `${dayStr} ${ts}: BUY break but risk<=0 (entry:${entry.toFixed(0)} sl:${sl.toFixed(0)})`); }
+        else if (reward1/risk < config.minRR) { log('warn', `${dayStr} ${ts}: BUY break R:R ${(reward1/risk).toFixed(2)} < ${config.minRR} — skipped`); }
+        else {
+          openTrade = { day:dayStr, dir:'BUY', trigger:'R1 Break', entry, sl, tp1, tp2, rr:parseFloat((reward1/risk).toFixed(2)), cpr, entryTime:ts };
+          log('cpr', `${dayStr} BUY signal @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} TP1:${tp1.toFixed(0)} R:R ${(reward1/risk).toFixed(2)}`);
         }
-      }
-      // SELL: close below S1, prev close at or above S1
-      else if (close < cpr.s1 && prevClose >= cpr.s1) {
+      } else if (sellBreak) {
         const entry = close;
         const sl = cpr.tc;
         const tp1 = cpr.s2;
         const tp2 = cpr.s3;
         const risk = sl - entry;
         const reward1 = entry - tp1;
-        if (risk > 0 && reward1/risk >= config.minRR) {
-          openTrade = {
-            day:dayStr, dir:'SELL', trigger:'S1 Break',
-            entry, sl, tp1, tp2,
-            rr: parseFloat((reward1/risk).toFixed(2)),
-            cpr, entryTime:ts
-          };
+        if (risk <= 0) { log('warn', `${dayStr} ${ts}: SELL break but risk<=0 (entry:${entry.toFixed(0)} sl:${sl.toFixed(0)})`); }
+        else if (reward1/risk < config.minRR) { log('warn', `${dayStr} ${ts}: SELL break R:R ${(reward1/risk).toFixed(2)} < ${config.minRR} — skipped`); }
+        else {
+          openTrade = { day:dayStr, dir:'SELL', trigger:'S1 Break', entry, sl, tp1, tp2, rr:parseFloat((reward1/risk).toFixed(2)), cpr, entryTime:ts };
+          log('cpr', `${dayStr} SELL signal @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} TP1:${tp1.toFixed(0)} R:R ${(reward1/risk).toFixed(2)}`);
         }
       }
     }
@@ -498,7 +505,7 @@ async function startScan() {
     }
 
     if (dayTrades.length === 0) {
-      noTradeDays.push({day:dayStr,reason:'No R1/S1 break with R:R≥'+config.minRR});
+      noTradeDays.push({day:dayStr, reason:`No valid R1/S1 break (R:R≥${config.minRR})`, cpr});
     }
     allTrades.push(...dayTrades);
 
@@ -589,8 +596,8 @@ function renderResults(noTradeDays, daysScanned) {
   let bal = config.bal;
   const tbody = document.getElementById('trade-tbody');
   tbody.innerHTML = trades.map((t,i) => {
-    const pips = t.dir==='BUY' ? t.exit-t.entry : t.entry-t.exit;
     const resClass = t.result==='TP2'?'tp2':t.result==='TP1'?'tp1':t.result==='SL'?'sl':'eod';
+    const c = t.cpr;
     return `<tr>
       <td style="color:var(--t3);font-weight:600">${i+1}</td>
       <td style="font-weight:600">${t.day}<br><span style="color:var(--t3);font-size:0.58rem">${t.entryTime||''} → ${t.exitTime||''}</span></td>
@@ -603,9 +610,15 @@ function renderResults(noTradeDays, daysScanned) {
       <td style="color:var(--orange);font-weight:700">${t.rr}</td>
       <td style="font-weight:600">${t.exit.toFixed(2)}</td>
       <td><span class="tag ${resClass}">${t.result}</span></td>
-      <td class="${pips>=0?'pos':'neg'}">${pips>=0?'+':''}${pips.toFixed(2)}</td>
       <td class="${t.pnl>=0?'pos':'neg'}">${t.pnl>=0?'+$':'-$'}${Math.abs(t.pnl).toFixed(4)}</td>
       <td style="font-weight:700">$${t.bal.toFixed(2)}</td>
+      <td style="background:#faf5ff;color:#7c3aed;font-size:0.62rem">${c?c.pivot.toFixed(0):'—'}</td>
+      <td style="background:#faf5ff;color:#d97706;font-size:0.62rem">${c?c.tc.toFixed(0):'—'}</td>
+      <td style="background:#faf5ff;color:#0891b2;font-size:0.62rem">${c?c.bc.toFixed(0):'—'}</td>
+      <td style="background:#faf5ff;color:var(--red);font-size:0.62rem">${c?c.r1.toFixed(0):'—'}</td>
+      <td style="background:#faf5ff;color:var(--red);font-size:0.62rem">${c?c.r2.toFixed(0):'—'}</td>
+      <td style="background:#faf5ff;color:var(--blue);font-size:0.62rem">${c?c.s1.toFixed(0):'—'}</td>
+      <td style="background:#faf5ff;color:var(--blue);font-size:0.62rem">${c?c.s2.toFixed(0):'—'}</td>
     </tr>`;
   }).join('');
 
@@ -624,7 +637,7 @@ function resetScan() {
   allTrades = []; runningBal = config.bal; scanning = false;
   document.getElementById('prog-wrap').style.display='none';
   document.getElementById('prog-fill').style.width='0%';
-  document.getElementById('trade-tbody').innerHTML='<tr><td colspan="14" class="empty">Run the scanner to see trades</td></tr>';
+  document.getElementById('trade-tbody').innerHTML='<tr><td colspan="20" class="empty">Run the scanner to see trades</td></tr>';
   document.getElementById('month-grid').innerHTML='<div class="empty" style="grid-column:1/-1">Run the scanner to see monthly breakdown</div>';
   document.getElementById('no-trade-wrap').innerHTML='<div class="empty">Run the scanner to see no-signal days</div>';
   document.getElementById('trade-count').textContent='';
