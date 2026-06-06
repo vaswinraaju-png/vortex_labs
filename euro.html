@@ -373,9 +373,12 @@ function saveConfig() {
 }
 function loadConfig() {
   state.geminiKey = localStorage.getItem('pt_gemini') || '';
-  state.startBalance = parseFloat(localStorage.getItem('pt_balance') || '10000');
+  // Force correct defaults — ignore stale localStorage values
+  const savedBalance = parseFloat(localStorage.getItem('pt_balance') || '100');
+  const savedLot = parseFloat(localStorage.getItem('pt_lot') || '0.01');
+  state.startBalance = savedBalance > 1000 ? 100 : savedBalance;
   state.balance = state.startBalance;
-  state.lotSize = parseFloat(localStorage.getItem('pt_lot') || '10000');
+  state.lotSize = savedLot >= 1000 ? 0.01 : savedLot;
   document.getElementById('gemini-key').value = state.geminiKey;
   document.getElementById('balance-input').value = state.startBalance;
   document.getElementById('lot-size').value = state.lotSize;
