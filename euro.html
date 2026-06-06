@@ -59,11 +59,11 @@
   .layout { display:grid; grid-template-columns:300px 1fr; min-height:calc(100vh - 52px); }
 
   /* SIDEBAR */
-  .sidebar { background:var(--white); border-right:1px solid var(--border); padding:16px; display:flex; flex-direction:column; gap:12px; overflow-y:auto; height:calc(100vh - 52px); position:sticky; top:52px; }
-  .card { background:var(--white); border:1px solid var(--border); border-radius:10px; overflow:hidden; box-shadow:var(--shadow); }
+  .sidebar { background:var(--white); border-right:1px solid var(--border); padding:16px; display:flex; flex-direction:column; gap:12px; overflow-y:auto; height:calc(100vh - 52px); position:sticky; top:52px; min-width:300px; }
+  .card { background:var(--white); border:1px solid var(--border); border-radius:10px; overflow:visible; box-shadow:var(--shadow); flex-shrink:0; }
   .card-header { padding:10px 14px; border-bottom:1px solid var(--border2); display:flex; align-items:center; justify-content:space-between; }
   .card-title { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text2); }
-  .card-body { padding:12px 14px; }
+  .card-body { padding:14px; }
 
   /* FORM */
   .form-row { margin-bottom:8px; }
@@ -78,16 +78,17 @@
   .key-dot { width:8px; height:8px; border-radius:50%; justify-self:center; }
 
   /* BUTTONS */
-  .btn { width:100%; padding:8px 12px; border-radius:6px; font-family:var(--font); font-size:0.72rem; font-weight:600; cursor:pointer; transition:all 0.15s; border:none; letter-spacing:0.02em; }
+  .btn { width:100%; padding:9px 12px; border-radius:6px; font-family:var(--font); font-size:0.72rem; font-weight:600; cursor:pointer; transition:all 0.15s; border:none; letter-spacing:0.02em; display:block; text-align:center; }
   .btn-orange { background:var(--orange); color:#fff; }
   .btn-orange:hover { background:var(--orange-dark); }
-  .btn-orange:disabled { background:#fed7aa; cursor:not-allowed; }
-  .btn-outline { background:transparent; color:var(--orange); border:1.5px solid var(--orange); margin-top:6px; }
-  .btn-outline:hover { background:var(--orange-light); }
-  .btn-ghost { background:var(--bg); color:var(--text2); border:1px solid var(--border); margin-top:6px; }
-  .btn-ghost:hover { border-color:var(--text2); }
-  .btn-red { background:transparent; color:var(--red); border:1.5px solid #fca5a5; margin-top:6px; }
-  .btn-red:hover { background:var(--red-light); }
+  .btn-orange:disabled { background:#fed7aa; color:#fff; cursor:not-allowed; }
+  .btn-outline { background:var(--orange-light); color:var(--orange); border:1.5px solid var(--orange); margin-top:7px; }
+  .btn-outline:hover { background:var(--orange); color:#fff; }
+  .btn-outline:disabled { background:var(--border2); color:var(--text3); border-color:var(--border); cursor:not-allowed; }
+  .btn-ghost { background:var(--bg); color:var(--text2); border:1.5px solid var(--border); margin-top:7px; }
+  .btn-ghost:hover { border-color:var(--text2); background:var(--border2); }
+  .btn-red { background:var(--red-light); color:var(--red); border:1.5px solid #fca5a5; margin-top:7px; }
+  .btn-red:hover { background:var(--red); color:#fff; border-color:var(--red); }
   .btn-red:disabled { opacity:0.35; cursor:not-allowed; }
 
   /* SPEED */
