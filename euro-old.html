@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CPR 90-Day Scanner — storiesbyachu</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f5f7fa; --white:#fff; --border:#e2e8f0; --b2:#f0f4f8;
+  --orange:#F97316; --ol:#fff7ed; --od:#ea6c0a;
+  --blue:#2563eb; --bl:#eff6ff;
+  --green:#16a34a; --gl:#f0fdf4;
+  --red:#dc2626; --rl:#fef2f2;
+  --purple:#7c3aed; --pl:#f5f3ff;
+  --text:#0f172a; --t2:#475569; --t3:#94a3b8;
+  --sh:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --font:'Inter',sans-serif; --disp:'Syne',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;}
+
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 20px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--sh);}
+.brand{font-family:var(--disp);font-size:0.95rem;font-weight:800;}
+.brand span{color:var(--orange);}
+.brand small{font-family:var(--font);font-size:0.55rem;color:var(--t3);font-weight:400;display:block;text-transform:uppercase;letter-spacing:0.06em;margin-top:-1px;}
+.pill{display:flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;background:var(--b2);font-size:0.62rem;font-weight:600;color:var(--t2);text-transform:uppercase;}
+.pill .d{width:6px;height:6px;border-radius:50%;background:var(--t3);}
+.pill.running .d{background:var(--orange);box-shadow:0 0 5px var(--orange);animation:blink 0.6s infinite;}
+.pill.done .d{background:var(--green);box-shadow:0 0 5px var(--green);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 50px);}
+.sidebar{background:var(--white);border-right:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;height:calc(100vh - 50px);position:sticky;top:50px;}
+.main{padding:18px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;}
+
+.card{background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:var(--sh);flex-shrink:0;}
+.ch{padding:9px 13px;border-bottom:1px solid var(--b2);display:flex;align-items:center;justify-content:space-between;}
+.ct{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--t2);}
+.cb{padding:13px;}
+
+.fr{margin-bottom:8px;}
+.fr label{display:block;font-size:0.62rem;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;}
+.fr input,.fr select{width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-family:var(--font);font-size:0.73rem;color:var(--text);background:var(--white);outline:none;transition:border-color 0.15s;}
+.fr input:focus,.fr select:focus{border-color:var(--orange);box-shadow:0 0 0 2px rgba(249,115,22,0.1);}
+.kr{display:grid;grid-template-columns:12px 1fr;gap:6px;align-items:center;margin-bottom:6px;}
+.kd{width:7px;height:7px;border-radius:50%;justify-self:center;}
+
+.btn{width:100%;padding:8px;border-radius:6px;font-family:var(--font);font-size:0.7rem;font-weight:600;cursor:pointer;transition:all 0.15s;border:none;display:block;text-align:center;}
+.btn+.btn{margin-top:6px;}
+.bo{background:var(--orange);color:#fff;}
+.bo:hover{background:var(--od);}
+.bo:disabled{background:#fed7aa;cursor:not-allowed;}
+.bg{background:var(--bg);color:var(--t2);border:1.5px solid var(--border);}
+.bg:hover{border-color:var(--t2);}
+
+/* pair input row */
+.pair-row{display:flex;gap:6px;align-items:flex-end;margin-bottom:8px;}
+.pair-row .fr{flex:1;margin-bottom:0;}
+.pair-btn{flex-shrink:0;height:32px;padding:0 10px;border-radius:6px;font-family:var(--font);font-size:0.65rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--b2);color:var(--t2);transition:all 0.15s;white-space:nowrap;}
+.pair-btn:hover{border-color:var(--orange);color:var(--orange);}
+.pair-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+/* STAT CARDS */
+.stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+.stat{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px 16px;box-shadow:var(--sh);}
+.stat .sl{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--t2);margin-bottom:6px;}
+.stat .sv{font-size:1.5rem;font-weight:800;color:var(--text);line-height:1;}
+.stat .ss{font-size:0.62rem;color:var(--t3);margin-top:4px;}
+.stat.green .sv{color:var(--green);}
+.stat.red .sv{color:var(--red);}
+.stat.orange .sv{color:var(--orange);}
+.stat.blue .sv{color:var(--blue);}
+.stat.purple .sv{color:var(--purple);}
+
+/* PROGRESS */
+.prog-wrap{margin-top:10px;}
+.prog-track{background:var(--b2);border-radius:4px;height:6px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--od));border-radius:4px;transition:width 0.2s;width:0%;}
+.prog-label{font-size:0.6rem;color:var(--t3);margin-top:4px;display:flex;justify-content:space-between;}
+
+/* MONTHLY CHART */
+.month-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;}
+.month-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;box-shadow:var(--sh);}
+.month-card .mn{font-size:0.6rem;font-weight:700;color:var(--t2);text-transform:uppercase;margin-bottom:4px;}
+.month-card .mp{font-size:0.88rem;font-weight:800;}
+.month-card .ms{font-size:0.58rem;color:var(--t3);margin-top:2px;}
+.month-card.pos{border-top:3px solid var(--green);}
+.month-card.neg{border-top:3px solid var(--red);}
+.month-card.neu{border-top:3px solid var(--border);}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:0.68rem;}
+thead th{background:var(--b2);padding:8px 10px;text-align:left;font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--t2);border-bottom:2px solid var(--border);white-space:nowrap;}
+tbody td{padding:8px 10px;border-bottom:1px solid var(--b2);vertical-align:middle;}
+tbody tr:hover td{background:#fafbfc;}
+tbody tr:last-child td{border-bottom:none;}
+.tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:0.58rem;font-weight:700;text-transform:uppercase;}
+.tag.buy{background:var(--gl);color:var(--green);}
+.tag.sell{background:var(--rl);color:var(--red);}
+.tag.tp1{background:var(--gl);color:var(--green);}
+.tag.tp2{background:#dcfce7;color:#15803d;}
+.tag.sl{background:var(--rl);color:var(--red);}
+.tag.eod{background:var(--bl);color:var(--blue);}
+.tag.skip{background:var(--b2);color:var(--t3);}
+.pos{color:var(--green);font-weight:600;}
+.neg{color:var(--red);font-weight:600;}
+.neu{color:var(--t3);}
+
+/* WIN RATE BAR */
+.wr-bar{height:6px;border-radius:3px;background:var(--b2);overflow:hidden;margin-top:6px;}
+.wr-fill{height:100%;border-radius:3px;background:var(--green);}
+
+/* LOG */
+.log-box{max-height:150px;overflow-y:auto;font-size:0.6rem;line-height:1.9;}
+.le{display:flex;gap:5px;}
+.le .lt{color:var(--t3);flex-shrink:0;font-size:0.57rem;}
+.le.success .lm{color:var(--green);font-weight:500;}
+.le.error .lm{color:var(--red);}
+.le.warn .lm{color:#d97706;}
+.le.info .lm{color:var(--t2);}
+.le.cpr .lm{color:var(--purple);font-weight:600;}
+
+.sh{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.sh h2{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--t2);}
+.sh::after{content:'';flex:1;height:1px;background:var(--border);}
+.empty{text-align:center;padding:40px;color:var(--t3);font-size:0.72rem;}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr;}
+  .sidebar{position:static;height:auto;}
+  .stat-row{grid-template-columns:repeat(2,1fr);}
+  .month-grid{grid-template-columns:repeat(3,1fr);}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="brand">CPR Scanner <span>●</span><small>storiesbyachu · 90-Day Backtest</small></div>
+    <div class="pill" id="status-pill"><div class="d"></div><span id="status-txt">Idle</span></div>
+  </div>
+  <div style="font-size:0.62rem;color:var(--t3)">Pure CPR · R1 Break → R2/R3 · S1 Break → S2/S3</div>
+</div>
+
+<div class="layout">
+<!-- SIDEBAR -->
+<aside class="sidebar">
+
+  <div class="card">
+    <div class="ch"><span class="ct">Delta Exchange</span></div>
+    <div class="cb">
+      <div class="kr"><div class="kd" style="background:#6366f1"></div><input type="password" id="key-delta" placeholder="API Key (Read only)" /></div>
+      <div class="kr"><div class="kd" style="background:#8b5cf6"></div><input type="password" id="key-secret" placeholder="API Secret" /></div>
+      <button class="btn bo" onclick="saveConfig()">Save Keys</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span class="ct">Scanner Config</span></div>
+    <div class="cb">
+      <div class="fr">
+        <label>Symbol <span id="pair-status" style="font-size:0.55rem;color:var(--t3);font-weight:400;text-transform:none;letter-spacing:0">(type any Delta symbol)</span></label>
+        <div class="pair-row" style="display:flex;gap:6px;margin-bottom:0;">
+          <input type="text" id="btc-pair-input" placeholder="e.g. BTCUSD, ETHUSD…" style="flex:1;border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-family:var(--font);font-size:0.73rem;color:var(--text);background:var(--white);outline:none;transition:border-color 0.15s;" />
+        </div>
+        <!-- datalist for suggestions after lookup -->
+        <datalist id="pair-suggestions"></datalist>
+      </div>
+      <div class="fr"><label>Intraday Interval</label>
+        <select id="interval">
+          <option value="5m">5 Minutes</option>
+          <option value="15m" selected>15 Minutes</option>
+          <option value="30m">30 Minutes</option>
+        </select>
+      </div>
+      <div class="fr"><label>Lookback (days)</label>
+        <input type="number" id="lookback" value="3000" min="7" max="3000" step="1"/>
+      </div>
+      <div class="fr"><label>Stop Loss %</label>
+        <input type="number" id="sl-pct" value="" min="0.1" max="20" step="0.1" placeholder="e.g. 2  (blank = EOD only)"/>
+      </div>
+      <div class="fr"><label>Starting Balance (USD)</label>
+        <input type="number" id="bal" value="100" min="10" step="10"/>
+      </div>
+      <div class="fr"><label>Lot Size</label>
+        <input type="number" id="lot" value="0.01" min="0.001" step="0.001"/>
+      </div>
+      <button class="btn bo" id="scan-btn" onclick="startScan()">▶ Run Scan</button>
+      <button class="btn bg" onclick="resetScan()">↺ Reset</button>
+      <div class="prog-wrap" id="prog-wrap" style="display:none">
+        <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+        <div class="prog-label"><span id="prog-txt">Scanning...</span><span id="prog-pct">0%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span class="ct">Log</span></div>
+    <div class="cb" style="padding:8px 10px;"><div class="log-box" id="log-box"></div></div>
+  </div>
+
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- STATS -->
+  <div class="stat-row" id="stat-row">
+    <div class="stat"><div class="sl">Total Breaks</div><div class="sv" id="s-trades">—</div><div class="ss" id="s-bal">R1/S1 breaks found</div></div>
+    <div class="stat green"><div class="sl">Target Hit Rate</div><div class="sv" id="s-wr">—</div><div class="wr-bar"><div class="wr-fill" id="s-wr-bar" style="width:0%"></div></div></div>
+    <div class="stat orange"><div class="sl">Net P&L</div><div class="sv" id="s-pnl">—</div><div class="ss" id="s-bal2">Balance: $100</div></div>
+    <div class="stat blue"><div class="sl">R2/S2 Hits</div><div class="sv" id="s-tp1">—</div><div class="ss" id="s-tp2">TP2: —</div></div>
+    <div class="stat purple"><div class="sl">Hit / Total</div><div class="sv" id="s-rr">—</div><div class="ss" id="s-days">Days scanned: 0</div></div>
+  </div>
+
+  <!-- MONTHLY BREAKDOWN -->
+  <div>
+    <div class="sh"><h2>Monthly Breakdown</h2></div>
+    <div class="month-grid" id="month-grid">
+      <div class="empty" style="grid-column:1/-1">Run the scanner to see monthly breakdown</div>
+    </div>
+  </div>
+
+  <!-- TRADE LOG TABLE -->
+  <div>
+    <div class="sh"><h2>Trade Log <span id="trade-count" style="font-size:0.65rem;color:var(--t3);font-weight:400;margin-left:4px;"></span></h2></div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table id="trade-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th>Dir</th>
+              <th>Trigger</th>
+              <th>Break Time</th>
+              <th>Entry</th>
+              <th>Pivot</th>
+              <th>R1 / S1</th>
+              <th>R2 / S2 (TP1)</th>
+              <th>R3 / S3 (TP2)</th>
+              <th>Result</th>
+              <th>P&L ($)</th>
+            </tr>
+          </thead>
+          <tbody id="trade-tbody">
+            <tr><td colspan="12" class="empty">Run the scanner to see trades</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- NO-TRADE DAYS -->
+  <div>
+    <div class="sh"><h2>No-Signal Days</h2></div>
+    <div class="card cb" id="no-trade-wrap">
+      <div class="empty">Run the scanner to see no-signal days</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+const DELTA = 'https://api.india.delta.exchange';
+let config = { deltaKey:'', deltaSecret:'', pair:'', interval:'15m', lookback:3000, slPct:0, minRR:2, bal:100, lot:0.01 };
+let scanning = false;
+let allTrades = [];
+let runningBal = 100;
+let breakFired = null;
+
+window.onload = () => {
+  try {
+    const k = JSON.parse(localStorage.getItem('cpr_scan_keys')||'{}');
+    config.deltaKey = k.key||''; config.deltaSecret = k.secret||'';
+    document.getElementById('key-delta').value = config.deltaKey;
+    document.getElementById('key-secret').value = config.deltaSecret;
+    // Restore last used symbol
+    const lastSym = localStorage.getItem('cpr_last_symbol')||'';
+    if (lastSym) document.getElementById('btc-pair-input').value = lastSym;
+  } catch(e){}
+};
+
+function saveConfig() {
+  config.deltaKey = document.getElementById('key-delta').value.trim();
+  config.deltaSecret = document.getElementById('key-secret').value.trim();
+  localStorage.setItem('cpr_scan_keys', JSON.stringify({key:config.deltaKey, secret:config.deltaSecret}));
+  log('info','Keys saved.');
+}
+
+// ─── CPR MATH ────────────────────────────────────────────────
+function calcCPR(H, L, C) {
+  const pivot = (H+L+C)/3;
+  const bc = (H+L)/2;
+  const tc = pivot+(pivot-bc);
+  const r1 = 2*pivot-L;
+  const r2 = pivot+(H-L);
+  const r3 = H+2*(pivot-L);
+  const s1 = 2*pivot-H;
+  const s2 = pivot-(H-L);
+  const s3 = L-2*(H-pivot);
+  return {pivot,bc,tc,r1,r2,r3,s1,s2,s3};
+}
+
+// ─── SCAN ────────────────────────────────────────────────────
+async function startScan() {
+  if (scanning) return;
+
+  // Read symbol from text input
+  const sym = document.getElementById('btc-pair-input').value.trim().toUpperCase();
+  if (!sym) { log('error','Enter a symbol (e.g. BTCUSD).'); return; }
+
+  config.pair = sym;
+  config.interval = document.getElementById('interval').value;
+  config.lookback = parseInt(document.getElementById('lookback').value);
+  config.bal = parseFloat(document.getElementById('bal').value)||100;
+  config.lot = parseFloat(document.getElementById('lot').value)||0.01;
+  config.slPct = parseFloat(document.getElementById('sl-pct').value)||0;
+
+  // Persist last symbol
+  localStorage.setItem('cpr_last_symbol', sym);
+
+  scanning = true;
+  allTrades = [];
+  breakFired = null;
+  runningBal = config.bal;
+  document.getElementById('scan-btn').disabled = true;
+  document.getElementById('prog-wrap').style.display = 'block';
+  setStatus('running', 'Fetching...');
+  const slLabel = config.slPct > 0 ? `, SL ${config.slPct}%` : ', no SL';
+  log('info', `Starting scan: ${sym} (${config.interval}, ${config.lookback} days${slLabel})...`);
+
+  // Always work in UTC dates to match Delta's candle timestamps
+  const todayUTC = new Date();
+  const days = [];
+  for (let i = config.lookback; i >= 1; i--) {
+    const d = new Date(Date.UTC(
+      todayUTC.getUTCFullYear(), todayUTC.getUTCMonth(), todayUTC.getUTCDate() - i
+    ));
+    days.push(d);
+  }
+
+  const periodStart = Math.floor(days[0].getTime()/1000) - 86400;
+  const periodEnd   = Math.floor(todayUTC.getTime()/1000);
+
+  // Chunk-based fetch
+  async function fetchAllCandles(symbol, resolution, start, end, labelPrefix) {
+    const resSeconds = {'5m':300,'15m':900,'30m':1800,'1h':3600,'1d':86400}[resolution] || 900;
+    const chunkSize  = resSeconds * 500;
+    const chunks = [];
+    for (let s = start; s < end; s += chunkSize) {
+      chunks.push({ s, e: Math.min(s + chunkSize, end) });
+    }
+    const seen = new Set();
+    let all = [];
+    for (let i = 0; i < chunks.length; i++) {
+      const { s, e } = chunks[i];
+      document.getElementById('prog-txt').textContent =
+        `${labelPrefix} chunk ${i+1}/${chunks.length}...`;
+      document.getElementById('prog-pct').textContent =
+        Math.round((i+1)/chunks.length*100)+'%';
+      const url = `${DELTA}/v2/history/candles?symbol=${symbol}&resolution=${resolution}&start=${s}&end=${e}`;
+      const r = await fetch(url);
+      const d = await r.json();
+      if (d.result && d.result.length > 0) {
+        d.result.forEach(c => { if (!seen.has(c.time)) { seen.add(c.time); all.push(c); } });
+      }
+      await new Promise(r=>setTimeout(r,120));
+    }
+    return all.sort((a,b)=>a.time-b.time);
+  }
+
+  let dailyCandles = [], intradayAll = [];
+  try {
+    dailyCandles = await fetchAllCandles(sym, '1d', periodStart, periodEnd, 'Daily candles');
+    if (dailyCandles.length < 2) {
+      log('error',`No daily candles returned for "${sym}". Check the symbol and try again.`);
+      document.getElementById('pair-status').textContent = '⚠ symbol not found';
+      document.getElementById('pair-status').style.color = 'var(--red)';
+      setStatus('','Error');
+      scanning = false;
+      document.getElementById('scan-btn').disabled = false;
+      return;
+    }
+    // Symbol confirmed valid — update hint
+    document.getElementById('pair-status').textContent = `✓ ${dailyCandles.length} daily candles`;
+    document.getElementById('pair-status').style.color = 'var(--green)';
+
+    intradayAll = await fetchAllCandles(sym, config.interval, periodStart, periodEnd, `${config.interval} candles`);
+    if (intradayAll.length === 0) {
+      log('error','No intraday candles returned.');
+      setStatus('','Error');
+      scanning = false;
+      document.getElementById('scan-btn').disabled = false;
+      return;
+    }
+    log('success', `${dailyCandles.length} daily + ${intradayAll.length} intraday candles loaded. Processing...`);
+  } catch(e) {
+    log('error','Fetch failed: '+e.message);
+    setStatus('','Error');
+    scanning = false;
+    document.getElementById('scan-btn').disabled = false;
+    return;
+  }
+
+  // Group intraday candles by UTC date string
+  const intradayByDay = {};
+  intradayAll.forEach(c => {
+    const d = new Date(c.time * 1000);
+    const dateStr = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+    if (!intradayByDay[dateStr]) intradayByDay[dateStr] = [];
+    intradayByDay[dateStr].push(c);
+  });
+
+  const noTradeDays = [];
+  let scanned = 0;
+
+  function finalizeBreak(exitPrice, exitTimeStr, reason) {
+    if (!breakFired) return;
+    let result = 'No Target';
+    if (breakFired.dir === 'BUY') {
+      if (breakFired.hitR3) result = 'Hit R3';
+      else if (breakFired.hitR2) result = 'Hit R2';
+    } else {
+      if (breakFired.hitS3) result = 'Hit S3';
+      else if (breakFired.hitS2) result = 'Hit S2';
+    }
+    if (result === 'No Target' && exitPrice != null) {
+      result = reason === 'sl' ? 'SL Hit' : 'EOD Close';
+      breakFired.eodClose = exitPrice;
+      breakFired.eodTime  = exitTimeStr;
+    }
+    breakFired.result = result;
+    const exitPx = result.startsWith('Hit') ? (
+      breakFired.dir==='BUY' ? (breakFired.hitR3 ? breakFired.cpr.r3 : breakFired.cpr.r2)
+                              : (breakFired.hitS3 ? breakFired.cpr.s3 : breakFired.cpr.s2)
+    ) : (breakFired.eodClose || breakFired.entry);
+    const priceDiff = breakFired.dir==='BUY' ? exitPx - breakFired.entry : breakFired.entry - exitPx;
+    breakFired.pnl = priceDiff * config.lot;
+    allTrades.push({...breakFired});
+    const logType = result.startsWith('Hit') ? 'success' : result === 'SL Hit' ? 'error' : result === 'EOD Close' ? 'info' : 'warn';
+    log(logType, `${breakFired.day} ${breakFired.dir} → ${result} (entry:${breakFired.entry.toFixed(0)}${exitPrice!=null?' exit:'+exitPrice.toFixed(0):''})`);
+    breakFired = null;
+  }
+
+  setStatus('running', 'Scanning...');
+
+  for (let di = 0; di < days.length; di++) {
+    const day = days[di];
+    const dayStr = `${day.getUTCFullYear()}-${String(day.getUTCMonth()+1).padStart(2,'0')}-${String(day.getUTCDate()).padStart(2,'0')}`;
+    const dayTs = Math.floor(day.getTime()/1000);
+
+    const prevDaily = dailyCandles.filter(c => c.time < dayTs).slice(-1)[0];
+    if (!prevDaily) {
+      scanned++;
+      updateProgress(scanned, days.length);
+      continue;
+    }
+
+    const cpr = calcCPR(parseFloat(prevDaily.high), parseFloat(prevDaily.low), parseFloat(prevDaily.close));
+    const intraday = intradayByDay[dayStr] || [];
+
+    if (intraday.length < 2) {
+      if (!breakFired) noTradeDays.push({day:dayStr, reason:'No intraday data', cpr});
+      scanned++;
+      updateProgress(scanned, days.length);
+      continue;
+    }
+
+    let hadBreakToday = !!breakFired;
+
+    for (let ci = 1; ci < intraday.length; ci++) {
+      const candle    = intraday[ci];
+      const prev      = intraday[ci-1];
+      const close     = parseFloat(candle.close);
+      const prevClose = parseFloat(prev.close);
+      const high      = parseFloat(candle.high);
+      const low       = parseFloat(candle.low);
+      const _ct = new Date(candle.time*1000);
+      const ts = `${String(_ct.getUTCHours()).padStart(2,'0')}:${String(_ct.getUTCMinutes()).padStart(2,'0')}`;
+
+      if (breakFired) {
+        hadBreakToday = true;
+        const bc = breakFired.cpr;
+        const slPct = config.slPct;
+
+        if (slPct > 0) {
+          const slPrice = breakFired.dir === 'BUY'
+            ? breakFired.entry * (1 - slPct / 100)
+            : breakFired.entry * (1 + slPct / 100);
+          const slTriggered = breakFired.dir === 'BUY' ? low <= slPrice : high >= slPrice;
+          if (slTriggered) {
+            finalizeBreak(slPrice, `${dayStr} ${ts}`, 'sl');
+            if (!breakFired) continue;
+          }
+        }
+
+        if (breakFired) {
+          if (breakFired.dir === 'BUY') {
+            if (!breakFired.hitR2 && high >= bc.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
+            if (!breakFired.hitR3 && high >= bc.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
+            if (breakFired.hitR2) { finalizeBreak(); }
+          } else {
+            if (!breakFired.hitS2 && low <= bc.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
+            if (!breakFired.hitS3 && low <= bc.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
+            if (breakFired.hitS2) { finalizeBreak(); }
+          }
+        }
+        if (breakFired) continue;
+      }
+
+      if (!hadBreakToday && close < cpr.s1 && prevClose >= cpr.s1) {
+        breakFired = {
+          day:dayStr, dir:'SELL', trigger:'S1 Break',
+          entry:close, entryTime:`${dayStr} ${ts}`,
+          s1:cpr.s1, s2:cpr.s2, s3:cpr.s3,
+          hitS2:false, hitS3:false, s2Time:null, s3Time:null,
+          cpr
+        };
+        hadBreakToday = true;
+        if (low <= cpr.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
+        if (low <= cpr.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
+        if (breakFired.hitS2) { finalizeBreak(); }
+        log('cpr', `${dayStr} ${ts}: S1 BREAK SELL @ ${close.toFixed(0)} → S2:${cpr.s2.toFixed(0)} S3:${cpr.s3.toFixed(0)}`);
+      }
+      else if (!hadBreakToday && close > cpr.r1 && prevClose <= cpr.r1) {
+        breakFired = {
+          day:dayStr, dir:'BUY', trigger:'R1 Break',
+          entry:close, entryTime:`${dayStr} ${ts}`,
+          r1:cpr.r1, r2:cpr.r2, r3:cpr.r3,
+          hitR2:false, hitR3:false, r2Time:null, r3Time:null,
+          cpr
+        };
+        hadBreakToday = true;
+        if (high >= cpr.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
+        if (high >= cpr.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
+        if (breakFired.hitR2) { finalizeBreak(); }
+        log('cpr', `${dayStr} ${ts}: R1 BREAK BUY @ ${close.toFixed(0)} → R2:${cpr.r2.toFixed(0)} R3:${cpr.r3.toFixed(0)}`);
+      }
+    }
+
+    if (breakFired) {
+      const lastCandle = intraday[intraday.length - 1];
+      const eodPrice = parseFloat(lastCandle.close);
+      const _et = new Date(lastCandle.time*1000);
+      const eodTs = `${String(_et.getUTCHours()).padStart(2,'0')}:${String(_et.getUTCMinutes()).padStart(2,'0')}`;
+      finalizeBreak(eodPrice, `${dayStr} ${eodTs}`);
+    }
+
+    if (!hadBreakToday) {
+      noTradeDays.push({day:dayStr, reason:'No R1/S1 break', cpr});
+    }
+
+    scanned++;
+    updateProgress(scanned, days.length);
+    await delay(10);
+  }
+
+  if (breakFired) finalizeBreak();
+
+  scanning = false;
+  setStatus('done','Complete');
+  document.getElementById('scan-btn').disabled = false;
+  log('success', `Scan complete. ${allTrades.length} trades found across ${scanned} days.`);
+  renderResults(noTradeDays, scanned);
+}
+
+function updateProgress(done, total) {
+  const pct = Math.round(done/total*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  const activeMsg = breakFired ? ` [tracking ${breakFired.dir}]` : '';
+  document.getElementById('prog-txt').textContent = `Day ${done} of ${total}${activeMsg}`;
+  document.getElementById('prog-pct').textContent = pct+'%';
+}
+
+const delay = ms => new Promise(r=>setTimeout(r,ms));
+
+// ─── RENDER RESULTS ──────────────────────────────────────────
+function renderResults(noTradeDays, daysScanned) {
+  const trades = allTrades;
+  if (trades.length === 0) {
+    document.getElementById('trade-tbody').innerHTML = '<tr><td colspan="12" class="empty">No R1/S1 breaks found.</td></tr>';
+    document.getElementById('s-trades').textContent = '0';
+    document.getElementById('s-days').textContent = `Days scanned: ${daysScanned} | No break: ${noTradeDays.length}`;
+    return;
+  }
+
+  const buys  = trades.filter(t=>t.dir==='BUY');
+  const sells = trades.filter(t=>t.dir==='SELL');
+  const hitR2 = trades.filter(t=>t.dir==='BUY'&&t.hitR2);
+  const hitR3 = trades.filter(t=>t.dir==='BUY'&&t.hitR3);
+  const hitS2 = trades.filter(t=>t.dir==='SELL'&&t.hitS2);
+  const hitS3 = trades.filter(t=>t.dir==='SELL'&&t.hitS3);
+  const eodClosed = trades.filter(t=>t.result==='EOD Close');
+  const slHits    = trades.filter(t=>t.result==='SL Hit');
+  const anyTarget = trades.filter(t=>(t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2));
+  const wr = (anyTarget.length/trades.length*100).toFixed(1);
+
+  document.getElementById('s-trades').textContent = trades.length;
+  document.getElementById('s-wr').textContent = wr+'%';
+  document.getElementById('s-wr-bar').style.width = wr+'%';
+  document.getElementById('s-wr-bar').style.background = parseFloat(wr)>=50?'var(--green)':parseFloat(wr)>=35?'var(--orange)':'var(--red)';
+  const totalPnl = trades.reduce((s,t)=>s+(t.pnl||0), 0);
+  const finalBal = config.bal + totalPnl;
+  const pnlEl = document.getElementById('s-pnl');
+  pnlEl.textContent = (totalPnl >= 0 ? '+$' : '-$') + Math.abs(totalPnl).toFixed(2);
+  pnlEl.style.color = totalPnl >= 0 ? 'var(--green)' : 'var(--red)';
+  pnlEl.style.fontSize = '1.3rem';
+  document.getElementById('s-bal2').textContent = `Final bal: $${finalBal.toFixed(2)} (${buys.length}B / ${sells.length}S)`;
+  document.getElementById('s-tp1').textContent = `R2:${hitR2.length} S2:${hitS2.length}`;
+  document.getElementById('s-tp2').textContent = `R3:${hitR3.length} S3:${hitS3.length} EOD:${eodClosed.length} SL:${slHits.length}`;
+  document.getElementById('s-rr').textContent = `${anyTarget.length}/${trades.length}`;
+  document.getElementById('s-days').textContent = `Scanned: ${daysScanned} | No break: ${noTradeDays.length}`;
+  document.getElementById('trade-count').textContent = `(${trades.length} breaks)`;
+
+  // Monthly breakdown
+  const months = {};
+  trades.forEach(t => {
+    const m = t.day.substr(0,7);
+    if (!months[m]) months[m]={total:0,hit:0,buys:0,sells:0,r2:0,r3:0,s2:0,s3:0,pnl:0};
+    months[m].total++;
+    months[m].pnl += (t.pnl||0);
+    if (t.dir==='BUY') { months[m].buys++; if(t.hitR2)months[m].r2++; if(t.hitR3)months[m].r3++; }
+    else               { months[m].sells++; if(t.hitS2)months[m].s2++; if(t.hitS3)months[m].s3++; }
+    if ((t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2)) months[m].hit++;
+  });
+  const mKeys = Object.keys(months).sort();
+  document.getElementById('month-grid').innerHTML = mKeys.length===0
+    ? '<div class="empty" style="grid-column:1/-1">No data</div>'
+    : mKeys.map(m => {
+        const mo = months[m];
+        const mwr = mo.total>0 ? (mo.hit/mo.total*100).toFixed(0)+'%' : '—';
+        const d = new Date(m+'-01');
+        const mn = d.toLocaleString('default',{month:'short',year:'2-digit'});
+        const good = parseFloat(mwr)>=50;
+        const mpnl = mo.pnl>=0 ? '+$'+mo.pnl.toFixed(2) : '-$'+Math.abs(mo.pnl).toFixed(2);
+        return `<div class="month-card ${good?'pos':'neg'}">
+          <div class="mn">${mn}</div>
+          <div class="mp ${good?'pos':'neg'}">${mo.hit}/${mo.total} hit</div>
+          <div class="ms" style="font-weight:700;color:${mo.pnl>=0?'var(--green)':'var(--red)'}">${mpnl}</div>
+          <div class="ms">WR ${mwr} · B:${mo.buys} S:${mo.sells}</div>
+          <div class="ms" style="margin-top:2px">R2:${mo.r2} R3:${mo.r3} S2:${mo.s2} S3:${mo.s3}</div>
+        </div>`;
+      }).join('');
+
+  // Trade table
+  const tbody = document.getElementById('trade-tbody');
+  tbody.innerHTML = trades.map((t,i) => {
+    const c = t.cpr;
+    const hitTgt  = (t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2);
+    const hitFull = (t.dir==='BUY'&&t.hitR3)||(t.dir==='SELL'&&t.hitS3);
+    const isEOD   = t.result === 'EOD Close';
+    const isSL    = t.result === 'SL Hit';
+    const lbl = hitFull ? (t.dir==='BUY'?'Hit R3':'Hit S3')
+              : hitTgt  ? (t.dir==='BUY'?'Hit R2':'Hit S2')
+              : isSL    ? `SL ${t.eodClose!=null?t.eodClose.toFixed(0):''}`
+              : isEOD   ? `EOD ${t.eodClose!=null?t.eodClose.toFixed(0):''}`
+              : 'No Target';
+    const rc  = hitFull ? 'tp2' : hitTgt ? 'tp1' : isSL ? 'sl' : isEOD ? 'eod' : 'skip';
+    const tp1v = t.dir==='BUY' ? c.r2.toFixed(0) : c.s2.toFixed(0);
+    const tp2v = t.dir==='BUY' ? c.r3.toFixed(0) : c.s3.toFixed(0);
+    const tp1h = t.dir==='BUY' ? t.hitR2 : t.hitS2;
+    const tp2h = t.dir==='BUY' ? t.hitR3 : t.hitS3;
+    const tp1t = t.dir==='BUY' ? t.r2Time : t.s2Time;
+    const tp2t = t.dir==='BUY' ? t.r3Time : t.s3Time;
+    return `<tr>
+      <td style="color:var(--t3);font-weight:600">${i+1}</td>
+      <td style="font-weight:600">${t.day}</td>
+      <td><span class="tag ${t.dir.toLowerCase()}">${t.dir}</span></td>
+      <td style="color:var(--purple);font-size:0.62rem;font-weight:600">${t.trigger}</td>
+      <td style="font-weight:700">${t.entryTime}</td>
+      <td style="font-weight:700">${t.entry.toFixed(0)}</td>
+      <td style="background:#faf5ff;color:#7c3aed;font-size:0.62rem">${c.pivot.toFixed(0)}</td>
+      <td style="color:var(--red);font-size:0.62rem">${c.r1.toFixed(0)} / ${c.s1.toFixed(0)}</td>
+      <td style="${tp1h?'color:var(--green);font-weight:700':'color:var(--t3)'}">${tp1v}${tp1h?' ✓ '+tp1t:''}</td>
+      <td style="${tp2h?'color:#15803d;font-weight:700':'color:var(--t3)'}">${tp2v}${tp2h?' ✓ '+tp2t:''}</td>
+      <td><span class="tag ${rc}">${lbl}</span></td>
+      <td style="font-weight:700;${t.pnl>=0?'color:var(--green)':'color:var(--red)'}">${t.pnl!=null?(t.pnl>=0?'+$':'-$')+Math.abs(t.pnl).toFixed(2):'—'}</td>
+    </tr>`;
+  }).join('');
+
+  // No-signal days
+  document.getElementById('no-trade-wrap').innerHTML = noTradeDays.length===0
+    ? '<div class="empty">Every day had a R1/S1 break!</div>'
+    : `<div style="padding:10px;display:flex;flex-wrap:wrap;gap:6px;">${noTradeDays.map(d=>`<span style="background:var(--b2);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:0.62rem;color:var(--t2)">${d.day}</span>`).join('')}</div>`;
+}
+
+function resetScan() {
+  allTrades = [];
+  breakFired = null;
+  runningBal = config.bal;
+  scanning = false;
+  document.getElementById('prog-wrap').style.display='none';
+  document.getElementById('prog-fill').style.width='0%';
+  document.getElementById('trade-tbody').innerHTML='<tr><td colspan="12" class="empty">Run the scanner to see trades</td></tr>';
+  document.getElementById('month-grid').innerHTML='<div class="empty" style="grid-column:1/-1">Run the scanner to see monthly breakdown</div>';
+  document.getElementById('no-trade-wrap').innerHTML='<div class="empty">Run the scanner to see no-signal days</div>';
+  document.getElementById('trade-count').textContent='';
+  ['s-trades','s-wr','s-pnl','s-tp1','s-rr'].forEach(id=>document.getElementById(id).textContent='—');
+  document.getElementById('s-wr-bar').style.width='0%';
+  document.getElementById('pair-status').textContent='(type any Delta symbol)';
+  document.getElementById('pair-status').style.color='';
+  setStatus('','Idle');
+  log('info','Reset.');
+}
+
+function setStatus(type, text) {
+  const p = document.getElementById('status-pill');
+  p.className = 'pill'+(type?' '+type:'');
+  document.getElementById('status-txt').textContent = text;
+}
+
+function log(type, msg) {
+  const box = document.getElementById('log-box');
+  const time = new Date().toLocaleTimeString('en-US',{hour12:false});
+  const el = document.createElement('div');
+  el.className = 'le '+type;
+  el.innerHTML = `<span class="lt">${time}</span><span class="lm">${msg}</span>`;
+  box.insertBefore(el, box.firstChild);
+  if (box.children.length>100) box.removeChild(box.lastChild);
+}
+</script>
+</body>
+</html>
