@@ -449,31 +449,34 @@ async function startScan() {
     let hadBreakToday = !!breakFired;
 
     for (let ci = 1; ci < intraday.length; ci++) {
-      const candle = intraday[ci];
-      const prev   = intraday[ci-1];
+      const candle    = intraday[ci];
+      const prev      = intraday[ci-1];
       const close     = parseFloat(candle.close);
       const prevClose = parseFloat(prev.close);
       const high      = parseFloat(candle.high);
       const low       = parseFloat(candle.low);
       const ts = new Date(candle.time*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:false});
 
-      // If a break is already active, track targets using original breakFired CPR
       if (breakFired) {
+        // ── Track targets for active trade ──
         hadBreakToday = true;
         const bc = breakFired.cpr;
         if (breakFired.dir === 'BUY') {
           if (!breakFired.hitR2 && high >= bc.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
           if (!breakFired.hitR3 && high >= bc.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
-          if (breakFired.hitR3) { finalizeBreak(); hadBreakToday = true; }
+          // R2 hit = TP1 reached → close trade (best result so far recorded)
+          if (breakFired.hitR2) { finalizeBreak(); }
         } else {
           if (!breakFired.hitS2 && low <= bc.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
           if (!breakFired.hitS3 && low <= bc.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
-          if (breakFired.hitS3) { finalizeBreak(); hadBreakToday = true; }
+          // S2 hit = TP1 reached → close trade
+          if (breakFired.hitS2) { finalizeBreak(); }
         }
-        if (breakFired) continue; // still tracking, skip new signal detection
+        // Trade still open → keep scanning this day, but don't look for new breaks
+        if (breakFired) continue;
       }
 
-      // Look for new S1 break → SELL
+      // ── Look for new S1 break → SELL ──
       if (close < cpr.s1 && prevClose >= cpr.s1) {
         breakFired = {
           day:dayStr, dir:'SELL', trigger:'S1 Break',
@@ -483,11 +486,13 @@ async function startScan() {
           cpr
         };
         hadBreakToday = true;
+        // Check same candle immediately
         if (low <= cpr.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
         if (low <= cpr.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
+        if (breakFired.hitS2) { finalizeBreak(); }
         log('cpr', `${dayStr} ${ts}: S1 BREAK SELL @ ${close.toFixed(0)} → S2:${cpr.s2.toFixed(0)} S3:${cpr.s3.toFixed(0)}`);
       }
-      // Look for new R1 break → BUY
+      // ── Look for new R1 break → BUY ──
       else if (close > cpr.r1 && prevClose <= cpr.r1) {
         breakFired = {
           day:dayStr, dir:'BUY', trigger:'R1 Break',
@@ -497,13 +502,15 @@ async function startScan() {
           cpr
         };
         hadBreakToday = true;
+        // Check same candle immediately
         if (high >= cpr.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
         if (high >= cpr.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
+        if (breakFired.hitR2) { finalizeBreak(); }
         log('cpr', `${dayStr} ${ts}: R1 BREAK BUY @ ${close.toFixed(0)} → R2:${cpr.r2.toFixed(0)} R3:${cpr.r3.toFixed(0)}`);
       }
     }
 
-    // End of day — EOD close any active trade at last candle's close
+    // ── End of day: EOD close if trade still open ──
     if (breakFired) {
       const lastCandle = intraday[intraday.length - 1];
       const eodPrice = parseFloat(lastCandle.close);
