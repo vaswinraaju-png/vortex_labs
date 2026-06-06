@@ -184,9 +184,9 @@
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-section">
-      <h3>Gemini API Key</h3>
+      <h3>Claude API Key</h3>
       <div class="form-group">
-        <input type="password" id="gemini-key" placeholder="AIza..." />
+        <input type="password" id="gemini-key" placeholder="sk-ant-..." />
       </div>
       <div class="form-group">
         <label>Starting Balance (USD)</label>
@@ -214,7 +214,7 @@
         </select>
       </div>
       <div class="form-group">
-        <label>Gemini analyses every N candles</label>
+        <label>Claude analyses every N candles</label>
         <select id="analyze-every">
           <option value="1">Every candle</option>
           <option value="3" selected>Every 3 candles</option>
@@ -282,7 +282,7 @@
         </div>
       </div>
       <div class="ai-reasoning">
-        <div class="ai-label">🤖 Gemini Reasoning</div>
+        <div class="ai-label">🤖 Claude Reasoning</div>
         <div id="ai-reasoning-text">Fetch data and start replay to begin analysis...</div>
       </div>
     </div>
@@ -638,20 +638,24 @@ Respond ONLY in valid JSON, no markdown fences:
 }`;
 
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${state.geminiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.25, maxOutputTokens: 500 }
-        })
-      }
-    );
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': state.geminiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 512,
+        temperature: 0.25,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
     const data = await res.json();
-    if (data.error) { log('error', 'Gemini: ' + data.error.message); setStatus('replay', 'Replaying'); return; }
-    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if (data.error) { log('error', 'Claude: ' + data.error.message); setStatus('replay', 'Replaying'); return; }
+    const raw = data.content?.[0]?.text || '';
     const cleaned = raw.replace(/```json|```/g, '').trim();
     const parsed = JSON.parse(cleaned);
 
@@ -680,7 +684,7 @@ Respond ONLY in valid JSON, no markdown fences:
     }
     openTrade(sig, cursorIdx);
   } catch(e) {
-    log('error', 'Gemini error: ' + e.message);
+    log('error', 'Claude error: ' + e.message);
   }
   setStatus('replay', 'Replaying');
 }
