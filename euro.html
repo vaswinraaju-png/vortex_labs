@@ -139,7 +139,7 @@ tbody tr:last-child td{border-bottom:none;}
     <div class="brand">CPR Scanner <span>●</span><small>storiesbyachu · 90-Day Backtest</small></div>
     <div class="pill" id="status-pill"><div class="d"></div><span id="status-txt">Idle</span></div>
   </div>
-  <div style="font-size:0.62rem;color:var(--t3)">Pure CPR · R1/S1 Break · R:R ≥ 2</div>
+  <div style="font-size:0.62rem;color:var(--t3)">Pure CPR · R1 Break → R2/R3 · S1 Break → S2/S3</div>
 </div>
 
 <div class="layout">
@@ -173,14 +173,6 @@ tbody tr:last-child td{border-bottom:none;}
           <option value="30">30 Days</option>
           <option value="60">60 Days</option>
           <option value="90" selected>90 Days</option>
-        </select>
-      </div>
-      <div class="fr"><label>Min R:R</label>
-        <select id="min-rr">
-          <option value="1.5">1.5</option>
-          <option value="2" selected>2.0</option>
-          <option value="2.5">2.5</option>
-          <option value="3">3.0</option>
         </select>
       </div>
       <div class="fr"><label>Starting Balance (USD)</label>
@@ -296,17 +288,28 @@ async function loadPairs() {
   try {
     const res = await fetch(`${DELTA}/v2/products?contract_types=perpetual_futures,futures&states=live`);
     const data = await res.json();
-    const pairs = (data.result||[]).filter(p=>p.symbol?.includes('BTC')).sort((a,b)=>a.symbol.localeCompare(b.symbol));
+    const pairs = (data.result||[]).sort((a,b)=>a.symbol.localeCompare(b.symbol));
     const sel = document.getElementById('btc-pair');
     sel.innerHTML = '<option value="">— Select —</option>';
-    pairs.forEach(p => {
-      const o = document.createElement('option');
-      o.value = p.symbol;
-      o.textContent = `${p.symbol} — ${p.description||''}`;
-      sel.appendChild(o);
-    });
+    // Group by underlying
+    const btc = pairs.filter(p=>p.symbol?.includes('BTC'));
+    const others = pairs.filter(p=>!p.symbol?.includes('BTC'));
+    const addGroup = (label, items) => {
+      if (!items.length) return;
+      const og = document.createElement('optgroup');
+      og.label = label;
+      items.forEach(p => {
+        const o = document.createElement('option');
+        o.value = p.symbol;
+        o.textContent = `${p.symbol} — ${p.description||''}`;
+        og.appendChild(o);
+      });
+      sel.appendChild(og);
+    };
+    addGroup('BTC', btc);
+    addGroup('Others', others);
     document.getElementById('scan-btn').disabled = false;
-    log('success', `${pairs.length} pairs loaded.`);
+    log('success', `${pairs.length} pairs loaded (${btc.length} BTC + ${others.length} others).`);
   } catch(e) { log('error','Load pairs failed: '+e.message); }
   document.getElementById('load-btn').disabled = false;
 }
@@ -332,7 +335,6 @@ async function startScan() {
   config.pair = sym;
   config.interval = document.getElementById('interval').value;
   config.lookback = parseInt(document.getElementById('lookback').value);
-  config.minRR = parseFloat(document.getElementById('min-rr').value);
   config.bal = parseFloat(document.getElementById('bal').value)||100;
   config.lot = parseFloat(document.getElementById('lot').value)||0.01;
 
