@@ -347,16 +347,19 @@ async function startScan() {
   setStatus('running', 'Fetching...');
   log('info', `Fetching all data for ${sym} (${config.interval}, ${config.lookback} days)...`);
 
-  const today = new Date();
+  // Always work in UTC dates to match Delta's candle timestamps
+  const todayUTC = new Date();
+  const todayDateStr = todayUTC.toISOString().split('T')[0]; // e.g. "2026-06-06"
   const days = [];
   for (let i = config.lookback; i >= 1; i--) {
-    const d = new Date(today);
-    d.setDate(today.getDate()-i);
+    const d = new Date(Date.UTC(
+      todayUTC.getUTCFullYear(), todayUTC.getUTCMonth(), todayUTC.getUTCDate() - i
+    ));
     days.push(d);
   }
 
   const periodStart = Math.floor(days[0].getTime()/1000) - 86400;
-  const periodEnd   = Math.floor(today.getTime()/1000);
+  const periodEnd   = Math.floor(todayUTC.getTime()/1000);
 
   let dailyCandles = [], intradayAll = [];
   try {
@@ -388,10 +391,11 @@ async function startScan() {
     return;
   }
 
-  // Group intraday candles by date string
+  // Group intraday candles by UTC date string — must match Delta's daily candle boundaries
   const intradayByDay = {};
   intradayAll.forEach(c => {
-    const dateStr = new Date(c.time*1000).toISOString().split('T')[0];
+    const d = new Date(c.time * 1000);
+    const dateStr = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
     if (!intradayByDay[dateStr]) intradayByDay[dateStr] = [];
     intradayByDay[dateStr].push(c);
   });
@@ -426,8 +430,8 @@ async function startScan() {
 
   for (let di = 0; di < days.length; di++) {
     const day = days[di];
-    const dayStr = day.toISOString().split('T')[0];
-    const dayTs = Math.floor(day.getTime()/1000);
+    const dayStr = `${day.getUTCFullYear()}-${String(day.getUTCMonth()+1).padStart(2,'0')}-${String(day.getUTCDate()).padStart(2,'0')}`;
+    const dayTs = Math.floor(day.getTime()/1000); // already UTC midnight since we built days[] with Date.UTC
 
     const prevDaily = dailyCandles.filter(c => c.time < dayTs).slice(-1)[0];
     if (!prevDaily) {
@@ -455,7 +459,8 @@ async function startScan() {
       const prevClose = parseFloat(prev.close);
       const high      = parseFloat(candle.high);
       const low       = parseFloat(candle.low);
-      const ts = new Date(candle.time*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:false});
+      const _ct = new Date(candle.time*1000);
+      const ts = `${String(_ct.getUTCHours()).padStart(2,'0')}:${String(_ct.getUTCMinutes()).padStart(2,'0')}`;
 
       if (breakFired) {
         // ── Track targets for active trade ──
@@ -514,7 +519,8 @@ async function startScan() {
     if (breakFired) {
       const lastCandle = intraday[intraday.length - 1];
       const eodPrice = parseFloat(lastCandle.close);
-      const eodTs = new Date(lastCandle.time*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:false});
+      const _et = new Date(lastCandle.time*1000);
+      const eodTs = `${String(_et.getUTCHours()).padStart(2,'0')}:${String(_et.getUTCMinutes()).padStart(2,'0')}`;
       finalizeBreak(eodPrice, `${dayStr} ${eodTs}`);
     }
 
