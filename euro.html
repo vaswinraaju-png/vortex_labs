@@ -211,11 +211,11 @@ tbody tr:last-child td{border-bottom:none;}
 
   <!-- STATS -->
   <div class="stat-row" id="stat-row">
-    <div class="stat"><div class="sl">Total Trades</div><div class="sv" id="s-trades">—</div><div class="ss">R1/S1 breaks taken</div></div>
-    <div class="stat green"><div class="sl">Win Rate</div><div class="sv" id="s-wr">—</div><div class="wr-bar"><div class="wr-fill" id="s-wr-bar" style="width:0%"></div></div></div>
+    <div class="stat"><div class="sl">Total Breaks</div><div class="sv" id="s-trades">—</div><div class="ss" id="s-bal">R1/S1 breaks found</div></div>
+    <div class="stat green"><div class="sl">Target Hit Rate</div><div class="sv" id="s-wr">—</div><div class="wr-bar"><div class="wr-fill" id="s-wr-bar" style="width:0%"></div></div></div>
     <div class="stat orange"><div class="sl">Net P&L</div><div class="sv" id="s-pnl">—</div><div class="ss" id="s-bal">Balance: $100</div></div>
-    <div class="stat blue"><div class="sl">TP1 Hits</div><div class="sv" id="s-tp1">—</div><div class="ss" id="s-tp2">TP2: —</div></div>
-    <div class="stat purple"><div class="sl">Avg R:R</div><div class="sv" id="s-rr">—</div><div class="ss" id="s-days">Days scanned: 0</div></div>
+    <div class="stat blue"><div class="sl">R2/S2 Hits</div><div class="sv" id="s-tp1">—</div><div class="ss" id="s-tp2">TP2: —</div></div>
+    <div class="stat purple"><div class="sl">Hit / Total</div><div class="sv" id="s-rr">—</div><div class="ss" id="s-days">Days scanned: 0</div></div>
   </div>
 
   <!-- MONTHLY BREAKDOWN -->
@@ -238,22 +238,13 @@ tbody tr:last-child td{border-bottom:none;}
               <th>Date</th>
               <th>Dir</th>
               <th>Trigger</th>
+              <th>Break Time</th>
               <th>Entry</th>
-              <th>SL</th>
-              <th>TP1</th>
-              <th>TP2</th>
-              <th>R:R</th>
-              <th>Exit</th>
+              <th>Pivot</th>
+              <th>R1 / S1</th>
+              <th>R2 / S2 (TP1)</th>
+              <th>R3 / S3 (TP2)</th>
               <th>Result</th>
-              <th>P&L</th>
-              <th>Balance</th>
-              <th style="background:#f5f3ff;color:#7c3aed">Pivot</th>
-              <th style="background:#f5f3ff;color:#d97706">TC</th>
-              <th style="background:#f5f3ff;color:#0891b2">BC</th>
-              <th style="background:#f5f3ff;color:var(--red)">R1</th>
-              <th style="background:#f5f3ff;color:var(--red)">R2</th>
-              <th style="background:#f5f3ff;color:var(--blue)">S1</th>
-              <th style="background:#f5f3ff;color:var(--blue)">S2</th>
             </tr>
           </thead>
           <tbody id="trade-tbody">
@@ -403,11 +394,12 @@ async function startScan() {
       intraday = (d.result||[]).sort((a,b)=>a.time-b.time);
     } catch(e) { log('warn',`${dayStr}: fetch error`); scanned++; updateProgress(scanned,days.length); continue; }
 
-    if (intraday.length < 2) { noTradeDays.push({day:dayStr,reason:'No intraday data'}); scanned++; updateProgress(scanned,days.length); continue; }
+    if (intraday.length < 2) { noTradeDays.push({day:dayStr,reason:'No intraday data',cpr}); scanned++; updateProgress(scanned,days.length); continue; }
 
-    // Scan candles for R1/S1 breaks
-    let dayTrades = [];
-    let openTrade = null;
+    // PURE FACT FINDER — no SL, no R:R filter
+    // Q: after R1/S1 break, did price reach R2, R3, S2, S3 that same day?
+    let dayEvents = [];
+    let breakFired = null; // track first break of the day
 
     for (let ci = 1; ci < intraday.length; ci++) {
       const candle = intraday[ci];
@@ -418,101 +410,64 @@ async function startScan() {
       const low = parseFloat(candle.low);
       const ts = new Date(candle.time*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:false});
 
-      // Check open trade SL/TP
-      if (openTrade) {
-        let hitSL=false, hitTP1=false, hitTP2=false;
-        if (openTrade.dir==='BUY') {
-          hitSL = low <= openTrade.sl;
-          hitTP2 = high >= openTrade.tp2;
-          hitTP1 = high >= openTrade.tp1 && !hitTP2;
+      // After a break fires, track if targets were hit in remaining candles
+      if (breakFired) {
+        if (breakFired.dir === 'BUY') {
+          if (!breakFired.hitR2 && high >= cpr.r2) { breakFired.hitR2 = true; breakFired.r2Time = ts; }
+          if (!breakFired.hitR3 && high >= cpr.r3) { breakFired.hitR3 = true; breakFired.r3Time = ts; }
         } else {
-          hitSL = high >= openTrade.sl;
-          hitTP2 = low <= openTrade.tp2;
-          hitTP1 = low <= openTrade.tp1 && !hitTP2;
+          if (!breakFired.hitS2 && low <= cpr.s2) { breakFired.hitS2 = true; breakFired.s2Time = ts; }
+          if (!breakFired.hitS3 && low <= cpr.s3) { breakFired.hitS3 = true; breakFired.s3Time = ts; }
         }
-
-        if (hitSL && !hitTP1 && !hitTP2) {
-          const exit = openTrade.sl;
-          const diff = openTrade.dir==='BUY' ? exit-openTrade.entry : openTrade.entry-exit;
-          const pnl = diff*config.lot;
-          runningBal += pnl;
-          dayTrades.push({...openTrade,exit,result:'SL',pnl,bal:runningBal,exitTime:ts});
-          openTrade = null;
-        } else if (hitTP2) {
-          const exit = openTrade.tp2;
-          const diff = openTrade.dir==='BUY' ? exit-openTrade.entry : openTrade.entry-exit;
-          const pnl = diff*config.lot;
-          runningBal += pnl;
-          dayTrades.push({...openTrade,exit,result:'TP2',pnl,bal:runningBal,exitTime:ts});
-          openTrade = null;
-        } else if (hitTP1) {
-          const exit = openTrade.tp1;
-          const diff = openTrade.dir==='BUY' ? exit-openTrade.entry : openTrade.entry-exit;
-          const pnl = diff*config.lot;
-          runningBal += pnl;
-          dayTrades.push({...openTrade,exit,result:'TP1',pnl,bal:runningBal,exitTime:ts});
-          openTrade = null;
-        }
-        if (openTrade) continue; // still open, check next candle
+        continue; // don't look for new breaks after first one
       }
 
-      // Check for new signal (only 1 trade per day)
-      if (dayTrades.length > 0) continue;
-
-      // BUY: candle closes above R1 AND previous candle closed at or below R1
-      const buyBreak = close > cpr.r1 && prevClose <= cpr.r1;
-      // SELL: candle closes below S1 AND previous candle closed at or above S1
-      const sellBreak = close < cpr.s1 && prevClose >= cpr.s1;
-
-      if (buyBreak) {
-        const entry = close;
-        const sl = cpr.bc;
-        const tp1 = cpr.r2;
-        const tp2 = cpr.r3;
-        const risk = entry - sl;
-        const reward1 = tp1 - entry;
-        if (risk <= 0) { log('warn', `${dayStr} ${ts}: BUY break but risk<=0 (entry:${entry.toFixed(0)} sl:${sl.toFixed(0)})`); }
-        else if (reward1/risk < config.minRR) { log('warn', `${dayStr} ${ts}: BUY break R:R ${(reward1/risk).toFixed(2)} < ${config.minRR} — skipped`); }
-        else {
-          openTrade = { day:dayStr, dir:'BUY', trigger:'R1 Break', entry, sl, tp1, tp2, rr:parseFloat((reward1/risk).toFixed(2)), cpr, entryTime:ts };
-          log('cpr', `${dayStr} BUY signal @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} TP1:${tp1.toFixed(0)} R:R ${(reward1/risk).toFixed(2)}`);
-        }
-      } else if (sellBreak) {
-        const entry = close;
-        const sl = cpr.tc;
-        const tp1 = cpr.s2;
-        const tp2 = cpr.s3;
-        const risk = sl - entry;
-        const reward1 = entry - tp1;
-        if (risk <= 0) { log('warn', `${dayStr} ${ts}: SELL break but risk<=0 (entry:${entry.toFixed(0)} sl:${sl.toFixed(0)})`); }
-        else if (reward1/risk < config.minRR) { log('warn', `${dayStr} ${ts}: SELL break R:R ${(reward1/risk).toFixed(2)} < ${config.minRR} — skipped`); }
-        else {
-          openTrade = { day:dayStr, dir:'SELL', trigger:'S1 Break', entry, sl, tp1, tp2, rr:parseFloat((reward1/risk).toFixed(2)), cpr, entryTime:ts };
-          log('cpr', `${dayStr} SELL signal @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} TP1:${tp1.toFixed(0)} R:R ${(reward1/risk).toFixed(2)}`);
-        }
+      // BUY: close above R1
+      if (close > cpr.r1 && prevClose <= cpr.r1) {
+        breakFired = {
+          day:dayStr, dir:'BUY', trigger:'R1 Break',
+          entry:close, entryTime:ts,
+          r1:cpr.r1, r2:cpr.r2, r3:cpr.r3,
+          hitR2:false, hitR3:false, r2Time:null, r3Time:null,
+          cpr
+        };
+        log('cpr', `${dayStr} ${ts}: R1 BREAK BUY @ ${close.toFixed(0)} → watching for R2:${cpr.r2.toFixed(0)} R3:${cpr.r3.toFixed(0)}`);
+      }
+      // SELL: close below S1
+      else if (close < cpr.s1 && prevClose >= cpr.s1) {
+        breakFired = {
+          day:dayStr, dir:'SELL', trigger:'S1 Break',
+          entry:close, entryTime:ts,
+          s1:cpr.s1, s2:cpr.s2, s3:cpr.s3,
+          hitS2:false, hitS3:false, s2Time:null, s3Time:null,
+          cpr
+        };
+        log('cpr', `${dayStr} ${ts}: S1 BREAK SELL @ ${close.toFixed(0)} → watching for S2:${cpr.s2.toFixed(0)} S3:${cpr.s3.toFixed(0)}`);
       }
     }
 
-    // EOD close if still open
-    if (openTrade) {
-      const lastCandle = intraday[intraday.length-1];
-      const exit = parseFloat(lastCandle.close);
-      const diff = openTrade.dir==='BUY' ? exit-openTrade.entry : openTrade.entry-exit;
-      const pnl = diff*config.lot;
-      runningBal += pnl;
-      dayTrades.push({...openTrade,exit,result:'EOD',pnl,bal:runningBal,exitTime:'EOD'});
-      openTrade = null;
+    if (breakFired) {
+      // Determine result
+      let result = 'No Target';
+      if (breakFired.dir === 'BUY') {
+        if (breakFired.hitR3) result = 'Hit R3';
+        else if (breakFired.hitR2) result = 'Hit R2';
+        else result = 'No Target';
+      } else {
+        if (breakFired.hitS3) result = 'Hit S3';
+        else if (breakFired.hitS2) result = 'Hit S2';
+        else result = 'No Target';
+      }
+      dayEvents.push({...breakFired, result});
+      log(result.startsWith('Hit') ? 'success' : 'warn',
+        `${dayStr} ${breakFired.dir} → ${result}`);
+    } else {
+      noTradeDays.push({day:dayStr, reason:'No R1/S1 break', cpr});
     }
 
-    if (dayTrades.length === 0) {
-      noTradeDays.push({day:dayStr, reason:`No valid R1/S1 break (R:R≥${config.minRR})`, cpr});
-    }
-    allTrades.push(...dayTrades);
-
+    allTrades.push(...dayEvents);
     scanned++;
     updateProgress(scanned, days.length);
-
-    // Small delay to avoid rate limiting
     await delay(120);
   }
 
@@ -536,101 +491,94 @@ const delay = ms => new Promise(r=>setTimeout(r,ms));
 function renderResults(noTradeDays, daysScanned) {
   const trades = allTrades;
   if (trades.length === 0) {
-    document.getElementById('trade-tbody').innerHTML = '<tr><td colspan="14" class="empty">No trades found in this period.</td></tr>';
+    document.getElementById('trade-tbody').innerHTML = '<tr><td colspan="12" class="empty">No R1/S1 breaks found.</td></tr>';
+    document.getElementById('s-trades').textContent = '0';
+    document.getElementById('s-days').textContent = `Days scanned: ${daysScanned} | No break: ${noTradeDays.length}`;
     return;
   }
+  const buys = trades.filter(t=>t.dir==='BUY');
+  const sells = trades.filter(t=>t.dir==='SELL');
+  const hitR2 = trades.filter(t=>t.dir==='BUY'&&t.hitR2);
+  const hitR3 = trades.filter(t=>t.dir==='BUY'&&t.hitR3);
+  const hitS2 = trades.filter(t=>t.dir==='SELL'&&t.hitS2);
+  const hitS3 = trades.filter(t=>t.dir==='SELL'&&t.hitS3);
+  const anyTarget = trades.filter(t=>(t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2));
+  const wr = (anyTarget.length/trades.length*100).toFixed(1);
 
-  const wins = trades.filter(t=>t.result==='TP1'||t.result==='TP2');
-  const losses = trades.filter(t=>t.result==='SL');
-  const eods = trades.filter(t=>t.result==='EOD');
-  const tp2s = trades.filter(t=>t.result==='TP2');
-  const tp1s = trades.filter(t=>t.result==='TP1');
-  const wr = (wins.length/trades.length*100).toFixed(1);
-  const totalPnl = trades.reduce((s,t)=>s+t.pnl,0);
-  const avgRR = (trades.reduce((s,t)=>s+t.rr,0)/trades.length).toFixed(2);
-
-  // Stats
   document.getElementById('s-trades').textContent = trades.length;
   document.getElementById('s-wr').textContent = wr+'%';
   document.getElementById('s-wr-bar').style.width = wr+'%';
   document.getElementById('s-wr-bar').style.background = parseFloat(wr)>=50?'var(--green)':parseFloat(wr)>=35?'var(--orange)':'var(--red)';
   const pnlEl = document.getElementById('s-pnl');
-  pnlEl.textContent = (totalPnl>=0?'+$':'-$')+Math.abs(totalPnl).toFixed(2);
-  pnlEl.style.color = totalPnl>=0?'var(--green)':'var(--red)';
-  document.getElementById('s-bal').textContent = `Balance: $${runningBal.toFixed(2)}`;
-  document.getElementById('s-tp1').textContent = tp1s.length;
-  document.getElementById('s-tp2').textContent = `TP2: ${tp2s.length} | EOD: ${eods.length} | SL: ${losses.length}`;
-  document.getElementById('s-rr').textContent = avgRR;
-  document.getElementById('s-days').textContent = `Days scanned: ${daysScanned} | No signal: ${noTradeDays.length}`;
-  document.getElementById('trade-count').textContent = `(${trades.length} trades)`;
+  pnlEl.textContent = `${buys.length}B / ${sells.length}S`;
+  pnlEl.style.color = 'var(--text)'; pnlEl.style.fontSize = '1.1rem';
+  document.getElementById('s-bal').textContent = `Breaks on ${trades.length}/${daysScanned} days`;
+  document.getElementById('s-tp1').textContent = `R2:${hitR2.length} S2:${hitS2.length}`;
+  document.getElementById('s-tp2').textContent = `R3:${hitR3.length} S3:${hitS3.length}`;
+  document.getElementById('s-rr').textContent = `${anyTarget.length}/${trades.length}`;
+  document.getElementById('s-days').textContent = `Scanned: ${daysScanned} | No break: ${noTradeDays.length}`;
+  document.getElementById('trade-count').textContent = `(${trades.length} breaks)`;
 
-  // Monthly breakdown
+  // Monthly
   const months = {};
   trades.forEach(t => {
     const m = t.day.substr(0,7);
-    if (!months[m]) months[m] = {pnl:0,trades:0,wins:0};
-    months[m].pnl += t.pnl;
-    months[m].trades++;
-    if (t.result==='TP1'||t.result==='TP2') months[m].wins++;
+    if (!months[m]) months[m]={total:0,hit:0,buys:0,sells:0,r2:0,r3:0,s2:0,s3:0};
+    months[m].total++;
+    if(t.dir==='BUY'){months[m].buys++;if(t.hitR2)months[m].r2++;if(t.hitR3)months[m].r3++;}
+    else{months[m].sells++;if(t.hitS2)months[m].s2++;if(t.hitS3)months[m].s3++;}
+    if((t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2))months[m].hit++;
   });
-  const mgEl = document.getElementById('month-grid');
-  const mKeys = Object.keys(months).sort();
-  if (mKeys.length === 0) {
-    mgEl.innerHTML = '<div class="empty" style="grid-column:1/-1">No monthly data</div>';
-  } else {
-    mgEl.innerHTML = mKeys.map(m => {
-      const mo = months[m];
-      const mwr = mo.trades>0?(mo.wins/mo.trades*100).toFixed(0)+'%':'—';
-      const cls = mo.pnl>0?'pos':mo.pnl<0?'neg':'neu';
-      const d = new Date(m+'-01');
-      const mname = d.toLocaleString('default',{month:'short',year:'2-digit'});
-      return `<div class="month-card ${mo.pnl>0?'pos':mo.pnl<0?'neg':'neu'}">
-        <div class="mn">${mname}</div>
-        <div class="mp ${cls}">${mo.pnl>=0?'+$':'-$'}${Math.abs(mo.pnl).toFixed(2)}</div>
-        <div class="ms">${mo.trades}T · WR ${mwr}</div>
+  const mKeys=Object.keys(months).sort();
+  document.getElementById('month-grid').innerHTML=mKeys.length===0
+    ?'<div class="empty" style="grid-column:1/-1">No data</div>'
+    :mKeys.map(m=>{
+      const mo=months[m];
+      const mwr=mo.total>0?(mo.hit/mo.total*100).toFixed(0)+'%':'—';
+      const d=new Date(m+'-01');
+      const mn=d.toLocaleString('default',{month:'short',year:'2-digit'});
+      const good=parseFloat(mwr)>=50;
+      return `<div class="month-card ${good?'pos':'neg'}">
+        <div class="mn">${mn}</div>
+        <div class="mp ${good?'pos':'neg'}">${mo.hit}/${mo.total} hit</div>
+        <div class="ms">WR ${mwr} · B:${mo.buys} S:${mo.sells}</div>
+        <div class="ms" style="margin-top:2px">R2:${mo.r2} R3:${mo.r3} S2:${mo.s2} S3:${mo.s3}</div>
       </div>`;
     }).join('');
-  }
 
-  // Trade table
-  let bal = config.bal;
-  const tbody = document.getElementById('trade-tbody');
-  tbody.innerHTML = trades.map((t,i) => {
-    const resClass = t.result==='TP2'?'tp2':t.result==='TP1'?'tp1':t.result==='SL'?'sl':'eod';
-    const c = t.cpr;
+  // Table
+  const tbody=document.getElementById('trade-tbody');
+  tbody.innerHTML=trades.map((t,i)=>{
+    const c=t.cpr;
+    const hitTgt=(t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2);
+    const hitFull=(t.dir==='BUY'&&t.hitR3)||(t.dir==='SELL'&&t.hitS3);
+    const lbl=hitFull?(t.dir==='BUY'?'Hit R3':'Hit S3'):hitTgt?(t.dir==='BUY'?'Hit R2':'Hit S2'):'No Target';
+    const rc=hitFull?'tp2':hitTgt?'tp1':'sl';
+    const tp1v=t.dir==='BUY'?c.r2.toFixed(0):c.s2.toFixed(0);
+    const tp2v=t.dir==='BUY'?c.r3.toFixed(0):c.s3.toFixed(0);
+    const tp1h=t.dir==='BUY'?t.hitR2:t.hitS2;
+    const tp2h=t.dir==='BUY'?t.hitR3:t.hitS3;
+    const tp1t=t.dir==='BUY'?t.r2Time:t.s2Time;
+    const tp2t=t.dir==='BUY'?t.r3Time:t.s3Time;
     return `<tr>
       <td style="color:var(--t3);font-weight:600">${i+1}</td>
-      <td style="font-weight:600">${t.day}<br><span style="color:var(--t3);font-size:0.58rem">${t.entryTime||''} → ${t.exitTime||''}</span></td>
+      <td style="font-weight:600">${t.day}</td>
       <td><span class="tag ${t.dir.toLowerCase()}">${t.dir}</span></td>
       <td style="color:var(--purple);font-size:0.62rem;font-weight:600">${t.trigger}</td>
-      <td style="font-weight:600">${t.entry.toFixed(2)}</td>
-      <td style="color:var(--red)">${t.sl.toFixed(2)}</td>
-      <td style="color:var(--green)">${t.tp1.toFixed(2)}</td>
-      <td style="color:#15803d">${t.tp2.toFixed(2)}</td>
-      <td style="color:var(--orange);font-weight:700">${t.rr}</td>
-      <td style="font-weight:600">${t.exit.toFixed(2)}</td>
-      <td><span class="tag ${resClass}">${t.result}</span></td>
-      <td class="${t.pnl>=0?'pos':'neg'}">${t.pnl>=0?'+$':'-$'}${Math.abs(t.pnl).toFixed(4)}</td>
-      <td style="font-weight:700">$${t.bal.toFixed(2)}</td>
-      <td style="background:#faf5ff;color:#7c3aed;font-size:0.62rem">${c?c.pivot.toFixed(0):'—'}</td>
-      <td style="background:#faf5ff;color:#d97706;font-size:0.62rem">${c?c.tc.toFixed(0):'—'}</td>
-      <td style="background:#faf5ff;color:#0891b2;font-size:0.62rem">${c?c.bc.toFixed(0):'—'}</td>
-      <td style="background:#faf5ff;color:var(--red);font-size:0.62rem">${c?c.r1.toFixed(0):'—'}</td>
-      <td style="background:#faf5ff;color:var(--red);font-size:0.62rem">${c?c.r2.toFixed(0):'—'}</td>
-      <td style="background:#faf5ff;color:var(--blue);font-size:0.62rem">${c?c.s1.toFixed(0):'—'}</td>
-      <td style="background:#faf5ff;color:var(--blue);font-size:0.62rem">${c?c.s2.toFixed(0):'—'}</td>
+      <td style="font-weight:700">${t.entryTime}</td>
+      <td style="font-weight:700">${t.entry.toFixed(0)}</td>
+      <td style="background:#faf5ff;color:#7c3aed;font-size:0.62rem">${c.pivot.toFixed(0)}</td>
+      <td style="color:var(--red);font-size:0.62rem">${c.r1.toFixed(0)} / ${c.s1.toFixed(0)}</td>
+      <td style="${tp1h?'color:var(--green);font-weight:700':'color:var(--t3)'}">${tp1v}${tp1h?' ✓ '+tp1t:''}</td>
+      <td style="${tp2h?'color:#15803d;font-weight:700':'color:var(--t3)'}">${tp2v}${tp2h?' ✓ '+tp2t:''}</td>
+      <td><span class="tag ${rc}">${lbl}</span></td>
     </tr>`;
   }).join('');
 
-  // No trade days
-  const ntEl = document.getElementById('no-trade-wrap');
-  if (noTradeDays.length === 0) {
-    ntEl.innerHTML = '<div class="empty">Every day had a signal!</div>';
-  } else {
-    ntEl.innerHTML = `<div style="padding:10px;display:flex;flex-wrap:wrap;gap:6px;">
-      ${noTradeDays.map(d=>`<span style="background:var(--b2);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:0.62rem;color:var(--t2)">${d.day}</span>`).join('')}
-    </div>`;
-  }
+  // No break days
+  document.getElementById('no-trade-wrap').innerHTML=noTradeDays.length===0
+    ?'<div class="empty">Every day had a R1/S1 break!</div>'
+    :`<div style="padding:10px;display:flex;flex-wrap:wrap;gap:6px;">${noTradeDays.map(d=>`<span style="background:var(--b2);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:0.62rem;color:var(--t2)">${d.day}</span>`).join('')}</div>`;
 }
 
 function resetScan() {
