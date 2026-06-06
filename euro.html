@@ -120,7 +120,15 @@ tbody tr:last-child td{border-bottom:none;}
 .sh::after{content:'';flex:1;height:1px;background:var(--border);}
 .empty{text-align:center;padding:40px;color:var(--t3);font-size:0.72rem;}
 
-::-webkit-scrollbar{width:4px;height:4px;}
+/* TOGGLE SWITCH */
+.toggle{position:relative;display:inline-block;width:36px;height:20px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.tslider{position:absolute;cursor:pointer;inset:0;background:var(--border);border-radius:20px;transition:0.2s;}
+.tslider:before{position:absolute;content:'';height:14px;width:14px;left:3px;bottom:3px;background:white;border-radius:50%;transition:0.2s;}
+.toggle input:checked+.tslider{background:var(--orange);}
+.toggle input:checked+.tslider:before{transform:translateX(16px);}
+
+
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
 
@@ -169,10 +177,7 @@ tbody tr:last-child td{border-bottom:none;}
         </select>
       </div>
       <div class="fr"><label>Lookback (days)</label>
-        <input type="number" id="lookback" value="3000" min="7" max="3000" step="1"/>
-      </div>
-      <div class="fr"><label>Stop Loss %</label>
-        <input type="number" id="sl-pct" value="" min="0.1" max="20" step="0.1" placeholder="e.g. 2  (blank = EOD only)"/>
+        <input type="number" id="lookback" value="300" min="7" max="3000" step="1"/>
       </div>
       <div class="fr"><label>Starting Balance (USD)</label>
         <input type="number" id="bal" value="100" min="10" step="10"/>
@@ -180,8 +185,66 @@ tbody tr:last-child td{border-bottom:none;}
       <div class="fr"><label>Lot Size</label>
         <input type="number" id="lot" value="0.01" min="0.001" step="0.001"/>
       </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span class="ct">Filters</span><span style="font-size:0.58rem;color:var(--t3)">Toggle independently</span></div>
+    <div class="cb">
+
+      <!-- FILTER 1: Session Time -->
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div>
+            <div style="font-size:0.65rem;font-weight:700;color:var(--text)">Session Time Filter</div>
+            <div style="font-size:0.58rem;color:var(--t3)">Only take breaks during active sessions</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="f-session" checked><span class="tslider"></span></label>
+        </div>
+        <div id="f-session-opts" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div class="fr" style="margin:0"><label>From (UTC)</label><input type="time" id="f-session-from" value="08:00"/></div>
+          <div class="fr" style="margin:0"><label>To (UTC)</label><input type="time" id="f-session-to" value="20:00"/></div>
+        </div>
+      </div>
+
+      <!-- FILTER 2: CPR Width -->
+      <div style="margin-bottom:12px;padding-top:10px;border-top:1px solid var(--border2);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div>
+            <div style="font-size:0.65rem;font-weight:700;color:var(--text)">CPR Width Filter</div>
+            <div style="font-size:0.58rem;color:var(--t3)">Skip narrow CPR days (ranging market)</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="f-cpr-width" checked><span class="tslider"></span></label>
+        </div>
+        <div id="f-cpr-opts">
+          <div class="fr" style="margin:0"><label>Min CPR Width % of price</label><input type="number" id="f-cpr-min" value="0.5" min="0.1" max="5" step="0.1" placeholder="e.g. 0.5"/></div>
+        </div>
+      </div>
+
+      <!-- FILTER 3: EOD Time Exit -->
+      <div style="padding-top:10px;border-top:1px solid var(--border2);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div>
+            <div style="font-size:0.65rem;font-weight:700;color:var(--text)">Time-Based Exit</div>
+            <div style="font-size:0.58rem;color:var(--t3)">Close trade if not hit by this time</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="f-exit-time" checked><span class="tslider"></span></label>
+        </div>
+        <div id="f-exit-opts">
+          <div class="fr" style="margin:0"><label>Exit by (UTC)</label><input type="time" id="f-exit-at" value="20:00"/></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+      <div class="fr"><label>Starting Balance (USD)</label>
+        <input type="number" id="bal" value="100" min="10" step="10"/>
+      </div>
+      <div class="fr"><label>Lot Size</label>
+        <input type="number" id="lot" value="0.01" min="0.001" step="0.001"/>
+      </div>
       <button class="btn bo" id="load-btn" onclick="loadPairs()">⬇ Load Pairs</button>
-      <button class="btn bo" id="scan-btn" onclick="startScan()" disabled>▶ Run Scan</button>
+      <button class="btn bo" id="scan-btn" onclick="startScan()" disabled>▶ Run 90-Day Scan</button>
       <button class="btn bg" onclick="resetScan()">↺ Reset</button>
       <div class="prog-wrap" id="prog-wrap" style="display:none">
         <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
@@ -204,7 +267,7 @@ tbody tr:last-child td{border-bottom:none;}
   <div class="stat-row" id="stat-row">
     <div class="stat"><div class="sl">Total Breaks</div><div class="sv" id="s-trades">—</div><div class="ss" id="s-bal">R1/S1 breaks found</div></div>
     <div class="stat green"><div class="sl">Target Hit Rate</div><div class="sv" id="s-wr">—</div><div class="wr-bar"><div class="wr-fill" id="s-wr-bar" style="width:0%"></div></div></div>
-    <div class="stat orange"><div class="sl">Net P&L</div><div class="sv" id="s-pnl">—</div><div class="ss" id="s-bal2">Balance: $100</div></div>
+    <div class="stat orange"><div class="sl">Net P&L</div><div class="sv" id="s-pnl">—</div><div class="ss" id="s-bal">Balance: $100</div></div>
     <div class="stat blue"><div class="sl">R2/S2 Hits</div><div class="sv" id="s-tp1">—</div><div class="ss" id="s-tp2">TP2: —</div></div>
     <div class="stat purple"><div class="sl">Hit / Total</div><div class="sv" id="s-rr">—</div><div class="ss" id="s-days">Days scanned: 0</div></div>
   </div>
@@ -236,11 +299,11 @@ tbody tr:last-child td{border-bottom:none;}
               <th>R2 / S2 (TP1)</th>
               <th>R3 / S3 (TP2)</th>
               <th>Result</th>
-              <th>P&L ($)</th>
+              <th>P&L</th>
             </tr>
           </thead>
           <tbody id="trade-tbody">
-            <tr><td colspan="12" class="empty">Run the scanner to see trades</td></tr>
+            <tr><td colspan="20" class="empty">Run the scanner to see trades</td></tr>
           </tbody>
         </table>
       </div>
@@ -260,11 +323,10 @@ tbody tr:last-child td{border-bottom:none;}
 
 <script>
 const DELTA = 'https://api.india.delta.exchange';
-let config = { deltaKey:'', deltaSecret:'', pair:'', interval:'15m', lookback:3000, slPct:0, minRR:2, bal:100, lot:0.01 };
+let config = { deltaKey:'', deltaSecret:'', pair:'', interval:'15m', lookback:90, minRR:2, bal:100, lot:0.01 };
 let scanning = false;
 let allTrades = [];
 let runningBal = 100;
-let breakFired = null;
 
 window.onload = () => {
   try {
@@ -278,7 +340,7 @@ window.onload = () => {
 function saveConfig() {
   config.deltaKey = document.getElementById('key-delta').value.trim();
   config.deltaSecret = document.getElementById('key-secret').value.trim();
-  localStorage.setItem('cpr_scan_keys', JSON.stringify({key:config.deltaKey, secret:config.deltaSecret}));
+  localStorage.setItem('cpr_scan_keys', JSON.stringify({key:config.deltaKey,secret:config.deltaSecret}));
   log('info','Keys saved.');
 }
 
@@ -292,6 +354,7 @@ async function loadPairs() {
     const pairs = (data.result||[]).sort((a,b)=>a.symbol.localeCompare(b.symbol));
     const sel = document.getElementById('btc-pair');
     sel.innerHTML = '<option value="">— Select —</option>';
+    // Group by underlying
     const btc = pairs.filter(p=>p.symbol?.includes('BTC'));
     const others = pairs.filter(p=>!p.symbol?.includes('BTC'));
     const addGroup = (label, items) => {
@@ -332,102 +395,68 @@ function calcCPR(H, L, C) {
 async function startScan() {
   const sym = document.getElementById('btc-pair').value;
   if (!sym) { log('error','Select a pair.'); return; }
-  config.pair = sym;
+  config.pair     = sym;
   config.interval = document.getElementById('interval').value;
   config.lookback = parseInt(document.getElementById('lookback').value);
-  config.bal = parseFloat(document.getElementById('bal').value)||100;
-  config.lot = parseFloat(document.getElementById('lot').value)||0.01;
-  config.slPct = parseFloat(document.getElementById('sl-pct').value)||0;
+  config.bal      = parseFloat(document.getElementById('bal').value)||100;
+  config.lot      = parseFloat(document.getElementById('lot').value)||0.01;
+  // Filters
+  config.filterSession  = document.getElementById('f-session').checked;
+  config.sessionFrom    = document.getElementById('f-session-from').value;
+  config.sessionTo      = document.getElementById('f-session-to').value;
+  config.filterCPRWidth = document.getElementById('f-cpr-width').checked;
+  config.cprMinPct      = parseFloat(document.getElementById('f-cpr-min').value)||0.5;
+  config.filterExitTime = document.getElementById('f-exit-time').checked;
+  config.exitAt         = document.getElementById('f-exit-at').value;
 
   scanning = true;
   allTrades = [];
-  breakFired = null;
   runningBal = config.bal;
   document.getElementById('scan-btn').disabled = true;
   document.getElementById('prog-wrap').style.display = 'block';
   setStatus('running', 'Fetching...');
-  const slLabel = config.slPct > 0 ? `, SL ${config.slPct}%` : ', no SL';
-  log('info', `Fetching all data for ${sym} (${config.interval}, ${config.lookback} days${slLabel})...`);
+  log('info', `Fetching all data for ${sym} (${config.interval}, ${config.lookback} days)...`);
 
-  // Always work in UTC dates to match Delta's candle timestamps
-  const todayUTC = new Date();
-  const todayDateStr = todayUTC.toISOString().split('T')[0]; // e.g. "2026-06-06"
+  const today = new Date();
   const days = [];
   for (let i = config.lookback; i >= 1; i--) {
-    const d = new Date(Date.UTC(
-      todayUTC.getUTCFullYear(), todayUTC.getUTCMonth(), todayUTC.getUTCDate() - i
-    ));
+    const d = new Date(today);
+    d.setDate(today.getDate()-i);
     days.push(d);
   }
 
   const periodStart = Math.floor(days[0].getTime()/1000) - 86400;
-  const periodEnd   = Math.floor(todayUTC.getTime()/1000);
+  const periodEnd   = Math.floor(today.getTime()/1000);
 
-  // Chunk-based fetch: split time range into fixed windows, fetch each, dedupe
-  async function fetchAllCandles(symbol, resolution, start, end, labelPrefix) {
-    const resSeconds = {'5m':300,'15m':900,'30m':1800,'1h':3600,'1d':86400}[resolution] || 900;
-    const chunkSize  = resSeconds * 500; // 500 candles per chunk — safely under API limit
-    const chunks = [];
-    for (let s = start; s < end; s += chunkSize) {
-      chunks.push({ s, e: Math.min(s + chunkSize, end) });
-    }
-    const seen = new Set();
-    let all = [];
-    for (let i = 0; i < chunks.length; i++) {
-      const { s, e } = chunks[i];
-      document.getElementById('prog-txt').textContent =
-        `${labelPrefix} chunk ${i+1}/${chunks.length}...`;
-      document.getElementById('prog-pct').textContent =
-        Math.round((i+1)/chunks.length*100)+'%';
-      const url = `${DELTA}/v2/history/candles?symbol=${symbol}&resolution=${resolution}&start=${s}&end=${e}`;
-      const r = await fetch(url);
-      const d = await r.json();
-      if (d.result && d.result.length > 0) {
-        d.result.forEach(c => { if (!seen.has(c.time)) { seen.add(c.time); all.push(c); } });
-      }
-      await new Promise(r=>setTimeout(r,120)); // rate-limit buffer
-    }
-    return all.sort((a,b)=>a.time-b.time);
-  }
-
+  // ── SINGLE BULK FETCH: daily candles + all intraday candles in ONE call each ──
   let dailyCandles = [], intradayAll = [];
   try {
-    dailyCandles = await fetchAllCandles(sym, '1d', periodStart, periodEnd, 'Daily candles');
-    if (dailyCandles.length < 2) {
-      log('error','Not enough daily candles.');
-      setStatus('','Error');
-      document.getElementById('scan-btn').disabled = false;
-      return;
-    }
-    intradayAll = await fetchAllCandles(sym, config.interval, periodStart, periodEnd, `${config.interval} candles`);
-    if (intradayAll.length === 0) {
-      log('error','No intraday candles returned.');
-      setStatus('','Error');
-      document.getElementById('scan-btn').disabled = false;
-      return;
-    }
+    document.getElementById('prog-txt').textContent = 'Fetching daily candles...';
+    document.getElementById('prog-pct').textContent = '0%';
+    const [rd, ri] = await Promise.all([
+      fetch(`${DELTA}/v2/history/candles?symbol=${sym}&resolution=1d&start=${periodStart}&end=${periodEnd}`).then(r=>r.json()),
+      fetch(`${DELTA}/v2/history/candles?symbol=${sym}&resolution=${config.interval}&start=${periodStart}&end=${periodEnd}`).then(r=>r.json()),
+    ]);
+    if (!rd.result || rd.result.length < 2) { log('error','Not enough daily candles.'); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
+    if (!ri.result || ri.result.length === 0) { log('error','No intraday candles returned.'); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
+    dailyCandles  = rd.result.sort((a,b)=>a.time-b.time);
+    intradayAll   = ri.result.sort((a,b)=>a.time-b.time);
     log('success', `${dailyCandles.length} daily + ${intradayAll.length} intraday candles loaded. Processing...`);
-  } catch(e) {
-    log('error','Fetch failed: '+e.message);
-    setStatus('','Error');
-    document.getElementById('scan-btn').disabled = false;
-    return;
-  }
+  } catch(e) { log('error','Fetch failed: '+e.message); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
 
-  // Group intraday candles by UTC date string — must match Delta's daily candle boundaries
+  // Group intraday candles by date string
   const intradayByDay = {};
   intradayAll.forEach(c => {
-    const d = new Date(c.time * 1000);
-    const dateStr = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+    const dateStr = new Date(c.time*1000).toISOString().split('T')[0];
     if (!intradayByDay[dateStr]) intradayByDay[dateStr] = [];
     intradayByDay[dateStr].push(c);
   });
 
   const noTradeDays = [];
   let scanned = 0;
+  let breakFired = null;
 
   function finalizeBreak(exitPrice, exitTimeStr, reason) {
-    // reason: 'eod' | 'sl' | undefined (target hit)
     if (!breakFired) return;
     let result = 'No Target';
     if (breakFired.dir === 'BUY') {
@@ -438,47 +467,122 @@ async function startScan() {
       else if (breakFired.hitS2) result = 'Hit S2';
     }
     if (result === 'No Target' && exitPrice != null) {
-      result = reason === 'sl' ? 'SL Hit' : 'EOD Close';
+      result = reason === 'timeexit' ? 'Time Exit' : 'EOD Close';
       breakFired.eodClose = exitPrice;
       breakFired.eodTime  = exitTimeStr;
     }
     breakFired.result = result;
-    // Calculate P&L: (exit - entry) * lot for BUY, (entry - exit) * lot for SELL
-    const exitPx = result.startsWith('Hit') ? (
-      breakFired.dir==='BUY' ? (breakFired.hitR3 ? breakFired.cpr.r3 : breakFired.cpr.r2)
-                              : (breakFired.hitS3 ? breakFired.cpr.s3 : breakFired.cpr.s2)
-    ) : (breakFired.eodClose || breakFired.entry);
-    const priceDiff = breakFired.dir==='BUY' ? exitPx - breakFired.entry : breakFired.entry - exitPx;
+    const exitPx = result.startsWith('Hit')
+      ? (breakFired.dir==='BUY' ? (breakFired.hitR3?breakFired.cpr.r3:breakFired.cpr.r2) : (breakFired.hitS3?breakFired.cpr.s3:breakFired.cpr.s2))
+      : (breakFired.eodClose || breakFired.entry);
+    const priceDiff = breakFired.dir==='BUY' ? exitPx-breakFired.entry : breakFired.entry-exitPx;
     breakFired.pnl = priceDiff * config.lot;
     allTrades.push({...breakFired});
-    const logType = result.startsWith('Hit') ? 'success' : result === 'SL Hit' ? 'error' : result === 'EOD Close' ? 'info' : 'warn';
+    const logType = result.startsWith('Hit') ? 'success' : result==='Time Exit' ? 'warn' : 'info';
     log(logType, `${breakFired.day} ${breakFired.dir} → ${result} (entry:${breakFired.entry.toFixed(0)}${exitPrice!=null?' exit:'+exitPrice.toFixed(0):''})`);
     breakFired = null;
   }
 
-  setStatus('running', 'Scanning...');
+  function activeFilters() {
+    const f = [];
+    if (config.filterSession)  f.push(`Session ${config.sessionFrom}-${config.sessionTo}`);
+    if (config.filterCPRWidth) f.push(`CPR≥${config.cprMinPct}%`);
+    if (config.filterExitTime) f.push(`Exit@${config.exitAt}`);
+    return f.join(' · ') || 'None';
+  }
 
+  // ── PROCESS ALL DAYS IN MEMORY (no more per-day API calls) ──
+  // ── FILTER HELPERS ──────────────────────────────────────────
+  function timeToMins(hhmm) {
+    const [h,m] = hhmm.split(':').map(Number);
+    return h*60+m;
+  }
+  function utcMins(ts) {
+    const d = new Date(ts*1000);
+    return d.getUTCHours()*60 + d.getUTCMinutes();
+  }
+  function inSession(ts) {
+    if (!config.filterSession) return true;
+    const m = utcMins(ts);
+    return m >= timeToMins(config.sessionFrom) && m < timeToMins(config.sessionTo);
+  }
+  function cprWideEnough(cpr, price) {
+    if (!config.filterCPRWidth) return true;
+    const width = Math.abs(cpr.tc - cpr.bc);
+    return (width / price) * 100 >= config.cprMinPct;
+  }
+  function pastExitTime(ts) {
+    if (!config.filterExitTime) return false;
+    return utcMins(ts) >= timeToMins(config.exitAt);
+  }
+
+  setStatus('running', 'Scanning...');
   for (let di = 0; di < days.length; di++) {
     const day = days[di];
-    const dayStr = `${day.getUTCFullYear()}-${String(day.getUTCMonth()+1).padStart(2,'0')}-${String(day.getUTCDate()).padStart(2,'0')}`;
-    const dayTs = Math.floor(day.getTime()/1000); // already UTC midnight since we built days[] with Date.UTC
+    const dayStr = day.toISOString().split('T')[0];
 
+    const dayTs = Math.floor(day.getTime()/1000);
     const prevDaily = dailyCandles.filter(c => c.time < dayTs).slice(-1)[0];
-    if (!prevDaily) {
-      scanned++;
-      updateProgress(scanned, days.length);
-      continue;
-    }
+    if (!prevDaily) { scanned++; updateProgress(scanned, days.length); continue; }
 
     const cpr = calcCPR(parseFloat(prevDaily.high), parseFloat(prevDaily.low), parseFloat(prevDaily.close));
     const intraday = intradayByDay[dayStr] || [];
 
+    // Filter 2: CPR width — skip narrow/ranging days
+    const refPrice = parseFloat(prevDaily.close);
+    if (!breakFired && !cprWideEnough(cpr, refPrice)) {
+      noTradeDays.push({day:dayStr, reason:`CPR too narrow (${((Math.abs(cpr.tc-cpr.bc)/refPrice)*100).toFixed(2)}% < ${config.cprMinPct}%)`, cpr, filtered:'cpr'});
+      scanned++; updateProgress(scanned, days.length); continue;
+    }
+
     if (intraday.length < 2) {
       if (!breakFired) noTradeDays.push({day:dayStr, reason:'No intraday data', cpr});
-      scanned++;
-      updateProgress(scanned, days.length);
-      continue;
+      scanned++; updateProgress(scanned, days.length); continue;
     }
+
+    for (let ci = 1; ci < intraday.length; ci++) {
+      const candle = intraday[ci];
+      const prev   = intraday[ci-1];
+      const close    = parseFloat(candle.close);
+      const prevClose= parseFloat(prev.close);
+      const high     = parseFloat(candle.high);
+      const low      = parseFloat(candle.low);
+      const ts = new Date(candle.time*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:false});
+
+      if (breakFired) {
+        const bc = breakFired.cpr;
+        if (breakFired.dir === 'BUY') {
+          if (!breakFired.hitR2 && high >= bc.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
+          if (!breakFired.hitR3 && high >= bc.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
+          if (breakFired.hitR3) { finalizeBreak(); }
+        } else {
+          if (!breakFired.hitS2 && low <= bc.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
+          if (!breakFired.hitS3 && low <= bc.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
+          if (breakFired.hitS3) { finalizeBreak(); }
+        }
+        if (breakFired) continue;
+      }
+
+      // S1 break → SELL
+      if (close < cpr.s1 && prevClose >= cpr.s1) {
+        breakFired = { day:dayStr, dir:'SELL', trigger:'S1 Break', entry:close, entryTime:`${dayStr} ${ts}`, s1:cpr.s1, s2:cpr.s2, s3:cpr.s3, hitS2:false, hitS3:false, s2Time:null, s3Time:null, cpr };
+        if (low <= cpr.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
+        if (low <= cpr.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
+        log('cpr', `${dayStr} ${ts}: S1 BREAK SELL @ ${close.toFixed(0)} → S2:${cpr.s2.toFixed(0)} S3:${cpr.s3.toFixed(0)}`);
+      }
+      // R1 break → BUY
+      else if (close > cpr.r1 && prevClose <= cpr.r1) {
+        breakFired = { day:dayStr, dir:'BUY', trigger:'R1 Break', entry:close, entryTime:`${dayStr} ${ts}`, r1:cpr.r1, r2:cpr.r2, r3:cpr.r3, hitR2:false, hitR3:false, r2Time:null, r3Time:null, cpr };
+        if (high >= cpr.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
+        if (high >= cpr.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
+        log('cpr', `${dayStr} ${ts}: R1 BREAK BUY @ ${close.toFixed(0)} → R2:${cpr.r2.toFixed(0)} R3:${cpr.r3.toFixed(0)}`);
+      }
+    }
+
+    if (!breakFired) noTradeDays.push({day:dayStr, reason:'No R1/S1 break', cpr});
+    scanned++;
+    updateProgress(scanned, days.length);
+  }
 
     let hadBreakToday = !!breakFired;
 
@@ -493,24 +597,17 @@ async function startScan() {
       const ts = `${String(_ct.getUTCHours()).padStart(2,'0')}:${String(_ct.getUTCMinutes()).padStart(2,'0')}`;
 
       if (breakFired) {
-        // ── Track targets + SL for active trade ──
         hadBreakToday = true;
-        const bc = breakFired.cpr;
-        const slPct = config.slPct;
 
-        // Check SL first (worst case on this candle)
-        if (slPct > 0) {
-          const slPrice = breakFired.dir === 'BUY'
-            ? breakFired.entry * (1 - slPct / 100)
-            : breakFired.entry * (1 + slPct / 100);
-          const slTriggered = breakFired.dir === 'BUY' ? low <= slPrice : high >= slPrice;
-          if (slTriggered) {
-            finalizeBreak(slPrice, `${dayStr} ${ts}`, 'sl');
-            if (!breakFired) continue;
-          }
+        // Filter 3: time-based exit
+        if (config.filterExitTime && pastExitTime(candle.time)) {
+          const exitPrice = close;
+          finalizeBreak(exitPrice, `${dayStr} ${ts}`, 'timeexit');
+          if (!breakFired) continue;
         }
 
         if (breakFired) {
+          const bc = breakFired.cpr;
           if (breakFired.dir === 'BUY') {
             if (!breakFired.hitR2 && high >= bc.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
             if (!breakFired.hitR3 && high >= bc.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
@@ -521,63 +618,44 @@ async function startScan() {
             if (breakFired.hitS2) { finalizeBreak(); }
           }
         }
-        // Trade still open → keep scanning this day, don't look for new breaks
         if (breakFired) continue;
       }
 
-      // ── Look for new S1 break → SELL (only one trade per day) ──
+      // Filter 1: session time — only look for new breaks during session window
+      if (!hadBreakToday && !inSession(candle.time)) continue;
+
+      // S1 break → SELL
       if (!hadBreakToday && close < cpr.s1 && prevClose >= cpr.s1) {
-        breakFired = {
-          day:dayStr, dir:'SELL', trigger:'S1 Break',
-          entry:close, entryTime:`${dayStr} ${ts}`,
-          s1:cpr.s1, s2:cpr.s2, s3:cpr.s3,
-          hitS2:false, hitS3:false, s2Time:null, s3Time:null,
-          cpr
-        };
+        breakFired = { day:dayStr, dir:'SELL', trigger:'S1 Break', entry:close, entryTime:`${dayStr} ${ts}`, s1:cpr.s1, s2:cpr.s2, s3:cpr.s3, hitS2:false, hitS3:false, s2Time:null, s3Time:null, cpr, filters:activeFilters() };
         hadBreakToday = true;
-        // Check same candle immediately
         if (low <= cpr.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
         if (low <= cpr.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
         if (breakFired.hitS2) { finalizeBreak(); }
-        log('cpr', `${dayStr} ${ts}: S1 BREAK SELL @ ${close.toFixed(0)} → S2:${cpr.s2.toFixed(0)} S3:${cpr.s3.toFixed(0)}`);
+        else log('cpr', `${dayStr} ${ts}: S1 BREAK SELL @ ${close.toFixed(0)} → S2:${cpr.s2.toFixed(0)} S3:${cpr.s3.toFixed(0)}`);
       }
-      // ── Look for new R1 break → BUY ──
+      // R1 break → BUY
       else if (!hadBreakToday && close > cpr.r1 && prevClose <= cpr.r1) {
-        breakFired = {
-          day:dayStr, dir:'BUY', trigger:'R1 Break',
-          entry:close, entryTime:`${dayStr} ${ts}`,
-          r1:cpr.r1, r2:cpr.r2, r3:cpr.r3,
-          hitR2:false, hitR3:false, r2Time:null, r3Time:null,
-          cpr
-        };
+        breakFired = { day:dayStr, dir:'BUY', trigger:'R1 Break', entry:close, entryTime:`${dayStr} ${ts}`, r1:cpr.r1, r2:cpr.r2, r3:cpr.r3, hitR2:false, hitR3:false, r2Time:null, r3Time:null, cpr, filters:activeFilters() };
         hadBreakToday = true;
-        // Check same candle immediately
         if (high >= cpr.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
         if (high >= cpr.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
         if (breakFired.hitR2) { finalizeBreak(); }
-        log('cpr', `${dayStr} ${ts}: R1 BREAK BUY @ ${close.toFixed(0)} → R2:${cpr.r2.toFixed(0)} R3:${cpr.r3.toFixed(0)}`);
+        else log('cpr', `${dayStr} ${ts}: R1 BREAK BUY @ ${close.toFixed(0)} → R2:${cpr.r2.toFixed(0)} R3:${cpr.r3.toFixed(0)}`);
       }
     }
 
-    // ── End of day: EOD close if trade still open ──
+    // EOD close if still open
     if (breakFired) {
-      const lastCandle = intraday[intraday.length - 1];
-      const eodPrice = parseFloat(lastCandle.close);
-      const _et = new Date(lastCandle.time*1000);
-      const eodTs = `${String(_et.getUTCHours()).padStart(2,'0')}:${String(_et.getUTCMinutes()).padStart(2,'0')}`;
-      finalizeBreak(eodPrice, `${dayStr} ${eodTs}`);
+      const last = intraday[intraday.length-1];
+      finalizeBreak(parseFloat(last.close), `${dayStr} EOD`, 'eod');
     }
 
-    if (!hadBreakToday) {
-      noTradeDays.push({day:dayStr, reason:'No R1/S1 break', cpr});
-    }
-
+    if (!hadBreakToday) noTradeDays.push({day:dayStr, reason:'No R1/S1 break in session', cpr});
     scanned++;
     updateProgress(scanned, days.length);
     await delay(10);
   }
 
-  // Finalize any remaining open trade at end of scan
   if (breakFired) finalizeBreak();
 
   scanning = false;
@@ -606,85 +684,82 @@ function renderResults(noTradeDays, daysScanned) {
     document.getElementById('s-days').textContent = `Days scanned: ${daysScanned} | No break: ${noTradeDays.length}`;
     return;
   }
-
-  const buys  = trades.filter(t=>t.dir==='BUY');
+  const buys = trades.filter(t=>t.dir==='BUY');
   const sells = trades.filter(t=>t.dir==='SELL');
   const hitR2 = trades.filter(t=>t.dir==='BUY'&&t.hitR2);
   const hitR3 = trades.filter(t=>t.dir==='BUY'&&t.hitR3);
   const hitS2 = trades.filter(t=>t.dir==='SELL'&&t.hitS2);
   const hitS3 = trades.filter(t=>t.dir==='SELL'&&t.hitS3);
-  const eodClosed = trades.filter(t=>t.result==='EOD Close');
-  const slHits    = trades.filter(t=>t.result==='SL Hit');
-  const anyTarget = trades.filter(t=>(t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2));
+  const anyTarget  = trades.filter(t=>(t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2));
+  const eodClosed  = trades.filter(t=>t.result==='EOD Close');
+  const timeExits  = trades.filter(t=>t.result==='Time Exit');
   const wr = (anyTarget.length/trades.length*100).toFixed(1);
+  const totalPnl = trades.reduce((s,t)=>s+(t.pnl||0),0);
+  const finalBal = config.bal + totalPnl;
 
   document.getElementById('s-trades').textContent = trades.length;
   document.getElementById('s-wr').textContent = wr+'%';
   document.getElementById('s-wr-bar').style.width = wr+'%';
   document.getElementById('s-wr-bar').style.background = parseFloat(wr)>=50?'var(--green)':parseFloat(wr)>=35?'var(--orange)':'var(--red)';
-  const totalPnl = trades.reduce((s,t)=>s+(t.pnl||0), 0);
-  const finalBal = config.bal + totalPnl;
   const pnlEl = document.getElementById('s-pnl');
-  pnlEl.textContent = (totalPnl >= 0 ? '+$' : '-$') + Math.abs(totalPnl).toFixed(2);
-  pnlEl.style.color = totalPnl >= 0 ? 'var(--green)' : 'var(--red)';
+  pnlEl.textContent = (totalPnl>=0?'+$':'-$')+Math.abs(totalPnl).toFixed(2);
+  pnlEl.style.color = totalPnl>=0?'var(--green)':'var(--red)';
   pnlEl.style.fontSize = '1.3rem';
-  document.getElementById('s-bal2').textContent = `Final bal: $${finalBal.toFixed(2)} (${buys.length}B / ${sells.length}S)`;
+  document.getElementById('s-bal').textContent = `Final: $${finalBal.toFixed(2)} · ${buys.length}B / ${sells.length}S`;
   document.getElementById('s-tp1').textContent = `R2:${hitR2.length} S2:${hitS2.length}`;
-  document.getElementById('s-tp2').textContent = `R3:${hitR3.length} S3:${hitS3.length} EOD:${eodClosed.length} SL:${slHits.length}`;
+  document.getElementById('s-tp2').textContent = `R3:${hitR3.length} S3:${hitS3.length} EOD:${eodClosed.length} TmExit:${timeExits.length}`;
   document.getElementById('s-rr').textContent = `${anyTarget.length}/${trades.length}`;
-  document.getElementById('s-days').textContent = `Scanned: ${daysScanned} | No break: ${noTradeDays.length}`;
+  const fLabel = [config.filterSession?'Session✓':'',config.filterCPRWidth?'CPRWidth✓':'',config.filterExitTime?'TimeExit✓':''].filter(Boolean).join(' ');
+  document.getElementById('s-days').textContent = `Scanned:${daysScanned} | No break:${noTradeDays.length} | Filters: ${fLabel||'None'}`;
   document.getElementById('trade-count').textContent = `(${trades.length} breaks)`;
 
-  // Monthly breakdown
+  // Monthly
   const months = {};
   trades.forEach(t => {
     const m = t.day.substr(0,7);
-    if (!months[m]) months[m]={total:0,hit:0,buys:0,sells:0,r2:0,r3:0,s2:0,s3:0,pnl:0};
+    if (!months[m]) months[m]={total:0,hit:0,buys:0,sells:0,r2:0,r3:0,s2:0,s3:0};
     months[m].total++;
-    months[m].pnl += (t.pnl||0);
-    if (t.dir==='BUY') { months[m].buys++; if(t.hitR2)months[m].r2++; if(t.hitR3)months[m].r3++; }
-    else               { months[m].sells++; if(t.hitS2)months[m].s2++; if(t.hitS3)months[m].s3++; }
-    if ((t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2)) months[m].hit++;
+    if(t.dir==='BUY'){months[m].buys++;if(t.hitR2)months[m].r2++;if(t.hitR3)months[m].r3++;}
+    else{months[m].sells++;if(t.hitS2)months[m].s2++;if(t.hitS3)months[m].s3++;}
+    if((t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2))months[m].hit++;
   });
-  const mKeys = Object.keys(months).sort();
-  document.getElementById('month-grid').innerHTML = mKeys.length===0
-    ? '<div class="empty" style="grid-column:1/-1">No data</div>'
-    : mKeys.map(m => {
-        const mo = months[m];
-        const mwr = mo.total>0 ? (mo.hit/mo.total*100).toFixed(0)+'%' : '—';
-        const d = new Date(m+'-01');
-        const mn = d.toLocaleString('default',{month:'short',year:'2-digit'});
-        const good = parseFloat(mwr)>=50;
-        const mpnl = mo.pnl>=0 ? '+$'+mo.pnl.toFixed(2) : '-$'+Math.abs(mo.pnl).toFixed(2);
-        return `<div class="month-card ${good?'pos':'neg'}">
-          <div class="mn">${mn}</div>
-          <div class="mp ${good?'pos':'neg'}">${mo.hit}/${mo.total} hit</div>
-          <div class="ms" style="font-weight:700;color:${mo.pnl>=0?'var(--green)':'var(--red)'}">${mpnl}</div>
-          <div class="ms">WR ${mwr} · B:${mo.buys} S:${mo.sells}</div>
-          <div class="ms" style="margin-top:2px">R2:${mo.r2} R3:${mo.r3} S2:${mo.s2} S3:${mo.s3}</div>
-        </div>`;
-      }).join('');
+  const mKeys=Object.keys(months).sort();
+  document.getElementById('month-grid').innerHTML=mKeys.length===0
+    ?'<div class="empty" style="grid-column:1/-1">No data</div>'
+    :mKeys.map(m=>{
+      const mo=months[m];
+      const mwr=mo.total>0?(mo.hit/mo.total*100).toFixed(0)+'%':'—';
+      const d=new Date(m+'-01');
+      const mn=d.toLocaleString('default',{month:'short',year:'2-digit'});
+      const good=parseFloat(mwr)>=50;
+      return `<div class="month-card ${good?'pos':'neg'}">
+        <div class="mn">${mn}</div>
+        <div class="mp ${good?'pos':'neg'}">${mo.hit}/${mo.total} hit</div>
+        <div class="ms">WR ${mwr} · B:${mo.buys} S:${mo.sells}</div>
+        <div class="ms" style="margin-top:2px">R2:${mo.r2} R3:${mo.r3} S2:${mo.s2} S3:${mo.s3}</div>
+      </div>`;
+    }).join('');
 
-  // Trade table
-  const tbody = document.getElementById('trade-tbody');
-  tbody.innerHTML = trades.map((t,i) => {
-    const c = t.cpr;
-    const hitTgt  = (t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2);
-    const hitFull = (t.dir==='BUY'&&t.hitR3)||(t.dir==='SELL'&&t.hitS3);
-    const isEOD   = t.result === 'EOD Close';
-    const isSL    = t.result === 'SL Hit';
-    const lbl = hitFull ? (t.dir==='BUY'?'Hit R3':'Hit S3')
-              : hitTgt  ? (t.dir==='BUY'?'Hit R2':'Hit S2')
-              : isSL    ? `SL ${t.eodClose!=null?t.eodClose.toFixed(0):''}`
-              : isEOD   ? `EOD ${t.eodClose!=null?t.eodClose.toFixed(0):''}`
+  // Table
+  const tbody=document.getElementById('trade-tbody');
+  tbody.innerHTML=trades.map((t,i)=>{
+    const c=t.cpr;
+    const hitTgt=(t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2);
+    const hitFull=(t.dir==='BUY'&&t.hitR3)||(t.dir==='SELL'&&t.hitS3);
+    const isTE = t.result==='Time Exit';
+    const isEOD = t.result==='EOD Close';
+    const lbl = hitFull?(t.dir==='BUY'?'Hit R3':'Hit S3')
+              : hitTgt?(t.dir==='BUY'?'Hit R2':'Hit S2')
+              : isTE?`TmExit ${t.eodClose?t.eodClose.toFixed(0):''}`
+              : isEOD?`EOD ${t.eodClose?t.eodClose.toFixed(0):''}`
               : 'No Target';
-    const rc  = hitFull ? 'tp2' : hitTgt ? 'tp1' : isSL ? 'sl' : isEOD ? 'eod' : 'skip';
-    const tp1v = t.dir==='BUY' ? c.r2.toFixed(0) : c.s2.toFixed(0);
-    const tp2v = t.dir==='BUY' ? c.r3.toFixed(0) : c.s3.toFixed(0);
-    const tp1h = t.dir==='BUY' ? t.hitR2 : t.hitS2;
-    const tp2h = t.dir==='BUY' ? t.hitR3 : t.hitS3;
-    const tp1t = t.dir==='BUY' ? t.r2Time : t.s2Time;
-    const tp2t = t.dir==='BUY' ? t.r3Time : t.s3Time;
+    const rc=hitFull?'tp2':hitTgt?'tp1':(isTE||isEOD)?'eod':'skip';
+    const tp1v=t.dir==='BUY'?c.r2.toFixed(0):c.s2.toFixed(0);
+    const tp2v=t.dir==='BUY'?c.r3.toFixed(0):c.s3.toFixed(0);
+    const tp1h=t.dir==='BUY'?t.hitR2:t.hitS2;
+    const tp2h=t.dir==='BUY'?t.hitR3:t.hitS3;
+    const tp1t=t.dir==='BUY'?t.r2Time:t.s2Time;
+    const tp2t=t.dir==='BUY'?t.r3Time:t.s3Time;
     return `<tr>
       <td style="color:var(--t3);font-weight:600">${i+1}</td>
       <td style="font-weight:600">${t.day}</td>
@@ -701,43 +776,38 @@ function renderResults(noTradeDays, daysScanned) {
     </tr>`;
   }).join('');
 
-  // No-signal days
-  document.getElementById('no-trade-wrap').innerHTML = noTradeDays.length===0
-    ? '<div class="empty">Every day had a R1/S1 break!</div>'
-    : `<div style="padding:10px;display:flex;flex-wrap:wrap;gap:6px;">${noTradeDays.map(d=>`<span style="background:var(--b2);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:0.62rem;color:var(--t2)">${d.day}</span>`).join('')}</div>`;
+  // No break days
+  document.getElementById('no-trade-wrap').innerHTML=noTradeDays.length===0
+    ?'<div class="empty">Every day had a R1/S1 break!</div>'
+    :`<div style="padding:10px;display:flex;flex-wrap:wrap;gap:6px;">${noTradeDays.map(d=>`<span style="background:var(--b2);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:0.62rem;color:var(--t2)">${d.day}</span>`).join('')}</div>`;
 }
 
 function resetScan() {
-  allTrades = [];
-  breakFired = null;
-  runningBal = config.bal;
-  scanning = false;
+  allTrades = []; runningBal = config.bal; scanning = false;
   document.getElementById('prog-wrap').style.display='none';
   document.getElementById('prog-fill').style.width='0%';
-  document.getElementById('trade-tbody').innerHTML='<tr><td colspan="12" class="empty">Run the scanner to see trades</td></tr>';
+  document.getElementById('trade-tbody').innerHTML='<tr><td colspan="20" class="empty">Run the scanner to see trades</td></tr>';
   document.getElementById('month-grid').innerHTML='<div class="empty" style="grid-column:1/-1">Run the scanner to see monthly breakdown</div>';
   document.getElementById('no-trade-wrap').innerHTML='<div class="empty">Run the scanner to see no-signal days</div>';
   document.getElementById('trade-count').textContent='';
   ['s-trades','s-wr','s-pnl','s-tp1','s-rr'].forEach(id=>document.getElementById(id).textContent='—');
   document.getElementById('s-wr-bar').style.width='0%';
-  setStatus('','Idle');
-  log('info','Reset.');
+  setStatus('','Idle'); log('info','Reset.');
 }
 
-function setStatus(type, text) {
-  const p = document.getElementById('status-pill');
-  p.className = 'pill'+(type?' '+type:'');
-  document.getElementById('status-txt').textContent = text;
+function setStatus(type,text) {
+  const p=document.getElementById('status-pill');
+  p.className='pill'+(type?' '+type:'');
+  document.getElementById('status-txt').textContent=text;
 }
-
-function log(type, msg) {
-  const box = document.getElementById('log-box');
-  const time = new Date().toLocaleTimeString('en-US',{hour12:false});
-  const el = document.createElement('div');
-  el.className = 'le '+type;
-  el.innerHTML = `<span class="lt">${time}</span><span class="lm">${msg}</span>`;
-  box.insertBefore(el, box.firstChild);
-  if (box.children.length>100) box.removeChild(box.lastChild);
+function log(type,msg) {
+  const box=document.getElementById('log-box');
+  const time=new Date().toLocaleTimeString('en-US',{hour12:false});
+  const el=document.createElement('div');
+  el.className='le '+type;
+  el.innerHTML=`<span class="lt">${time}</span><span class="lm">${msg}</span>`;
+  box.insertBefore(el,box.firstChild);
+  if(box.children.length>100)box.removeChild(box.lastChild);
 }
 </script>
 </body>
