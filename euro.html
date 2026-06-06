@@ -147,7 +147,7 @@ tbody tr:last-child td{border-bottom:none;}
     <div class="brand">CPR Scanner <span>●</span><small>storiesbyachu · 90-Day Backtest</small></div>
     <div class="pill" id="status-pill"><div class="d"></div><span id="status-txt">Idle</span></div>
   </div>
-  <div style="font-size:0.62rem;color:var(--t3)">CPR Fib Strategy · R1/S1 Break → 0.618 Entry → R2/S2</div>
+  <div style="font-size:0.62rem;color:var(--t3)">CPR Simple · R1/S1 Break at Close · 5% SL · R2/S2 TP</div>
 </div>
 
 <div class="layout">
@@ -263,7 +263,7 @@ tbody tr:last-child td{border-bottom:none;}
 
   <!-- STATS -->
   <div class="stat-row" id="stat-row">
-    <div class="stat"><div class="sl">Total Breaks</div><div class="sv" id="s-trades">—</div><div class="ss" id="s-bal">Breaks with fib entry triggered</div></div>
+    <div class="stat"><div class="sl">Total Breaks</div><div class="sv" id="s-trades">—</div><div class="ss" id="s-bal">R1/S1 breaks taken</div></div>
     <div class="stat green"><div class="sl">Target Hit Rate</div><div class="sv" id="s-wr">—</div><div class="wr-bar"><div class="wr-fill" id="s-wr-bar" style="width:0%"></div></div></div>
     <div class="stat orange"><div class="sl">Net P&L</div><div class="sv" id="s-pnl">—</div><div class="ss" id="s-bal">Balance: $100</div></div>
     <div class="stat blue"><div class="sl">TP Hits (R2/S2)</div><div class="sv" id="s-tp1">—</div><div class="ss" id="s-tp2">Fib entries triggered: —</div></div>
@@ -289,14 +289,13 @@ tbody tr:last-child td{border-bottom:none;}
               <th>#</th>
               <th>Date</th>
               <th>Dir</th>
-              <th>Break Time</th>
-              <th>Break H/L</th>
-              <th>Fib 0.618 Entry</th>
               <th>Entry Time</th>
-              <th>SL (candle low/high)</th>
+              <th>Entry</th>
+              <th>SL (5%)</th>
               <th>TP (R2/S2)</th>
               <th>Pivot</th>
               <th>R1 / S1</th>
+              <th>Exit</th>
               <th>Result</th>
               <th>P&L</th>
             </tr>
@@ -404,8 +403,11 @@ function finalizeBreak(exitPrice, exitTimeStr, reason) {
   let result = 'No Target';
   if (breakFired.hitTP) {
     result = breakFired.dir==='BUY' ? 'Hit R2' : 'Hit S2';
-  }
-  if (result === 'No Target' && exitPrice != null) {
+  } else if (reason === 'sl') {
+    result = 'SL Hit';
+    breakFired.eodClose = exitPrice;
+    breakFired.eodTime  = exitTimeStr;
+  } else if (exitPrice != null) {
     result = reason === 'timeexit' ? 'Time Exit' : 'EOD Close';
     breakFired.eodClose = exitPrice;
     breakFired.eodTime  = exitTimeStr;
@@ -416,10 +418,8 @@ function finalizeBreak(exitPrice, exitTimeStr, reason) {
     : (breakFired.eodClose || breakFired.entry);
   const priceDiff = breakFired.dir==='BUY' ? exitPx-breakFired.entry : breakFired.entry-exitPx;
   breakFired.pnl = priceDiff * config.lot;
-  // Also compute SL distance for reference
-  breakFired.slDist = Math.abs(breakFired.entry - breakFired.sl);
   allTrades.push({...breakFired});
-  const logType = breakFired.hitTP ? 'success' : result==='Time Exit' ? 'warn' : 'info';
+  const logType = breakFired.hitTP ? 'success' : result==='SL Hit' ? 'error' : 'info';
   log(logType, `${breakFired.day} ${breakFired.dir} → ${result} P&L:${breakFired.pnl>=0?'+':''}$${breakFired.pnl.toFixed(2)}`);
   breakFired = null;
 }
@@ -504,7 +504,7 @@ async function startScan() {
         const r = await fetch(`${DELTA}/v2/history/candles?symbol=${symbol}&resolution=${resolution}&start=${s}&end=${e}`);
         const d = await r.json();
         if (d.result) d.result.forEach(c=>{ if(!seen.has(c.time)){seen.add(c.time);all.push(c);} });
-      } catch(e) { log('warn',`Chunk ${i+1} failed`); }
+      } catch(e2) { log('warn',`Chunk ${i+1} failed`); }
       await new Promise(r=>setTimeout(r,100));
     }
     return all.sort((a,b)=>a.time-b.time);
@@ -529,8 +529,6 @@ async function startScan() {
 
   const noTradeDays = [];
   let scanned = 0;
-  // pendingBreak: a break has fired, waiting for 0.618 fib pullback to trigger entry
-  let pendingBreak = null;
   setStatus('running','Scanning...');
 
   for (let di = 0; di < days.length; di++) {
@@ -545,16 +543,16 @@ async function startScan() {
     const refPrice = parseFloat(prevDaily.close);
     const intraday = intradayByDay[dayStr]||[];
 
-    if (!breakFired && !pendingBreak && !cprWideEnough(cpr,refPrice)) {
+    if (!breakFired && !cprWideEnough(cpr,refPrice)) {
       noTradeDays.push({day:dayStr, reason:'CPR too narrow', cpr, filtered:'cpr'});
       scanned++; updateProgress(scanned,days.length); continue;
     }
     if (intraday.length < 2) {
-      if (!breakFired && !pendingBreak) noTradeDays.push({day:dayStr, reason:'No intraday data', cpr});
+      if (!breakFired) noTradeDays.push({day:dayStr, reason:'No intraday data', cpr});
       scanned++; updateProgress(scanned,days.length); continue;
     }
 
-    let hadBreakToday = !!breakFired || !!pendingBreak;
+    let hadBreakToday = !!breakFired;
 
     for (let ci = 1; ci < intraday.length; ci++) {
       const candle    = intraday[ci];
@@ -566,70 +564,29 @@ async function startScan() {
       const _d = new Date(candle.time*1000);
       const ts = `${String(_d.getUTCHours()).padStart(2,'0')}:${String(_d.getUTCMinutes()).padStart(2,'0')}`;
 
-      // ── Active trade: check TP / time exit ──
+      // ── Active trade: check TP / SL / time exit ──
       if (breakFired) {
         hadBreakToday = true;
+
+        // Time exit
         if (config.filterExitTime && pastExitTime(candle.time)) {
           finalizeBreak(close, `${dayStr} ${ts}`, 'timeexit');
           continue;
         }
+
         const bc = breakFired.cpr;
         if (breakFired.dir==='BUY') {
-          if (!breakFired.hitTP && high >= bc.r2) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; }
-          if (breakFired.hitTP) { finalizeBreak(); }
+          // SL hit
+          if (low <= breakFired.sl) { finalizeBreak(breakFired.sl, `${dayStr} ${ts}`, 'sl'); continue; }
+          // TP hit
+          if (high >= bc.r2) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; finalizeBreak(); }
         } else {
-          if (!breakFired.hitTP && low <= bc.s2) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; }
-          if (breakFired.hitTP) { finalizeBreak(); }
+          // SL hit
+          if (high >= breakFired.sl) { finalizeBreak(breakFired.sl, `${dayStr} ${ts}`, 'sl'); continue; }
+          // TP hit
+          if (low <= bc.s2) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; finalizeBreak(); }
         }
         if (breakFired) continue;
-      }
-
-      // ── Pending break: wait for 0.618 fib pullback to trigger entry ──
-      if (pendingBreak) {
-        hadBreakToday = true;
-        const pb = pendingBreak;
-
-        // Check if SL hit before entry triggered (price went straight to SL)
-        if (pb.dir==='BUY' && low <= pb.sl) {
-          log('warn', `${dayStr} ${ts}: BUY fib entry never hit — SL breached before pullback`);
-          pendingBreak = null;
-          continue;
-        }
-        if (pb.dir==='SELL' && high >= pb.sl) {
-          log('warn', `${dayStr} ${ts}: SELL fib entry never hit — SL breached before pullback`);
-          pendingBreak = null;
-          continue;
-        }
-
-        // Check if fib entry touched
-        const entryTriggered = pb.dir==='BUY' ? low <= pb.entry : high >= pb.entry;
-        if (entryTriggered) {
-          // Entry filled — open the trade
-          breakFired = {
-            day: pb.day, dir: pb.dir, trigger: pb.trigger,
-            entry: pb.entry, sl: pb.sl,
-            tp1: pb.tp1, tp2: pb.tp2,
-            breakHigh: pb.breakHigh, breakLow: pb.breakLow,
-            fib618: pb.entry,
-            hitTP: false, tpTime: null,
-            entryTime: `${dayStr} ${ts}`,
-            breakTime: pb.breakTime,
-            cpr: pb.cpr
-          };
-          pendingBreak = null;
-          log('success', `${dayStr} ${ts}: ${breakFired.dir} ENTRY TRIGGERED @ ${breakFired.entry.toFixed(0)} (fib 0.618) SL:${breakFired.sl.toFixed(0)} TP:${breakFired.tp1.toFixed(0)}`);
-
-          // Check if TP also hit on same candle
-          if (breakFired.dir==='BUY' && high >= breakFired.cpr.r2) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; finalizeBreak(); }
-          else if (breakFired.dir==='SELL' && low <= breakFired.cpr.s2) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; finalizeBreak(); }
-        }
-
-        // Check exit time for pending too
-        if (pendingBreak && config.filterExitTime && pastExitTime(candle.time)) {
-          log('warn', `${dayStr} ${ts}: Fib entry not triggered by exit time — cancelled`);
-          pendingBreak = null;
-        }
-        continue;
       }
 
       // ── Look for new R1/S1 break ──
@@ -638,40 +595,42 @@ async function startScan() {
 
       // SELL: close below S1
       if (close < cpr.s1 && prevClose >= cpr.s1) {
-        const cHigh = parseFloat(candle.high);
-        const cLow  = parseFloat(candle.low);
-        const range = cHigh - cLow;
-        const fibEntry = parseFloat((cLow + range * 0.618).toFixed(2));  // pullback up to 0.618
-        const sl    = parseFloat(cHigh.toFixed(2));                       // SL = break candle high
-        const tp1   = parseFloat(cpr.s2.toFixed(2));
-        const tp2   = parseFloat(cpr.s3.toFixed(2));
-        pendingBreak = {day:dayStr, dir:'SELL', trigger:'S1 Break', breakHigh:cHigh, breakLow:cLow, entry:fibEntry, sl, tp1, tp2, breakTime:`${dayStr} ${ts}`, cpr};
+        const entry = close;
+        const sl    = parseFloat((entry * 1.05).toFixed(2)); // 5% above entry
+        const tp    = parseFloat(cpr.s2.toFixed(2));
+        breakFired = {
+          day:dayStr, dir:'SELL', trigger:'S1 Break',
+          entry, sl, tp1:tp, cpr,
+          entryTime:`${dayStr} ${ts}`,
+          hitTP:false, tpTime:null
+        };
         hadBreakToday = true;
-        log('cpr', `${dayStr} ${ts}: S1 BREAK SELL — waiting fib 0.618 entry @ ${fibEntry.toFixed(0)} SL:${sl.toFixed(0)} TP:${tp1.toFixed(0)}`);
+        // Check same candle
+        if (low <= tp) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; finalizeBreak(); }
+        else log('cpr',`${dayStr} ${ts}: SELL @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} TP:${tp.toFixed(0)}`);
       }
       // BUY: close above R1
       else if (close > cpr.r1 && prevClose <= cpr.r1) {
-        const cHigh = parseFloat(candle.high);
-        const cLow  = parseFloat(candle.low);
-        const range = cHigh - cLow;
-        const fibEntry = parseFloat((cHigh - range * 0.618).toFixed(2)); // pullback down to 0.618
-        const sl    = parseFloat(cLow.toFixed(2));                        // SL = break candle low
-        const tp1   = parseFloat(cpr.r2.toFixed(2));
-        const tp2   = parseFloat(cpr.r3.toFixed(2));
-        pendingBreak = {day:dayStr, dir:'BUY', trigger:'R1 Break', breakHigh:cHigh, breakLow:cLow, entry:fibEntry, sl, tp1, tp2, breakTime:`${dayStr} ${ts}`, cpr};
+        const entry = close;
+        const sl    = parseFloat((entry * 0.95).toFixed(2)); // 5% below entry
+        const tp    = parseFloat(cpr.r2.toFixed(2));
+        breakFired = {
+          day:dayStr, dir:'BUY', trigger:'R1 Break',
+          entry, sl, tp1:tp, cpr,
+          entryTime:`${dayStr} ${ts}`,
+          hitTP:false, tpTime:null
+        };
         hadBreakToday = true;
-        log('cpr', `${dayStr} ${ts}: R1 BREAK BUY — waiting fib 0.618 entry @ ${fibEntry.toFixed(0)} SL:${sl.toFixed(0)} TP:${tp1.toFixed(0)}`);
+        // Check same candle
+        if (high >= tp) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; finalizeBreak(); }
+        else log('cpr',`${dayStr} ${ts}: BUY @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} TP:${tp.toFixed(0)}`);
       }
     }
 
-    // EOD: close active trade, cancel pending
+    // EOD close
     if (breakFired) {
       const last = intraday[intraday.length-1];
       finalizeBreak(parseFloat(last.close),`${dayStr} EOD`,'eod');
-    }
-    if (pendingBreak) {
-      log('warn', `${pendingBreak.day}: Fib entry not triggered EOD — cancelled`);
-      pendingBreak = null;
     }
     if (!hadBreakToday) noTradeDays.push({day:dayStr,reason:'No R1/S1 break in session',cpr});
     scanned++;
@@ -702,19 +661,18 @@ const delay = ms => new Promise(r=>setTimeout(r,ms));
 function renderResults(noTradeDays, daysScanned) {
   const trades = allTrades;
   if (trades.length === 0) {
-    document.getElementById('trade-tbody').innerHTML = '<tr><td colspan="12" class="empty">No Breaks with fib entry triggered.</td></tr>';
+    document.getElementById('trade-tbody').innerHTML = '<tr><td colspan="12" class="empty">No R1/S1 breaks taken.</td></tr>';
     document.getElementById('s-trades').textContent = '0';
     document.getElementById('s-days').textContent = `Days scanned: ${daysScanned} | No break: ${noTradeDays.length}`;
     return;
   }
   const buys = trades.filter(t=>t.dir==='BUY');
   const sells = trades.filter(t=>t.dir==='SELL');
-  const entered   = trades.filter(t=>t.entryTime);
   const anyTarget = trades.filter(t=>t.hitTP);
+  const slHits    = trades.filter(t=>t.result==='SL Hit');
   const eodClosed = trades.filter(t=>t.result==='EOD Close');
   const timeExits = trades.filter(t=>t.result==='Time Exit');
-  const noEntry   = trades.filter(t=>!t.entryTime);
-  const wr = entered.length>0?(anyTarget.length/entered.length*100).toFixed(1):'0.0';
+  const wr = trades.length>0?(anyTarget.length/trades.length*100).toFixed(1):'0.0';
   const totalPnl = trades.reduce((s,t)=>s+(t.pnl||0),0);
   const finalBal = config.bal + totalPnl;
 
@@ -727,12 +685,12 @@ function renderResults(noTradeDays, daysScanned) {
   pnlEl.style.color = totalPnl>=0?'var(--green)':'var(--red)';
   pnlEl.style.fontSize = '1.3rem';
   document.getElementById('s-bal').textContent = `Final: $${finalBal.toFixed(2)} · ${buys.length}B / ${sells.length}S`;
-  document.getElementById('s-tp1').textContent = `${anyTarget.length} hits`;
-  document.getElementById('s-tp2').textContent = `Entered:${entered.length} | No entry:${noEntry.length} | EOD:${eodClosed.length}`;
-  document.getElementById('s-rr').textContent = `${anyTarget.length}/${entered.length}`;
+  document.getElementById('s-tp1').textContent = `${anyTarget.length} TP hits`;
+  document.getElementById('s-tp2').textContent = `SL:${slHits.length} EOD:${eodClosed.length} TmExit:${timeExits.length}`;
+  document.getElementById('s-rr').textContent = `${anyTarget.length}/${trades.length}`;
   const fLabel = [config.filterSession?'Session✓':'',config.filterCPRWidth?'CPRWidth✓':'',config.filterExitTime?'TimeExit✓':''].filter(Boolean).join(' ');
   document.getElementById('s-days').textContent = `Scanned:${daysScanned} | No break:${noTradeDays.length} | Filters:${fLabel||'None'}`;
-  document.getElementById('trade-count').textContent = `(${trades.length} breaks, ${entered.length} entered)`;
+  document.getElementById('trade-count').textContent = `(${trades.length} trades)`;
 
   // Monthly
   const months = {};
@@ -768,26 +726,29 @@ function renderResults(noTradeDays, daysScanned) {
   const tbody=document.getElementById('trade-tbody');
   tbody.innerHTML=trades.map((t,i)=>{
     const c=t.cpr;
-    const isTE = t.result==='Time Exit';
+    const isSL  = t.result==='SL Hit';
+    const isTE  = t.result==='Time Exit';
     const isEOD = t.result==='EOD Close';
-    const isTP = t.hitTP;
-    const lbl = isTP?(t.dir==='BUY'?'Hit R2':'Hit S2'):isTE?`TmExit ${t.eodClose?t.eodClose.toFixed(0):''}`
-              : isEOD?`EOD ${t.eodClose?t.eodClose.toFixed(0):''}`:  `No Entry`;
-    const rc = isTP?'tp1':(isTE||isEOD)?'eod':'skip';
-    const breakRange = `H:${t.breakHigh?t.breakHigh.toFixed(0):'—'} L:${t.breakLow?t.breakLow.toFixed(0):'—'}`;
-    const tp = t.dir==='BUY'?c.r2.toFixed(0):c.s2.toFixed(0);
+    const isTP  = t.hitTP;
+    const lbl = isTP?(t.dir==='BUY'?'Hit R2':'Hit S2')
+              : isSL?'SL Hit'
+              : isTE?`TmExit ${t.eodClose?t.eodClose.toFixed(0):''}`
+              : isEOD?`EOD ${t.eodClose?t.eodClose.toFixed(0):''}`
+              : 'No Target';
+    const rc  = isTP?'tp1':isSL?'sl':(isTE||isEOD)?'eod':'skip';
+    const tp  = t.dir==='BUY'?c.r2.toFixed(0):c.s2.toFixed(0);
+    const exitPx = isTP?(t.dir==='BUY'?c.r2:c.s2):(t.eodClose||t.entry);
     return `<tr>
       <td style="color:var(--t3);font-weight:600">${i+1}</td>
       <td style="font-weight:600">${t.day}</td>
       <td><span class="tag ${t.dir.toLowerCase()}">${t.dir}</span></td>
-      <td style="color:var(--purple);font-size:0.62rem">${t.breakTime||'—'}</td>
-      <td style="font-size:0.62rem;color:var(--t2)">${breakRange}</td>
-      <td style="font-weight:700;color:var(--orange)">${t.entry.toFixed(0)}</td>
-      <td style="font-size:0.62rem;color:var(--t3)">${t.entryTime||'Pending'}</td>
+      <td style="font-size:0.62rem;color:var(--t2)">${t.entryTime||'—'}</td>
+      <td style="font-weight:700">${t.entry.toFixed(0)}</td>
       <td style="color:var(--red);font-weight:600">${t.sl.toFixed(0)}</td>
-      <td style="color:var(--green);font-weight:600">${tp}${t.hitTP?' ✓ '+t.tpTime:''}</td>
+      <td style="${isTP?'color:var(--green);font-weight:700':'color:var(--t3)'}">${tp}${isTP?' ✓ '+t.tpTime:''}</td>
       <td style="background:#faf5ff;color:#7c3aed;font-size:0.62rem">${c.pivot.toFixed(0)}</td>
-      <td style="color:var(--red);font-size:0.62rem">${c.r1.toFixed(0)} / ${c.s1.toFixed(0)}</td>
+      <td style="color:var(--t2);font-size:0.62rem">${c.r1.toFixed(0)} / ${c.s1.toFixed(0)}</td>
+      <td style="font-weight:600;color:var(--t2)">${exitPx?exitPx.toFixed(0):'—'}</td>
       <td><span class="tag ${rc}">${lbl}</span></td>
       <td style="font-weight:700;${t.pnl>=0?'color:var(--green)':'color:var(--red)'}">${t.pnl!=null?(t.pnl>=0?'+$':'-$')+Math.abs(t.pnl).toFixed(2):'—'}</td>
     </tr>`;
