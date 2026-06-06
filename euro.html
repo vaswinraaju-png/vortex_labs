@@ -236,10 +236,11 @@ tbody tr:last-child td{border-bottom:none;}
               <th>R2 / S2 (TP1)</th>
               <th>R3 / S3 (TP2)</th>
               <th>Result</th>
+              <th>P&L ($)</th>
             </tr>
           </thead>
           <tbody id="trade-tbody">
-            <tr><td colspan="11" class="empty">Run the scanner to see trades</td></tr>
+            <tr><td colspan="12" class="empty">Run the scanner to see trades</td></tr>
           </tbody>
         </table>
       </div>
@@ -362,28 +363,46 @@ async function startScan() {
   const periodStart = Math.floor(days[0].getTime()/1000) - 86400;
   const periodEnd   = Math.floor(todayUTC.getTime()/1000);
 
+  // Paginated fetch — Delta caps at 2000 candles per request
+  async function fetchAllCandles(symbol, resolution, start, end) {
+    let all = [];
+    let cursor = start;
+    const resSeconds = {'5m':300,'15m':900,'30m':1800,'1h':3600,'1d':86400}[resolution] || 900;
+    const pageSize = 2000;
+    while (cursor < end) {
+      const pageEnd = Math.min(cursor + resSeconds * pageSize, end);
+      const url = `${DELTA}/v2/history/candles?symbol=${symbol}&resolution=${resolution}&start=${cursor}&end=${pageEnd}`;
+      const r = await fetch(url);
+      const d = await r.json();
+      if (!d.result || d.result.length === 0) break;
+      all = all.concat(d.result);
+      const lastTime = d.result[d.result.length-1].time;
+      if (lastTime <= cursor) break; // no progress
+      cursor = lastTime + resSeconds;
+      if (d.result.length < pageSize) break; // last page
+    }
+    return all.sort((a,b)=>a.time-b.time);
+  }
+
   let dailyCandles = [], intradayAll = [];
   try {
     document.getElementById('prog-txt').textContent = 'Fetching daily candles...';
     document.getElementById('prog-pct').textContent = '0%';
-    const [rd, ri] = await Promise.all([
-      fetch(`${DELTA}/v2/history/candles?symbol=${sym}&resolution=1d&start=${periodStart}&end=${periodEnd}`).then(r=>r.json()),
-      fetch(`${DELTA}/v2/history/candles?symbol=${sym}&resolution=${config.interval}&start=${periodStart}&end=${periodEnd}`).then(r=>r.json()),
-    ]);
-    if (!rd.result || rd.result.length < 2) {
+    dailyCandles = await fetchAllCandles(sym, '1d', periodStart, periodEnd);
+    if (dailyCandles.length < 2) {
       log('error','Not enough daily candles.');
       setStatus('','Error');
       document.getElementById('scan-btn').disabled = false;
       return;
     }
-    if (!ri.result || ri.result.length === 0) {
+    document.getElementById('prog-txt').textContent = `Fetching ${config.interval} candles (may take a moment)...`;
+    intradayAll = await fetchAllCandles(sym, config.interval, periodStart, periodEnd);
+    if (intradayAll.length === 0) {
       log('error','No intraday candles returned.');
       setStatus('','Error');
       document.getElementById('scan-btn').disabled = false;
       return;
     }
-    dailyCandles = rd.result.sort((a,b)=>a.time-b.time);
-    intradayAll  = ri.result.sort((a,b)=>a.time-b.time);
     log('success', `${dailyCandles.length} daily + ${intradayAll.length} intraday candles loaded. Processing...`);
   } catch(e) {
     log('error','Fetch failed: '+e.message);
@@ -421,6 +440,13 @@ async function startScan() {
       breakFired.eodTime  = exitTimeStr;
     }
     breakFired.result = result;
+    // Calculate P&L: (exit - entry) * lot for BUY, (entry - exit) * lot for SELL
+    const exitPx = result.startsWith('Hit') ? (
+      breakFired.dir==='BUY' ? (breakFired.hitR3 ? breakFired.cpr.r3 : breakFired.cpr.r2)
+                              : (breakFired.hitS3 ? breakFired.cpr.s3 : breakFired.cpr.s2)
+    ) : (breakFired.eodClose || breakFired.entry);
+    const priceDiff = breakFired.dir==='BUY' ? exitPx - breakFired.entry : breakFired.entry - exitPx;
+    breakFired.pnl = priceDiff * config.lot;
     allTrades.push({...breakFired});
     const logType = result.startsWith('Hit') ? 'success' : result === 'SL Hit' ? 'error' : result === 'EOD Close' ? 'info' : 'warn';
     log(logType, `${breakFired.day} ${breakFired.dir} → ${result} (entry:${breakFired.entry.toFixed(0)}${exitPrice!=null?' exit:'+exitPrice.toFixed(0):''})`);
@@ -496,8 +522,8 @@ async function startScan() {
         if (breakFired) continue;
       }
 
-      // ── Look for new S1 break → SELL ──
-      if (close < cpr.s1 && prevClose >= cpr.s1) {
+      // ── Look for new S1 break → SELL (only one trade per day) ──
+      if (!hadBreakToday && close < cpr.s1 && prevClose >= cpr.s1) {
         breakFired = {
           day:dayStr, dir:'SELL', trigger:'S1 Break',
           entry:close, entryTime:`${dayStr} ${ts}`,
@@ -513,7 +539,7 @@ async function startScan() {
         log('cpr', `${dayStr} ${ts}: S1 BREAK SELL @ ${close.toFixed(0)} → S2:${cpr.s2.toFixed(0)} S3:${cpr.s3.toFixed(0)}`);
       }
       // ── Look for new R1 break → BUY ──
-      else if (close > cpr.r1 && prevClose <= cpr.r1) {
+      else if (!hadBreakToday && close > cpr.r1 && prevClose <= cpr.r1) {
         breakFired = {
           day:dayStr, dir:'BUY', trigger:'R1 Break',
           entry:close, entryTime:`${dayStr} ${ts}`,
@@ -572,7 +598,7 @@ const delay = ms => new Promise(r=>setTimeout(r,ms));
 function renderResults(noTradeDays, daysScanned) {
   const trades = allTrades;
   if (trades.length === 0) {
-    document.getElementById('trade-tbody').innerHTML = '<tr><td colspan="11" class="empty">No R1/S1 breaks found.</td></tr>';
+    document.getElementById('trade-tbody').innerHTML = '<tr><td colspan="12" class="empty">No R1/S1 breaks found.</td></tr>';
     document.getElementById('s-trades').textContent = '0';
     document.getElementById('s-days').textContent = `Days scanned: ${daysScanned} | No break: ${noTradeDays.length}`;
     return;
@@ -593,11 +619,13 @@ function renderResults(noTradeDays, daysScanned) {
   document.getElementById('s-wr').textContent = wr+'%';
   document.getElementById('s-wr-bar').style.width = wr+'%';
   document.getElementById('s-wr-bar').style.background = parseFloat(wr)>=50?'var(--green)':parseFloat(wr)>=35?'var(--orange)':'var(--red)';
+  const totalPnl = trades.reduce((s,t)=>s+(t.pnl||0), 0);
+  const finalBal = config.bal + totalPnl;
   const pnlEl = document.getElementById('s-pnl');
-  pnlEl.textContent = `${buys.length}B / ${sells.length}S`;
-  pnlEl.style.color = 'var(--text)';
-  pnlEl.style.fontSize = '1.1rem';
-  document.getElementById('s-bal2').textContent = `Breaks on ${trades.length}/${daysScanned} days`;
+  pnlEl.textContent = (totalPnl >= 0 ? '+$' : '-$') + Math.abs(totalPnl).toFixed(2);
+  pnlEl.style.color = totalPnl >= 0 ? 'var(--green)' : 'var(--red)';
+  pnlEl.style.fontSize = '1.3rem';
+  document.getElementById('s-bal2').textContent = `Final bal: $${finalBal.toFixed(2)} (${buys.length}B / ${sells.length}S)`;
   document.getElementById('s-tp1').textContent = `R2:${hitR2.length} S2:${hitS2.length}`;
   document.getElementById('s-tp2').textContent = `R3:${hitR3.length} S3:${hitS3.length} EOD:${eodClosed.length} SL:${slHits.length}`;
   document.getElementById('s-rr').textContent = `${anyTarget.length}/${trades.length}`;
@@ -608,8 +636,9 @@ function renderResults(noTradeDays, daysScanned) {
   const months = {};
   trades.forEach(t => {
     const m = t.day.substr(0,7);
-    if (!months[m]) months[m]={total:0,hit:0,buys:0,sells:0,r2:0,r3:0,s2:0,s3:0};
+    if (!months[m]) months[m]={total:0,hit:0,buys:0,sells:0,r2:0,r3:0,s2:0,s3:0,pnl:0};
     months[m].total++;
+    months[m].pnl += (t.pnl||0);
     if (t.dir==='BUY') { months[m].buys++; if(t.hitR2)months[m].r2++; if(t.hitR3)months[m].r3++; }
     else               { months[m].sells++; if(t.hitS2)months[m].s2++; if(t.hitS3)months[m].s3++; }
     if ((t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2)) months[m].hit++;
@@ -623,9 +652,11 @@ function renderResults(noTradeDays, daysScanned) {
         const d = new Date(m+'-01');
         const mn = d.toLocaleString('default',{month:'short',year:'2-digit'});
         const good = parseFloat(mwr)>=50;
+        const mpnl = mo.pnl>=0 ? '+$'+mo.pnl.toFixed(2) : '-$'+Math.abs(mo.pnl).toFixed(2);
         return `<div class="month-card ${good?'pos':'neg'}">
           <div class="mn">${mn}</div>
           <div class="mp ${good?'pos':'neg'}">${mo.hit}/${mo.total} hit</div>
+          <div class="ms" style="font-weight:700;color:${mo.pnl>=0?'var(--green)':'var(--red)'}">${mpnl}</div>
           <div class="ms">WR ${mwr} · B:${mo.buys} S:${mo.sells}</div>
           <div class="ms" style="margin-top:2px">R2:${mo.r2} R3:${mo.r3} S2:${mo.s2} S3:${mo.s3}</div>
         </div>`;
@@ -663,6 +694,7 @@ function renderResults(noTradeDays, daysScanned) {
       <td style="${tp1h?'color:var(--green);font-weight:700':'color:var(--t3)'}">${tp1v}${tp1h?' ✓ '+tp1t:''}</td>
       <td style="${tp2h?'color:#15803d;font-weight:700':'color:var(--t3)'}">${tp2v}${tp2h?' ✓ '+tp2t:''}</td>
       <td><span class="tag ${rc}">${lbl}</span></td>
+      <td style="font-weight:700;${t.pnl>=0?'color:var(--green)':'color:var(--red)'}">${t.pnl!=null?(t.pnl>=0?'+$':'-$')+Math.abs(t.pnl).toFixed(2):'—'}</td>
     </tr>`;
   }).join('');
 
@@ -679,7 +711,7 @@ function resetScan() {
   scanning = false;
   document.getElementById('prog-wrap').style.display='none';
   document.getElementById('prog-fill').style.width='0%';
-  document.getElementById('trade-tbody').innerHTML='<tr><td colspan="11" class="empty">Run the scanner to see trades</td></tr>';
+  document.getElementById('trade-tbody').innerHTML='<tr><td colspan="12" class="empty">Run the scanner to see trades</td></tr>';
   document.getElementById('month-grid').innerHTML='<div class="empty" style="grid-column:1/-1">Run the scanner to see monthly breakdown</div>';
   document.getElementById('no-trade-wrap').innerHTML='<div class="empty">Run the scanner to see no-signal days</div>';
   document.getElementById('trade-count').textContent='';
