@@ -363,40 +363,43 @@ async function startScan() {
   const periodStart = Math.floor(days[0].getTime()/1000) - 86400;
   const periodEnd   = Math.floor(todayUTC.getTime()/1000);
 
-  // Paginated fetch — Delta caps at 2000 candles per request
-  async function fetchAllCandles(symbol, resolution, start, end) {
-    let all = [];
-    let cursor = start;
+  // Chunk-based fetch: split time range into fixed windows, fetch each, dedupe
+  async function fetchAllCandles(symbol, resolution, start, end, labelPrefix) {
     const resSeconds = {'5m':300,'15m':900,'30m':1800,'1h':3600,'1d':86400}[resolution] || 900;
-    const pageSize = 2000;
-    while (cursor < end) {
-      const pageEnd = Math.min(cursor + resSeconds * pageSize, end);
-      const url = `${DELTA}/v2/history/candles?symbol=${symbol}&resolution=${resolution}&start=${cursor}&end=${pageEnd}`;
+    const chunkSize  = resSeconds * 500; // 500 candles per chunk — safely under API limit
+    const chunks = [];
+    for (let s = start; s < end; s += chunkSize) {
+      chunks.push({ s, e: Math.min(s + chunkSize, end) });
+    }
+    const seen = new Set();
+    let all = [];
+    for (let i = 0; i < chunks.length; i++) {
+      const { s, e } = chunks[i];
+      document.getElementById('prog-txt').textContent =
+        `${labelPrefix} chunk ${i+1}/${chunks.length}...`;
+      document.getElementById('prog-pct').textContent =
+        Math.round((i+1)/chunks.length*100)+'%';
+      const url = `${DELTA}/v2/history/candles?symbol=${symbol}&resolution=${resolution}&start=${s}&end=${e}`;
       const r = await fetch(url);
       const d = await r.json();
-      if (!d.result || d.result.length === 0) break;
-      all = all.concat(d.result);
-      const lastTime = d.result[d.result.length-1].time;
-      if (lastTime <= cursor) break; // no progress
-      cursor = lastTime + resSeconds;
-      if (d.result.length < pageSize) break; // last page
+      if (d.result && d.result.length > 0) {
+        d.result.forEach(c => { if (!seen.has(c.time)) { seen.add(c.time); all.push(c); } });
+      }
+      await new Promise(r=>setTimeout(r,120)); // rate-limit buffer
     }
     return all.sort((a,b)=>a.time-b.time);
   }
 
   let dailyCandles = [], intradayAll = [];
   try {
-    document.getElementById('prog-txt').textContent = 'Fetching daily candles...';
-    document.getElementById('prog-pct').textContent = '0%';
-    dailyCandles = await fetchAllCandles(sym, '1d', periodStart, periodEnd);
+    dailyCandles = await fetchAllCandles(sym, '1d', periodStart, periodEnd, 'Daily candles');
     if (dailyCandles.length < 2) {
       log('error','Not enough daily candles.');
       setStatus('','Error');
       document.getElementById('scan-btn').disabled = false;
       return;
     }
-    document.getElementById('prog-txt').textContent = `Fetching ${config.interval} candles (may take a moment)...`;
-    intradayAll = await fetchAllCandles(sym, config.interval, periodStart, periodEnd);
+    intradayAll = await fetchAllCandles(sym, config.interval, periodStart, periodEnd, `${config.interval} candles`);
     if (intradayAll.length === 0) {
       log('error','No intraday candles returned.');
       setStatus('','Error');
