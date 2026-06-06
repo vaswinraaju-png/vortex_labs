@@ -147,7 +147,7 @@ tbody tr:last-child td{border-bottom:none;}
     <div class="brand">CPR Scanner <span>●</span><small>storiesbyachu · 90-Day Backtest</small></div>
     <div class="pill" id="status-pill"><div class="d"></div><span id="status-txt">Idle</span></div>
   </div>
-  <div style="font-size:0.62rem;color:var(--t3)">CPR Simple · R1/S1 Break at Close · 5% SL · R2/S2 TP</div>
+  <div style="font-size:0.62rem;color:var(--t3)">CPR · R1/S1 Break · 1:2 RR · 1:200 Leverage · $25</div>
 </div>
 
 <div class="layout">
@@ -179,11 +179,11 @@ tbody tr:last-child td{border-bottom:none;}
       <div class="fr"><label>Lookback (days)</label>
         <input type="number" id="lookback" value="300" min="7" max="3000" step="1"/>
       </div>
-      <div class="fr"><label>Starting Balance (USD)</label>
-        <input type="number" id="bal" value="100" min="10" step="10"/>
+      <div class="fr"><label>Balance (USD)</label>
+        <input type="number" id="bal" value="25" min="1" step="1"/>
       </div>
-      <div class="fr"><label>Lot Size</label>
-        <input type="number" id="lot" value="0.01" min="0.001" step="0.001"/>
+      <div class="fr"><label>Leverage</label>
+        <input type="number" id="leverage-display" value="200" disabled style="background:var(--b2);color:var(--t2);cursor:not-allowed"/>
       </div>
     </div>
   </div>
@@ -291,13 +291,13 @@ tbody tr:last-child td{border-bottom:none;}
               <th>Dir</th>
               <th>Entry Time</th>
               <th>Entry</th>
-              <th>SL (5%)</th>
+              <th>SL (1:2 RR)</th>
               <th>TP (R2/S2)</th>
-              <th>Pivot</th>
-              <th>R1 / S1</th>
+              <th>Lot</th>
               <th>Exit</th>
               <th>Result</th>
               <th>P&L</th>
+              <th>Balance</th>
             </tr>
           </thead>
           <tbody id="trade-tbody">
@@ -414,13 +414,16 @@ function finalizeBreak(exitPrice, exitTimeStr, reason) {
   }
   breakFired.result = result;
   const exitPx = breakFired.hitTP
-    ? (breakFired.dir==='BUY' ? breakFired.cpr.r2 : breakFired.cpr.s2)
+    ? breakFired.tp1
     : (breakFired.eodClose || breakFired.entry);
-  const priceDiff = breakFired.dir==='BUY' ? exitPx-breakFired.entry : breakFired.entry-exitPx;
-  breakFired.pnl = priceDiff * config.lot;
+  const priceDiff = breakFired.dir==='BUY' ? exitPx - breakFired.entry : breakFired.entry - exitPx;
+  const lot = breakFired.lot || config.lot || 0.01;
+  breakFired.pnl = priceDiff * lot;
+  runningBal += breakFired.pnl;
+  breakFired.balAfter = parseFloat(runningBal.toFixed(2));
   allTrades.push({...breakFired});
   const logType = breakFired.hitTP ? 'success' : result==='SL Hit' ? 'error' : 'info';
-  log(logType, `${breakFired.day} ${breakFired.dir} → ${result} P&L:${breakFired.pnl>=0?'+':''}$${breakFired.pnl.toFixed(2)}`);
+  log(logType, `${breakFired.day} ${breakFired.dir} → ${result} P&L:${breakFired.pnl>=0?'+':''}$${breakFired.pnl.toFixed(2)} | Bal:$${runningBal.toFixed(2)}`);
   breakFired = null;
 }
 
@@ -462,8 +465,8 @@ async function startScan() {
   config.pair     = sym;
   config.interval = document.getElementById('interval').value;
   config.lookback = parseInt(document.getElementById('lookback').value);
-  config.bal      = parseFloat(document.getElementById('bal').value)||100;
-  config.lot      = parseFloat(document.getElementById('lot').value)||0.01;
+  config.bal      = parseFloat(document.getElementById('bal').value)||25;
+  config.leverage = 200;
   config.filterSession  = document.getElementById('f-session').checked;
   config.sessionFrom    = document.getElementById('f-session-from').value;
   config.sessionTo      = document.getElementById('f-session-to').value;
@@ -479,7 +482,7 @@ async function startScan() {
   document.getElementById('scan-btn').disabled = true;
   document.getElementById('prog-wrap').style.display = 'block';
   setStatus('running','Fetching...');
-  log('info',`Fetching data for ${sym} (${config.interval}, ${config.lookback} days)...`);
+  log('info',`Fetching data for ${sym} (${config.interval}, ${config.lookback} days) | $${config.bal} × ${config.leverage}x leverage...`);
 
   const todayUTC = new Date();
   const days = [];
@@ -536,6 +539,12 @@ async function startScan() {
     const dayStr = `${day.getUTCFullYear()}-${String(day.getUTCMonth()+1).padStart(2,'0')}-${String(day.getUTCDate()).padStart(2,'0')}`;
     const dayTs  = Math.floor(day.getTime()/1000);
 
+    // Margin call check
+    if (runningBal <= 0) {
+      log('error', `MARGIN CALL on ${dayStr} — account blown. Stopping.`);
+      break;
+    }
+
     const prevDaily = dailyCandles.filter(c=>c.time<dayTs).slice(-1)[0];
     if (!prevDaily) { scanned++; updateProgress(scanned,days.length); continue; }
 
@@ -574,17 +583,12 @@ async function startScan() {
           continue;
         }
 
-        const bc = breakFired.cpr;
         if (breakFired.dir==='BUY') {
-          // SL hit
-          if (low <= breakFired.sl) { finalizeBreak(breakFired.sl, `${dayStr} ${ts}`, 'sl'); continue; }
-          // TP hit
-          if (high >= bc.r2) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; finalizeBreak(); }
+          if (low  <= breakFired.sl) { finalizeBreak(breakFired.sl, `${dayStr} ${ts}`, 'sl'); continue; }
+          if (high >= breakFired.tp1) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; finalizeBreak(); }
         } else {
-          // SL hit
           if (high >= breakFired.sl) { finalizeBreak(breakFired.sl, `${dayStr} ${ts}`, 'sl'); continue; }
-          // TP hit
-          if (low <= bc.s2) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; finalizeBreak(); }
+          if (low  <= breakFired.tp1) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; finalizeBreak(); }
         }
         if (breakFired) continue;
       }
@@ -593,31 +597,34 @@ async function startScan() {
       if (hadBreakToday) continue;
       if (!inSession(candle.time)) continue;
 
+      // Calculate lot size based on current balance × leverage / BTC price
+      const effectiveLot = parseFloat(((runningBal * config.leverage) / close).toFixed(6));
+
       // SELL: close below S1
       if (close < cpr.s1 && prevClose >= cpr.s1) {
-        const entry = close;
-        const slPct  = parseFloat((entry * 0.05).toFixed(2));   // 5% distance
-        const slCap  = 10 / config.lot;                          // $10 max loss in price terms
-        const slDist = Math.min(slPct, slCap);
-        const sl     = parseFloat((entry + slDist).toFixed(2));  // SL above entry for SELL
-        const tp     = parseFloat(cpr.s2.toFixed(2));
-        breakFired = { day:dayStr, dir:'SELL', trigger:'S1 Break', entry, sl, tp1:tp, cpr, entryTime:`${dayStr} ${ts}`, hitTP:false, tpTime:null };
+        const entry   = close;
+        const tp      = parseFloat(cpr.s2.toFixed(2));
+        const tpDist  = entry - tp;           // how far to TP
+        const slDist  = tpDist / 2;           // 1:2 R:R → SL is half TP distance
+        const sl      = parseFloat((entry + slDist).toFixed(2));
+        if (tpDist <= 0) { log('warn',`${dayStr} ${ts}: SELL skipped — S2 above entry`); continue; }
+        breakFired = { day:dayStr, dir:'SELL', trigger:'S1 Break', entry, sl, tp1:tp, cpr, entryTime:`${dayStr} ${ts}`, hitTP:false, tpTime:null, lot:effectiveLot, rr:'1:2' };
         hadBreakToday = true;
+        log('cpr',`${dayStr} ${ts}: SELL @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} TP:${tp.toFixed(0)} Lot:${effectiveLot.toFixed(4)} (bal:$${runningBal.toFixed(2)}×200)`);
         if (low <= tp) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; finalizeBreak(); }
-        else log('cpr',`${dayStr} ${ts}: SELL @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} (${slDist===slCap?'$10 cap':'5%'}) TP:${tp.toFixed(0)}`);
       }
       // BUY: close above R1
       else if (close > cpr.r1 && prevClose <= cpr.r1) {
-        const entry = close;
-        const slPct  = parseFloat((entry * 0.05).toFixed(2));   // 5% distance
-        const slCap  = 10 / config.lot;                          // $10 max loss in price terms
-        const slDist = Math.min(slPct, slCap);
-        const sl     = parseFloat((entry - slDist).toFixed(2));  // SL below entry for BUY
-        const tp     = parseFloat(cpr.r2.toFixed(2));
-        breakFired = { day:dayStr, dir:'BUY', trigger:'R1 Break', entry, sl, tp1:tp, cpr, entryTime:`${dayStr} ${ts}`, hitTP:false, tpTime:null };
+        const entry   = close;
+        const tp      = parseFloat(cpr.r2.toFixed(2));
+        const tpDist  = tp - entry;           // how far to TP
+        const slDist  = tpDist / 2;           // 1:2 R:R → SL is half TP distance
+        const sl      = parseFloat((entry - slDist).toFixed(2));
+        if (tpDist <= 0) { log('warn',`${dayStr} ${ts}: BUY skipped — R2 below entry`); continue; }
+        breakFired = { day:dayStr, dir:'BUY', trigger:'R1 Break', entry, sl, tp1:tp, cpr, entryTime:`${dayStr} ${ts}`, hitTP:false, tpTime:null, lot:effectiveLot, rr:'1:2' };
         hadBreakToday = true;
+        log('cpr',`${dayStr} ${ts}: BUY @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} TP:${tp.toFixed(0)} Lot:${effectiveLot.toFixed(4)} (bal:$${runningBal.toFixed(2)}×200)`);
         if (high >= tp) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; finalizeBreak(); }
-        else log('cpr',`${dayStr} ${ts}: BUY @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} (${slDist===slCap?'$10 cap':'5%'}) TP:${tp.toFixed(0)}`);
       }
     }
 
@@ -636,7 +643,7 @@ async function startScan() {
   scanning = false;
   setStatus('done','Complete');
   document.getElementById('scan-btn').disabled = false;
-  log('success',`Scan complete. ${allTrades.length} trades found across ${scanned} days.`);
+  log('success',`Scan complete. ${allTrades.length} trades | Final bal: $${runningBal.toFixed(2)}`);
   renderResults(noTradeDays, scanned);
 }
 
@@ -719,7 +726,6 @@ function renderResults(noTradeDays, daysScanned) {
   // Table
   const tbody=document.getElementById('trade-tbody');
   tbody.innerHTML=trades.map((t,i)=>{
-    const c=t.cpr;
     const isSL  = t.result==='SL Hit';
     const isTE  = t.result==='Time Exit';
     const isEOD = t.result==='EOD Close';
@@ -730,8 +736,7 @@ function renderResults(noTradeDays, daysScanned) {
               : isEOD?`EOD ${t.eodClose?t.eodClose.toFixed(0):''}`
               : 'No Target';
     const rc  = isTP?'tp1':isSL?'sl':(isTE||isEOD)?'eod':'skip';
-    const tp  = t.dir==='BUY'?c.r2.toFixed(0):c.s2.toFixed(0);
-    const exitPx = isTP?(t.dir==='BUY'?c.r2:c.s2):(t.eodClose||t.entry);
+    const exitPx = isTP ? t.tp1 : (t.eodClose||t.entry);
     return `<tr>
       <td style="color:var(--t3);font-weight:600">${i+1}</td>
       <td style="font-weight:600">${t.day}</td>
@@ -739,12 +744,12 @@ function renderResults(noTradeDays, daysScanned) {
       <td style="font-size:0.62rem;color:var(--t2)">${t.entryTime||'—'}</td>
       <td style="font-weight:700">${t.entry.toFixed(0)}</td>
       <td style="color:var(--red);font-weight:600">${t.sl.toFixed(0)}</td>
-      <td style="${isTP?'color:var(--green);font-weight:700':'color:var(--t3)'}">${tp}${isTP?' ✓ '+t.tpTime:''}</td>
-      <td style="background:#faf5ff;color:#7c3aed;font-size:0.62rem">${c.pivot.toFixed(0)}</td>
-      <td style="color:var(--t2);font-size:0.62rem">${c.r1.toFixed(0)} / ${c.s1.toFixed(0)}</td>
+      <td style="${isTP?'color:var(--green);font-weight:700':'color:var(--t3)'}">${t.tp1.toFixed(0)}${isTP?' ✓ '+t.tpTime:''}</td>
+      <td style="font-size:0.62rem;color:var(--t2)">${t.lot?t.lot.toFixed(4):'—'}</td>
       <td style="font-weight:600;color:var(--t2)">${exitPx?exitPx.toFixed(0):'—'}</td>
       <td><span class="tag ${rc}">${lbl}</span></td>
       <td style="font-weight:700;${t.pnl>=0?'color:var(--green)':'color:var(--red)'}">${t.pnl!=null?(t.pnl>=0?'+$':'-$')+Math.abs(t.pnl).toFixed(2):'—'}</td>
+      <td style="font-weight:700;color:var(--t2)">$${t.balAfter!=null?t.balAfter.toFixed(2):'—'}</td>
     </tr>`;
   }).join('');
 
