@@ -370,6 +370,24 @@ async function startScan() {
 
   const noTradeDays = [];
   let scanned = 0;
+  let breakFired = null; // persists across days until targets hit
+
+  function finalizeBreak() {
+    if (!breakFired) return;
+    let result = 'No Target';
+    if (breakFired.dir === 'BUY') {
+      if (breakFired.hitR3) result = 'Hit R3';
+      else if (breakFired.hitR2) result = 'Hit R2';
+    } else {
+      if (breakFired.hitS3) result = 'Hit S3';
+      else if (breakFired.hitS2) result = 'Hit S2';
+    }
+    breakFired.result = result;
+    allTrades.push({...breakFired});
+    log(result.startsWith('Hit') ? 'success' : 'warn',
+      `${breakFired.day} ${breakFired.dir} → ${result} (entry:${breakFired.entry.toFixed(0)})`);
+    breakFired = null;
+  }
 
   for (let di = 0; di < days.length; di++) {
     const day = days[di];
@@ -398,11 +416,6 @@ async function startScan() {
 
     if (intraday.length < 2) { noTradeDays.push({day:dayStr,reason:'No intraday data',cpr}); scanned++; updateProgress(scanned,days.length); continue; }
 
-    // PURE FACT FINDER — no SL, no R:R filter
-    // Q: after R1/S1 break, did price reach R2, R3, S2, S3 that same day?
-    let dayEvents = [];
-    let breakFired = null; // track first break of the day
-
     for (let ci = 1; ci < intraday.length; ci++) {
       const candle = intraday[ci];
       const prev = intraday[ci-1];
@@ -412,66 +425,65 @@ async function startScan() {
       const low = parseFloat(candle.low);
       const ts = new Date(candle.time*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:false});
 
-      // After a break fires, track if targets were hit in remaining candles
+      // If a break is already active, check targets using this candle's high/low
+      // Use the CPR from the day the break was fired (breakFired.cpr)
       if (breakFired) {
+        const bc = breakFired.cpr;
         if (breakFired.dir === 'BUY') {
-          if (!breakFired.hitR2 && high >= cpr.r2) { breakFired.hitR2 = true; breakFired.r2Time = ts; }
-          if (!breakFired.hitR3 && high >= cpr.r3) { breakFired.hitR3 = true; breakFired.r3Time = ts; }
+          if (!breakFired.hitR2 && high >= bc.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
+          if (!breakFired.hitR3 && high >= bc.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
         } else {
-          if (!breakFired.hitS2 && low <= cpr.s2) { breakFired.hitS2 = true; breakFired.s2Time = ts; }
-          if (!breakFired.hitS3 && low <= cpr.s3) { breakFired.hitS3 = true; breakFired.s3Time = ts; }
+          if (!breakFired.hitS2 && low <= bc.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
+          if (!breakFired.hitS3 && low <= bc.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
         }
-        continue; // don't look for new breaks after first one
+        // If both targets hit, close the trade
+        if (breakFired.dir==='BUY' && breakFired.hitR3) { finalizeBreak(); }
+        if (breakFired.dir==='SELL' && breakFired.hitS3) { finalizeBreak(); }
+        continue;
       }
 
-      // BUY: close above R1
-      if (close > cpr.r1 && prevClose <= cpr.r1) {
-        breakFired = {
-          day:dayStr, dir:'BUY', trigger:'R1 Break',
-          entry:close, entryTime:ts,
-          r1:cpr.r1, r2:cpr.r2, r3:cpr.r3,
-          hitR2:false, hitR3:false, r2Time:null, r3Time:null,
-          cpr
-        };
-        log('cpr', `${dayStr} ${ts}: R1 BREAK BUY @ ${close.toFixed(0)} → watching for R2:${cpr.r2.toFixed(0)} R3:${cpr.r3.toFixed(0)}`);
-      }
-      // SELL: close below S1
-      else if (close < cpr.s1 && prevClose >= cpr.s1) {
+      // Look for new S1 break (SELL) — check before BUY so downtrend gets priority
+      if (close < cpr.s1 && prevClose >= cpr.s1) {
         breakFired = {
           day:dayStr, dir:'SELL', trigger:'S1 Break',
-          entry:close, entryTime:ts,
+          entry:close, entryTime:`${dayStr} ${ts}`,
           s1:cpr.s1, s2:cpr.s2, s3:cpr.s3,
           hitS2:false, hitS3:false, s2Time:null, s3Time:null,
           cpr
         };
-        log('cpr', `${dayStr} ${ts}: S1 BREAK SELL @ ${close.toFixed(0)} → watching for S2:${cpr.s2.toFixed(0)} S3:${cpr.s3.toFixed(0)}`);
+        // Check same candle for immediate target hit
+        if (low <= cpr.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
+        if (low <= cpr.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
+        log('cpr', `${dayStr} ${ts}: S1 BREAK SELL @ ${close.toFixed(0)} → S2:${cpr.s2.toFixed(0)} S3:${cpr.s3.toFixed(0)}`);
+      }
+      // BUY: close above R1
+      else if (close > cpr.r1 && prevClose <= cpr.r1) {
+        breakFired = {
+          day:dayStr, dir:'BUY', trigger:'R1 Break',
+          entry:close, entryTime:`${dayStr} ${ts}`,
+          r1:cpr.r1, r2:cpr.r2, r3:cpr.r3,
+          hitR2:false, hitR3:false, r2Time:null, r3Time:null,
+          cpr
+        };
+        // Check same candle for immediate target hit
+        if (high >= cpr.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
+        if (high >= cpr.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
+        log('cpr', `${dayStr} ${ts}: R1 BREAK BUY @ ${close.toFixed(0)} → R2:${cpr.r2.toFixed(0)} R3:${cpr.r3.toFixed(0)}`);
       }
     }
 
-    if (breakFired) {
-      // Determine result
-      let result = 'No Target';
-      if (breakFired.dir === 'BUY') {
-        if (breakFired.hitR3) result = 'Hit R3';
-        else if (breakFired.hitR2) result = 'Hit R2';
-        else result = 'No Target';
-      } else {
-        if (breakFired.hitS3) result = 'Hit S3';
-        else if (breakFired.hitS2) result = 'Hit S2';
-        else result = 'No Target';
-      }
-      dayEvents.push({...breakFired, result});
-      log(result.startsWith('Hit') ? 'success' : 'warn',
-        `${dayStr} ${breakFired.dir} → ${result}`);
-    } else {
+    // End of day — don't finalize yet, carry breakFired into next day
+    if (!breakFired) {
       noTradeDays.push({day:dayStr, reason:'No R1/S1 break', cpr});
     }
 
-    allTrades.push(...dayEvents);
     scanned++;
     updateProgress(scanned, days.length);
     await delay(120);
   }
+
+  // Finalize any still-open break at end of scan
+  if (breakFired) finalizeBreak();
 
   scanning = false;
   setStatus('done','Complete');
