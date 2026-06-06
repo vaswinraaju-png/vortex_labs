@@ -169,11 +169,10 @@ tbody tr:last-child td{border-bottom:none;}
         </select>
       </div>
       <div class="fr"><label>Lookback (days)</label>
-        <select id="lookback">
-          <option value="30">30 Days</option>
-          <option value="60">60 Days</option>
-          <option value="90" selected>90 Days</option>
-        </select>
+        <input type="number" id="lookback" value="3000" min="7" max="3000" step="1"/>
+      </div>
+      <div class="fr"><label>Stop Loss %</label>
+        <input type="number" id="sl-pct" value="" min="0.1" max="20" step="0.1" placeholder="e.g. 2  (blank = EOD only)"/>
       </div>
       <div class="fr"><label>Starting Balance (USD)</label>
         <input type="number" id="bal" value="100" min="10" step="10"/>
@@ -182,7 +181,7 @@ tbody tr:last-child td{border-bottom:none;}
         <input type="number" id="lot" value="0.01" min="0.001" step="0.001"/>
       </div>
       <button class="btn bo" id="load-btn" onclick="loadPairs()">⬇ Load Pairs</button>
-      <button class="btn bo" id="scan-btn" onclick="startScan()" disabled>▶ Run 90-Day Scan</button>
+      <button class="btn bo" id="scan-btn" onclick="startScan()" disabled>▶ Run Scan</button>
       <button class="btn bg" onclick="resetScan()">↺ Reset</button>
       <div class="prog-wrap" id="prog-wrap" style="display:none">
         <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
@@ -260,7 +259,7 @@ tbody tr:last-child td{border-bottom:none;}
 
 <script>
 const DELTA = 'https://api.india.delta.exchange';
-let config = { deltaKey:'', deltaSecret:'', pair:'', interval:'15m', lookback:90, minRR:2, bal:100, lot:0.01 };
+let config = { deltaKey:'', deltaSecret:'', pair:'', interval:'15m', lookback:3000, slPct:0, minRR:2, bal:100, lot:0.01 };
 let scanning = false;
 let allTrades = [];
 let runningBal = 100;
@@ -337,6 +336,7 @@ async function startScan() {
   config.lookback = parseInt(document.getElementById('lookback').value);
   config.bal = parseFloat(document.getElementById('bal').value)||100;
   config.lot = parseFloat(document.getElementById('lot').value)||0.01;
+  config.slPct = parseFloat(document.getElementById('sl-pct').value)||0;
 
   scanning = true;
   allTrades = [];
@@ -345,7 +345,8 @@ async function startScan() {
   document.getElementById('scan-btn').disabled = true;
   document.getElementById('prog-wrap').style.display = 'block';
   setStatus('running', 'Fetching...');
-  log('info', `Fetching all data for ${sym} (${config.interval}, ${config.lookback} days)...`);
+  const slLabel = config.slPct > 0 ? `, SL ${config.slPct}%` : ', no SL';
+  log('info', `Fetching all data for ${sym} (${config.interval}, ${config.lookback} days${slLabel})...`);
 
   // Always work in UTC dates to match Delta's candle timestamps
   const todayUTC = new Date();
@@ -403,7 +404,8 @@ async function startScan() {
   const noTradeDays = [];
   let scanned = 0;
 
-  function finalizeBreak(eodPrice, eodTimeStr) {
+  function finalizeBreak(exitPrice, exitTimeStr, reason) {
+    // reason: 'eod' | 'sl' | undefined (target hit)
     if (!breakFired) return;
     let result = 'No Target';
     if (breakFired.dir === 'BUY') {
@@ -413,16 +415,15 @@ async function startScan() {
       if (breakFired.hitS3) result = 'Hit S3';
       else if (breakFired.hitS2) result = 'Hit S2';
     }
-    // If no target was hit and we have an EOD close price, mark as EOD Close
-    if (result === 'No Target' && eodPrice != null) {
-      result = 'EOD Close';
-      breakFired.eodClose = eodPrice;
-      breakFired.eodTime  = eodTimeStr;
+    if (result === 'No Target' && exitPrice != null) {
+      result = reason === 'sl' ? 'SL Hit' : 'EOD Close';
+      breakFired.eodClose = exitPrice;
+      breakFired.eodTime  = exitTimeStr;
     }
     breakFired.result = result;
     allTrades.push({...breakFired});
-    const logType = result.startsWith('Hit') ? 'success' : result === 'EOD Close' ? 'info' : 'warn';
-    log(logType, `${breakFired.day} ${breakFired.dir} → ${result} (entry:${breakFired.entry.toFixed(0)}${eodPrice!=null?' exit:'+eodPrice.toFixed(0):''})`);
+    const logType = result.startsWith('Hit') ? 'success' : result === 'SL Hit' ? 'error' : result === 'EOD Close' ? 'info' : 'warn';
+    log(logType, `${breakFired.day} ${breakFired.dir} → ${result} (entry:${breakFired.entry.toFixed(0)}${exitPrice!=null?' exit:'+exitPrice.toFixed(0):''})`);
     breakFired = null;
   }
 
@@ -463,21 +464,35 @@ async function startScan() {
       const ts = `${String(_ct.getUTCHours()).padStart(2,'0')}:${String(_ct.getUTCMinutes()).padStart(2,'0')}`;
 
       if (breakFired) {
-        // ── Track targets for active trade ──
+        // ── Track targets + SL for active trade ──
         hadBreakToday = true;
         const bc = breakFired.cpr;
-        if (breakFired.dir === 'BUY') {
-          if (!breakFired.hitR2 && high >= bc.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
-          if (!breakFired.hitR3 && high >= bc.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
-          // R2 hit = TP1 reached → close trade (best result so far recorded)
-          if (breakFired.hitR2) { finalizeBreak(); }
-        } else {
-          if (!breakFired.hitS2 && low <= bc.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
-          if (!breakFired.hitS3 && low <= bc.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
-          // S2 hit = TP1 reached → close trade
-          if (breakFired.hitS2) { finalizeBreak(); }
+        const slPct = config.slPct;
+
+        // Check SL first (worst case on this candle)
+        if (slPct > 0) {
+          const slPrice = breakFired.dir === 'BUY'
+            ? breakFired.entry * (1 - slPct / 100)
+            : breakFired.entry * (1 + slPct / 100);
+          const slTriggered = breakFired.dir === 'BUY' ? low <= slPrice : high >= slPrice;
+          if (slTriggered) {
+            finalizeBreak(slPrice, `${dayStr} ${ts}`, 'sl');
+            if (!breakFired) continue;
+          }
         }
-        // Trade still open → keep scanning this day, but don't look for new breaks
+
+        if (breakFired) {
+          if (breakFired.dir === 'BUY') {
+            if (!breakFired.hitR2 && high >= bc.r2) { breakFired.hitR2 = true; breakFired.r2Time = `${dayStr} ${ts}`; }
+            if (!breakFired.hitR3 && high >= bc.r3) { breakFired.hitR3 = true; breakFired.r3Time = `${dayStr} ${ts}`; }
+            if (breakFired.hitR2) { finalizeBreak(); }
+          } else {
+            if (!breakFired.hitS2 && low <= bc.s2) { breakFired.hitS2 = true; breakFired.s2Time = `${dayStr} ${ts}`; }
+            if (!breakFired.hitS3 && low <= bc.s3) { breakFired.hitS3 = true; breakFired.s3Time = `${dayStr} ${ts}`; }
+            if (breakFired.hitS2) { finalizeBreak(); }
+          }
+        }
+        // Trade still open → keep scanning this day, don't look for new breaks
         if (breakFired) continue;
       }
 
@@ -570,6 +585,7 @@ function renderResults(noTradeDays, daysScanned) {
   const hitS2 = trades.filter(t=>t.dir==='SELL'&&t.hitS2);
   const hitS3 = trades.filter(t=>t.dir==='SELL'&&t.hitS3);
   const eodClosed = trades.filter(t=>t.result==='EOD Close');
+  const slHits    = trades.filter(t=>t.result==='SL Hit');
   const anyTarget = trades.filter(t=>(t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2));
   const wr = (anyTarget.length/trades.length*100).toFixed(1);
 
@@ -583,7 +599,7 @@ function renderResults(noTradeDays, daysScanned) {
   pnlEl.style.fontSize = '1.1rem';
   document.getElementById('s-bal2').textContent = `Breaks on ${trades.length}/${daysScanned} days`;
   document.getElementById('s-tp1').textContent = `R2:${hitR2.length} S2:${hitS2.length}`;
-  document.getElementById('s-tp2').textContent = `R3:${hitR3.length} S3:${hitS3.length} EOD:${eodClosed.length}`;
+  document.getElementById('s-tp2').textContent = `R3:${hitR3.length} S3:${hitS3.length} EOD:${eodClosed.length} SL:${slHits.length}`;
   document.getElementById('s-rr').textContent = `${anyTarget.length}/${trades.length}`;
   document.getElementById('s-days').textContent = `Scanned: ${daysScanned} | No break: ${noTradeDays.length}`;
   document.getElementById('trade-count').textContent = `(${trades.length} breaks)`;
@@ -622,11 +638,13 @@ function renderResults(noTradeDays, daysScanned) {
     const hitTgt  = (t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2);
     const hitFull = (t.dir==='BUY'&&t.hitR3)||(t.dir==='SELL'&&t.hitS3);
     const isEOD   = t.result === 'EOD Close';
+    const isSL    = t.result === 'SL Hit';
     const lbl = hitFull ? (t.dir==='BUY'?'Hit R3':'Hit S3')
               : hitTgt  ? (t.dir==='BUY'?'Hit R2':'Hit S2')
+              : isSL    ? `SL ${t.eodClose!=null?t.eodClose.toFixed(0):''}`
               : isEOD   ? `EOD ${t.eodClose!=null?t.eodClose.toFixed(0):''}`
               : 'No Target';
-    const rc  = hitFull ? 'tp2' : hitTgt ? 'tp1' : isEOD ? 'eod' : 'sl';
+    const rc  = hitFull ? 'tp2' : hitTgt ? 'tp1' : isSL ? 'sl' : isEOD ? 'eod' : 'skip';
     const tp1v = t.dir==='BUY' ? c.r2.toFixed(0) : c.s2.toFixed(0);
     const tp2v = t.dir==='BUY' ? c.r3.toFixed(0) : c.s3.toFixed(0);
     const tp1h = t.dir==='BUY' ? t.hitR2 : t.hitS2;
