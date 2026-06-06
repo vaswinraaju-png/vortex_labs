@@ -294,7 +294,7 @@
           <thead>
             <tr>
               <th>Pair</th><th>Dir</th><th>Strategy</th><th>Entry</th>
-              <th>SL</th><th>TP</th><th>R:R</th><th>Units</th><th>Unrealized P&L</th><th>Candle</th>
+              <th>SL</th><th>TP</th><th>R:R</th><th>Lot</th><th>Unrealized P&L</th><th>Candle</th>
             </tr>
           </thead>
           <tbody id="open-tbody">
@@ -772,7 +772,7 @@ function renderTrades() {
         <td>${t.sl.toFixed(dp)}</td>
         <td>${t.tp.toFixed(dp)}</td>
         <td style="color:var(--yellow);font-weight:700">${t.rr}</td>
-        <td>${t.units.toLocaleString()}</td>
+        <td>${t.lotSize}</td>
         <td class="${upnl>=0?'pnl-positive':'pnl-negative'}">${upnl>=0?'+':''}$${upnl.toFixed(4)}</td>
         <td style="color:var(--muted);font-size:0.65rem">${t.openTime.split(' ')[1]||'—'}</td>
       </tr>`;
