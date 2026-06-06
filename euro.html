@@ -3,1028 +3,935 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BTC AI Battle Trader — storiesbyachu</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<title>CPR Battle Trader — storiesbyachu</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #f5f7fa;
-    --white: #ffffff;
-    --border: #e2e8f0;
-    --border2: #f0f2f5;
-    --orange: #F97316;
-    --orange-light: #fff7ed;
-    --orange-dark: #ea6c0a;
-    --blue: #2563eb;
-    --blue-light: #eff6ff;
-    --green: #16a34a;
-    --green-light: #f0fdf4;
-    --red: #dc2626;
-    --red-light: #fef2f2;
-    --purple: #7c3aed;
-    --purple-light: #f5f3ff;
-    --text: #0f172a;
-    --text2: #475569;
-    --text3: #94a3b8;
-    --claude: #2563eb;
-    --openai: #16a34a;
-    --gemini: #F97316;
-    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
-    --font: 'Inter', sans-serif;
-    --font-display: 'Syne', sans-serif;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:var(--bg); color:var(--text); font-family:var(--font); font-size:13px; min-height:100vh; }
+:root {
+  --bg:#f5f7fa; --white:#fff; --border:#e2e8f0; --border2:#f0f4f8;
+  --orange:#F97316; --orange-l:#fff7ed; --orange-d:#ea6c0a;
+  --blue:#2563eb; --blue-l:#eff6ff;
+  --green:#16a34a; --green-l:#f0fdf4;
+  --red:#dc2626; --red-l:#fef2f2;
+  --text:#0f172a; --t2:#475569; --t3:#94a3b8;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 6px rgba(0,0,0,0.07);
+  --font:'Inter',sans-serif; --disp:'Syne',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;min-height:100vh;}
 
-  /* TOPBAR */
-  .topbar {
-    background:var(--white); border-bottom:1px solid var(--border);
-    padding:0 24px; height:52px; display:flex; align-items:center;
-    justify-content:space-between; position:sticky; top:0; z-index:100;
-    box-shadow:var(--shadow);
-  }
-  .topbar-left { display:flex; align-items:center; gap:16px; }
-  .brand { font-family:var(--font-display); font-size:1rem; font-weight:800; color:var(--text); }
-  .brand span { color:var(--orange); }
-  .brand small { font-family:var(--font); font-size:0.6rem; color:var(--text3); font-weight:400; display:block; letter-spacing:0.05em; text-transform:uppercase; margin-top:-2px; }
-  .status-pill { display:flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; background:var(--border2); font-size:0.65rem; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.05em; }
-  .status-pill .dot { width:6px; height:6px; border-radius:50%; background:var(--text3); }
-  .status-pill.active .dot { background:var(--green); box-shadow:0 0 6px var(--green); animation:blink 2s infinite; }
-  .status-pill.thinking .dot { background:var(--orange); box-shadow:0 0 6px var(--orange); animation:blink 0.6s infinite; }
-  .status-pill.replay .dot { background:var(--blue); box-shadow:0 0 6px var(--blue); animation:blink 1s infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .topbar-right { display:flex; align-items:center; gap:8px; }
+/* TOPBAR */
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 20px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow);}
+.brand{font-family:var(--disp);font-size:0.95rem;font-weight:800;}
+.brand span{color:var(--orange);}
+.brand small{font-family:var(--font);font-size:0.55rem;color:var(--t3);font-weight:400;display:block;text-transform:uppercase;letter-spacing:0.06em;margin-top:-1px;}
+.spill{display:flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;background:var(--border2);font-size:0.62rem;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:0.05em;}
+.spill .d{width:6px;height:6px;border-radius:50%;background:var(--t3);}
+.spill.active .d{background:var(--green);box-shadow:0 0 5px var(--green);animation:blink 2s infinite;}
+.spill.thinking .d{background:var(--orange);box-shadow:0 0 5px var(--orange);animation:blink 0.6s infinite;}
+.spill.replay .d{background:var(--blue);box-shadow:0 0 5px var(--blue);animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.mode-chip{font-size:0.6rem;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--orange-l);color:var(--orange);border:1px solid #fed7aa;}
 
-  /* LAYOUT */
-  .layout { display:grid; grid-template-columns:300px 1fr; min-height:calc(100vh - 52px); }
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:285px 1fr;height:calc(100vh - 50px);}
+.sidebar{background:var(--white);border-right:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;height:calc(100vh - 50px);position:sticky;top:50px;}
+.main{padding:16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;}
 
-  /* SIDEBAR */
-  .sidebar { background:var(--white); border-right:1px solid var(--border); padding:16px; display:flex; flex-direction:column; gap:12px; overflow-y:auto; height:calc(100vh - 52px); position:sticky; top:52px; min-width:300px; }
-  .card { background:var(--white); border:1px solid var(--border); border-radius:10px; overflow:visible; box-shadow:var(--shadow); flex-shrink:0; }
-  .card-header { padding:10px 14px; border-bottom:1px solid var(--border2); display:flex; align-items:center; justify-content:space-between; }
-  .card-title { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text2); }
-  .card-body { padding:14px; }
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);flex-shrink:0;}
+.ch{padding:9px 13px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;}
+.ct{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--t2);}
+.cb{padding:13px;}
 
-  /* FORM */
-  .form-row { margin-bottom:8px; }
-  .form-row label { display:block; font-size:0.65rem; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:3px; }
-  .form-row input, .form-row select {
-    width:100%; border:1px solid var(--border); border-radius:6px;
-    padding:6px 10px; font-family:var(--font); font-size:0.75rem;
-    color:var(--text); background:var(--white); outline:none; transition:border-color 0.15s;
-  }
-  .form-row input:focus, .form-row select:focus { border-color:var(--orange); box-shadow:0 0 0 2px rgba(249,115,22,0.1); }
-  .key-row { display:grid; grid-template-columns:18px 1fr; gap:6px; align-items:center; margin-bottom:6px; }
-  .key-dot { width:8px; height:8px; border-radius:50%; justify-self:center; }
+/* FORM */
+.fr{margin-bottom:8px;}
+.fr label{display:block;font-size:0.62rem;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;}
+.fr input,.fr select{width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-family:var(--font);font-size:0.73rem;color:var(--text);background:var(--white);outline:none;transition:border-color 0.15s;}
+.fr input:focus,.fr select:focus{border-color:var(--orange);box-shadow:0 0 0 2px rgba(249,115,22,0.1);}
+.kr{display:grid;grid-template-columns:14px 1fr;gap:6px;align-items:center;margin-bottom:6px;}
+.kd{width:7px;height:7px;border-radius:50%;justify-self:center;}
 
-  /* BUTTONS */
-  .btn { width:100%; padding:9px 12px; border-radius:6px; font-family:var(--font); font-size:0.72rem; font-weight:600; cursor:pointer; transition:all 0.15s; border:none; letter-spacing:0.02em; display:block; text-align:center; }
-  .btn-orange { background:var(--orange); color:#fff; }
-  .btn-orange:hover { background:var(--orange-dark); }
-  .btn-orange:disabled { background:#fed7aa; color:#fff; cursor:not-allowed; }
-  .btn-outline { background:var(--orange-light); color:var(--orange); border:1.5px solid var(--orange); margin-top:7px; }
-  .btn-outline:hover { background:var(--orange); color:#fff; }
-  .btn-outline:disabled { background:var(--border2); color:var(--text3); border-color:var(--border); cursor:not-allowed; }
-  .btn-ghost { background:var(--bg); color:var(--text2); border:1.5px solid var(--border); margin-top:7px; }
-  .btn-ghost:hover { border-color:var(--text2); background:var(--border2); }
-  .btn-red { background:var(--red-light); color:var(--red); border:1.5px solid #fca5a5; margin-top:7px; }
-  .btn-red:hover { background:var(--red); color:#fff; border-color:var(--red); }
-  .btn-red:disabled { opacity:0.35; cursor:not-allowed; }
+/* BUTTONS */
+.btn{width:100%;padding:8px;border-radius:6px;font-family:var(--font);font-size:0.7rem;font-weight:600;cursor:pointer;transition:all 0.15s;border:none;display:block;text-align:center;}
+.btn+.btn{margin-top:6px;}
+.bo{background:var(--orange);color:#fff;}
+.bo:hover{background:var(--orange-d);}
+.bo:disabled{background:#fed7aa;cursor:not-allowed;}
+.bl{background:var(--orange-l);color:var(--orange);border:1.5px solid var(--orange);}
+.bl:hover{background:var(--orange);color:#fff;}
+.bl:disabled{background:var(--border2);color:var(--t3);border-color:var(--border);cursor:not-allowed;}
+.bg{background:var(--bg);color:var(--t2);border:1.5px solid var(--border);}
+.bg:hover{border-color:var(--t2);}
+.br{background:var(--red-l);color:var(--red);border:1.5px solid #fca5a5;}
+.br:hover{background:var(--red);color:#fff;border-color:var(--red);}
+.br:disabled{opacity:0.35;cursor:not-allowed;}
 
-  /* SPEED */
-  .speed-row { display:flex; gap:4px; margin-top:8px; }
-  .spd { flex:1; padding:5px 0; border:1px solid var(--border); border-radius:5px; background:var(--bg); color:var(--text2); font-size:0.65rem; font-weight:600; cursor:pointer; text-align:center; transition:all 0.15s; }
-  .spd:hover { border-color:var(--orange); color:var(--orange); }
-  .spd.active { background:var(--orange); color:#fff; border-color:var(--orange); }
+/* SPEED */
+.spd-row{display:flex;gap:4px;margin-top:8px;}
+.spd{flex:1;padding:5px 0;border:1px solid var(--border);border-radius:5px;background:var(--bg);color:var(--t2);font-size:0.62rem;font-weight:600;cursor:pointer;text-align:center;transition:all 0.15s;}
+.spd:hover{border-color:var(--orange);color:var(--orange);}
+.spd.active{background:var(--orange);color:#fff;border-color:var(--orange);}
 
-  /* PROGRESS */
-  .progress-wrap { margin-top:10px; }
-  .progress-track { background:var(--border2); border-radius:4px; height:4px; overflow:hidden; }
-  .progress-fill { height:100%; background:var(--orange); border-radius:4px; transition:width 0.3s; width:0%; }
-  .progress-label { display:flex; justify-content:space-between; font-size:0.6rem; color:var(--text3); margin-top:4px; }
-  .candle-ts { text-align:center; font-size:0.62rem; color:var(--text3); margin-top:3px; }
-  .candle-ts b { color:var(--orange); font-weight:600; }
+/* PROGRESS */
+.prog-track{background:var(--border2);border-radius:4px;height:4px;overflow:hidden;margin:8px 0 3px;}
+.prog-fill{height:100%;background:var(--orange);border-radius:4px;transition:width 0.3s;width:0%;}
+.prog-info{display:flex;justify-content:space-between;font-size:0.58rem;color:var(--t3);}
+.prog-ts{text-align:center;font-size:0.6rem;color:var(--t3);margin-top:3px;}
+.prog-ts b{color:var(--orange);font-weight:600;}
 
-  /* LEADERBOARD */
-  .lb-row { display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border-radius:7px; border:1px solid var(--border); margin-bottom:5px; background:var(--white); transition:all 0.2s; }
-  .lb-row.leader { border-color:var(--orange); background:var(--orange-light); box-shadow:0 0 0 1px var(--orange); }
-  .lb-left { display:flex; align-items:center; gap:8px; }
-  .lb-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-  .lb-name { font-weight:700; font-size:0.75rem; }
-  .lb-model { font-size:0.58rem; color:var(--text3); }
-  .lb-bal { font-weight:700; font-size:0.82rem; }
-  .lb-stats { font-size:0.58rem; color:var(--text3); margin-top:1px; text-align:right; }
-  .crown { font-size:0.7rem; }
+/* CPR LEVELS DISPLAY */
+.cpr-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;}
+.cpr-level{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 9px;}
+.cpr-level .lname{font-size:0.55rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;}
+.cpr-level .lval{font-size:0.82rem;font-weight:700;}
+.cpr-level.r1,.cpr-level.r2,.cpr-level.r3{border-left:3px solid var(--red);}
+.cpr-level.r1 .lname,.cpr-level.r2 .lname,.cpr-level.r3 .lname{color:var(--red);}
+.cpr-level.s1,.cpr-level.s2,.cpr-level.s3{border-left:3px solid var(--blue);}
+.cpr-level.s1 .lname,.cpr-level.s2 .lname,.cpr-level.s3 .lname{color:var(--blue);}
+.cpr-level.pivot{border-left:3px solid var(--orange);}
+.cpr-level.pivot .lname{color:var(--orange);}
+.cpr-level.tc{border-left:3px solid #d97706;}
+.cpr-level.tc .lname{color:#d97706;}
+.cpr-level.bc{border-left:3px solid #0891b2;}
+.cpr-level.bc .lname{color:#0891b2;}
 
-  /* LOG */
-  .log-box { max-height:130px; overflow-y:auto; font-size:0.62rem; line-height:1.9; }
-  .le { display:flex; gap:5px; }
-  .le .lt { color:var(--text3); flex-shrink:0; }
-  .le .lm { }
-  .le.success .lm { color:var(--green); font-weight:500; }
-  .le.error .lm { color:var(--red); font-weight:500; }
-  .le.warn .lm { color:#d97706; }
-  .le.claude .lm { color:var(--blue); }
-  .le.openai .lm { color:var(--green); }
-  .le.gemini .lm { color:var(--orange); }
-  .le.info .lm { color:var(--text2); }
+/* SIGNAL BANNER */
+.signal-banner{padding:10px 14px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.signal-banner.buy{background:var(--green-l);border:1.5px solid #86efac;}
+.signal-banner.sell{background:var(--red-l);border:1.5px solid #fca5a5;}
+.signal-banner.none{background:var(--border2);border:1.5px solid var(--border);}
+.sig-left{display:flex;align-items:center;gap:10px;}
+.sig-type{font-size:1rem;font-weight:800;font-family:var(--disp);}
+.sig-type.buy{color:var(--green);}
+.sig-type.sell{color:var(--red);}
+.sig-type.none{color:var(--t3);}
+.sig-detail{font-size:0.65rem;color:var(--t2);line-height:1.6;}
+.sig-rr{font-size:0.75rem;font-weight:700;}
 
-  /* MAIN */
-  .main { padding:20px; display:flex; flex-direction:column; gap:16px; overflow-y:auto; }
+/* LEADERBOARD */
+.lb-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:7px;border:1px solid var(--border);margin-bottom:5px;background:var(--white);transition:all 0.2s;}
+.lb-row.leader{border-color:var(--orange);background:var(--orange-l);}
+.lb-left{display:flex;align-items:center;gap:8px;}
+.lb-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.lb-name{font-weight:700;font-size:0.73rem;}
+.lb-model{font-size:0.56rem;color:var(--t3);}
+.lb-bal{font-weight:700;font-size:0.8rem;}
+.lb-stats{font-size:0.56rem;color:var(--t3);margin-top:1px;text-align:right;}
 
-  /* TICKER ROW */
-  .ticker-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
-  .ticker-card { background:var(--white); border:1px solid var(--border); border-radius:10px; padding:14px 16px; box-shadow:var(--shadow); }
-  .tc-pair { font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text2); margin-bottom:4px; }
-  .tc-price { font-size:1.6rem; font-weight:700; color:var(--text); letter-spacing:-0.02em; line-height:1; }
-    .tc-price.up { color:var(--green); }
-  .tc-price.dn { color:var(--red); }
-  .tc-ohlc { display:flex; gap:8px; margin-top:5px; font-size:0.6rem; color:var(--text3); flex-wrap:wrap; }
-  .tc-ohlc span { display:flex; gap:2px; }
-  .tc-ohlc .lbl { color:var(--text3); }
-  .tc-ohlc .up { color:var(--green); font-weight:600; }
-  .tc-ohlc .dn { color:var(--red); font-weight:600; }
-  .tc-ohlc .neu { color:var(--text2); font-weight:600; }
-  .tc-indicators { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
-  .ind-pill { padding:2px 7px; border-radius:20px; font-size:0.58rem; font-weight:600; }
-  .ind-pill.bull { background:var(--green-light); color:var(--green); }
-  .ind-pill.bear { background:var(--red-light); color:var(--red); }
-  .ind-pill.neu { background:var(--border2); color:var(--text2); }
-  .ind-pill.orange { background:var(--orange-light); color:var(--orange); }
+/* LOG */
+.log-box{max-height:120px;overflow-y:auto;font-size:0.61rem;line-height:1.9;}
+.le{display:flex;gap:5px;}
+.le .lt{color:var(--t3);flex-shrink:0;font-size:0.58rem;}
+.le.success .lm{color:var(--green);font-weight:500;}
+.le.error .lm{color:var(--red);font-weight:500;}
+.le.warn .lm{color:#d97706;}
+.le.claude .lm{color:var(--blue);}
+.le.openai .lm{color:var(--green);}
+.le.gemini .lm{color:var(--orange);}
+.le.cpr .lm{color:#7c3aed;font-weight:600;}
+.le.info .lm{color:var(--t2);}
 
-  /* REASONING CARD */
-  .reasoning-card { background:var(--white); border:1px solid var(--border); border-radius:10px; box-shadow:var(--shadow); overflow:hidden; }
-  .reasoning-tabs { display:flex; border-bottom:1px solid var(--border); }
-  .r-tab { flex:1; padding:8px; font-size:0.65rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; cursor:pointer; text-align:center; color:var(--text3); border-bottom:2px solid transparent; transition:all 0.15s; }
-  .r-tab:hover { color:var(--text2); }
-  .r-tab.active-claude { color:var(--blue); border-color:var(--blue); background:var(--blue-light); }
-  .r-tab.active-openai { color:var(--green); border-color:var(--green); background:var(--green-light); }
-  .r-tab.active-gemini { color:var(--orange); border-color:var(--orange); background:var(--orange-light); }
-  .r-body { padding:10px 14px; font-size:0.7rem; line-height:1.7; color:var(--text2); min-height:50px; }
+/* MAIN TICKER */
+.ticker-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.tc{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px 16px;box-shadow:var(--shadow);}
+.tc-pair{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--t2);margin-bottom:4px;}
+.tc-price{font-size:1.8rem;font-weight:800;color:var(--text);letter-spacing:-0.02em;line-height:1;}
+.tc-price.up{color:var(--green);}
+.tc-price.dn{color:var(--red);}
+.tc-ohlc{display:flex;gap:10px;margin-top:5px;font-size:0.6rem;color:var(--t3);flex-wrap:wrap;}
+.tc-ohlc .up{color:var(--green);font-weight:600;}
+.tc-ohlc .dn{color:var(--red);font-weight:600;}
 
-  /* AI COLUMNS */
-  .ai-cols { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
-  .ai-col { background:var(--white); border:1px solid var(--border); border-radius:10px; box-shadow:var(--shadow); overflow:hidden; }
-  .ai-col-head { padding:10px 12px; border-bottom:1px solid var(--border2); display:flex; align-items:center; justify-content:space-between; }
-  .ai-col-name { font-weight:700; font-size:0.78rem; }
-  .ai-col-name.claude { color:var(--blue); }
-  .ai-col-name.openai { color:var(--green); }
-  .ai-col-name.gemini { color:var(--orange); }
-  .ai-col-meta { text-align:right; }
-  .ai-col-bal { font-weight:700; font-size:0.82rem; }
-  .ai-col-wr { font-size:0.58rem; color:var(--text3); }
-  .trade-list { padding:8px; display:flex; flex-direction:column; gap:5px; min-height:60px; }
+/* CPR PANEL */
+.cpr-panel{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px 16px;box-shadow:var(--shadow);}
+.cpr-title{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.cpr-levels-row{display:grid;grid-template-columns:repeat(3,1fr) 3px repeat(3,1fr);gap:5px;align-items:center;}
+.cpr-sep{background:var(--border);height:100%;border-radius:2px;}
+.cl{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:5px 8px;text-align:center;}
+.cl .cn{font-size:0.55rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;}
+.cl .cv{font-size:0.72rem;font-weight:700;}
+.cl.r1,.cl.r2,.cl.r3{border-top:2px solid var(--red);}
+.cl.r1 .cn,.cl.r2 .cn,.cl.r3 .cn{color:var(--red);}
+.cl.s1,.cl.s2,.cl.s3{border-top:2px solid var(--blue);}
+.cl.s1 .cn,.cl.s2 .cn,.cl.s3 .cn{color:var(--blue);}
+.cl.pv{border-top:2px solid var(--orange);}
+.cl.pv .cn{color:var(--orange);}
+.cl.tc{border-top:2px solid #d97706;}
+.cl.tc .cn{color:#d97706;}
+.cl.bc{border-top:2px solid #0891b2;}
+.cl.bc .cn{color:#0891b2;}
 
-  /* TRADE CARDS */
-  .t-card { border:1px solid var(--border); border-radius:7px; padding:8px 10px; background:var(--bg); }
-  .t-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
-  .t-pair { font-weight:700; font-size:0.72rem; color:var(--text); }
-  .t-dir { padding:1px 6px; border-radius:3px; font-size:0.58rem; font-weight:700; text-transform:uppercase; }
-  .t-dir.buy { background:var(--green-light); color:var(--green); }
-  .t-dir.sell { background:var(--red-light); color:var(--red); }
-  .t-meta { font-size:0.6rem; color:var(--text3); line-height:1.7; }
-  .t-pnl { font-weight:700; font-size:0.72rem; margin-top:4px; }
-  .t-pnl.pos { color:var(--green); }
-  .t-pnl.neg { color:var(--red); }
-  .t-tag { display:inline-block; padding:1px 5px; border-radius:3px; font-size:0.56rem; font-weight:600; }
-  .t-tag.tp { background:var(--green-light); color:var(--green); }
-  .t-tag.sl { background:var(--red-light); color:var(--red); }
-  .t-tag.eod { background:var(--blue-light); color:var(--blue); }
-  .strat-tag { display:inline-block; padding:1px 6px; border-radius:10px; font-size:0.56rem; font-weight:600; background:var(--orange-light); color:var(--orange); }
-  .empty-col { text-align:center; padding:20px 10px; color:var(--text3); font-size:0.68rem; }
+/* REASONING */
+.r-card{background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);overflow:hidden;}
+.r-tabs{display:flex;border-bottom:1px solid var(--border);}
+.r-tab{flex:1;padding:8px;font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;cursor:pointer;text-align:center;color:var(--t3);border-bottom:2px solid transparent;transition:all 0.15s;}
+.r-tab:hover{color:var(--t2);}
+.r-tab.ac{color:var(--blue);border-color:var(--blue);background:var(--blue-l);}
+.r-tab.ao{color:var(--green);border-color:var(--green);background:var(--green-l);}
+.r-tab.ag{color:var(--orange);border-color:var(--orange);background:var(--orange-l);}
+.r-tab.an{color:var(--t2);border-color:var(--t2);background:var(--border2);}
+.r-body{padding:10px 14px;font-size:0.7rem;line-height:1.7;color:var(--t2);min-height:44px;}
 
-  /* SECTION HEADER */
-  .section-head { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-  .section-head h2 { font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text2); }
-  .section-head::after { content:''; flex:1; height:1px; background:var(--border); }
-  .badge { background:var(--orange); color:#fff; font-size:0.55rem; padding:1px 6px; border-radius:10px; font-weight:700; }
+/* AI COLS */
+.ai-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.ai-col{background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);overflow:hidden;}
+.ai-ch{padding:9px 12px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;}
+.ai-name{font-weight:700;font-size:0.75rem;}
+.ai-name.claude{color:var(--blue);}
+.ai-name.openai{color:var(--green);}
+.ai-name.gemini{color:var(--orange);}
+.ai-name.cpr{color:#7c3aed;}
+.ai-meta{text-align:right;}
+.ai-bal{font-weight:700;font-size:0.8rem;}
+.ai-wr{font-size:0.56rem;color:var(--t3);}
+.tlist{padding:8px;display:flex;flex-direction:column;gap:5px;min-height:60px;}
 
-  /* SCROLLBAR */
-  ::-webkit-scrollbar { width:4px; height:4px; }
-  ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
-  ::-webkit-scrollbar-thumb:hover { background:var(--text3); }
+/* TRADE CARDS */
+.tcard{border:1px solid var(--border);border-radius:7px;padding:8px 10px;background:var(--bg);}
+.tcard-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.tpair{font-weight:700;font-size:0.7rem;}
+.tdir{padding:1px 6px;border-radius:3px;font-size:0.56rem;font-weight:700;text-transform:uppercase;}
+.tdir.buy{background:var(--green-l);color:var(--green);}
+.tdir.sell{background:var(--red-l);color:var(--red);}
+.tmeta{font-size:0.58rem;color:var(--t3);line-height:1.7;}
+.tpnl{font-weight:700;font-size:0.7rem;margin-top:3px;}
+.tpnl.pos{color:var(--green);}
+.tpnl.neg{color:var(--red);}
+.ttag{display:inline-block;padding:1px 5px;border-radius:3px;font-size:0.55rem;font-weight:600;}
+.ttag.tp{background:var(--green-l);color:var(--green);}
+.ttag.sl{background:var(--red-l);color:var(--red);}
+.ttag.eod{background:var(--blue-l);color:var(--blue);}
+.empty-col{text-align:center;padding:18px 10px;color:var(--t3);font-size:0.65rem;}
 
-  @media (max-width:900px) {
-    .layout { grid-template-columns:1fr; }
-    .sidebar { position:static; height:auto; }
-    .ticker-row, .ai-cols { grid-template-columns:1fr; }
-  }
+.sh{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.sh h2{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--t2);}
+.sh::after{content:'';flex:1;height:1px;background:var(--border);}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr;}
+  .sidebar{position:static;height:auto;}
+  .ai-cols,.ticker-row{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
-  <div class="topbar-left">
-    <div class="brand">BTC Battle Trader <span>●</span><small>storiesbyachu · Delta Exchange India</small></div>
-    <div class="status-pill" id="status-pill">
-      <div class="dot"></div>
-      <span id="status-text">Idle</span>
-    </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="brand">CPR Battle Trader <span>●</span><small>storiesbyachu · Delta Exchange India</small></div>
+    <div class="spill" id="status-pill"><div class="d"></div><span id="status-text">Idle</span></div>
+    <span class="mode-chip" id="mode-chip">CPR Only</span>
   </div>
-  <div class="topbar-right">
-    <span style="font-size:0.65rem;color:var(--text3)">Claude vs OpenAI vs Gemini</span>
-  </div>
+  <div style="font-size:0.62rem;color:var(--t3);">Claude · OpenAI · Gemini · CPR Pure</div>
 </div>
 
 <div class="layout">
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
+<!-- SIDEBAR -->
+<aside class="sidebar">
 
-    <!-- API KEYS -->
-    <div class="card">
-      <div class="card-header"><span class="card-title">API Keys</span></div>
-      <div class="card-body">
-        <div class="key-row">
-          <div class="key-dot" style="background:var(--blue)"></div>
-          <input type="password" id="key-claude" placeholder="Claude sk-ant-..." />
-        </div>
-        <div class="key-row">
-          <div class="key-dot" style="background:var(--green)"></div>
-          <input type="password" id="key-openai" placeholder="OpenAI sk-..." />
-        </div>
-        <div class="key-row">
-          <div class="key-dot" style="background:var(--orange)"></div>
-          <input type="password" id="key-gemini" placeholder="Gemini AIza..." />
-        </div>
-        <div class="key-row">
-          <div class="key-dot" style="background:#6366f1"></div>
-          <input type="password" id="key-delta" placeholder="Delta API Key" />
-        </div>
-        <div class="key-row">
-          <div class="key-dot" style="background:#8b5cf6"></div>
-          <input type="password" id="secret-delta" placeholder="Delta API Secret" />
-        </div>
-        <div class="form-row" style="margin-top:8px">
-          <label>Balance (USD)</label>
-          <input type="number" id="balance-input" value="100" min="10" step="10" />
-        </div>
-        <div class="form-row">
-          <label>Lot Size</label>
-          <input type="number" id="lot-size" value="0.01" min="0.001" step="0.001" />
-        </div>
-        <div class="form-row">
-          <label>Spread (pips)</label>
-          <input type="number" id="spread-pips" value="1" min="0" step="0.1" />
-        </div>
-        <button class="btn btn-orange" onclick="saveConfig()">Save Config</button>
-      </div>
+  <div class="card">
+    <div class="ch"><span class="ct">API Keys</span><span style="font-size:0.58rem;color:var(--t3)">Optional</span></div>
+    <div class="cb">
+      <div class="kr"><div class="kd" style="background:var(--blue)"></div><input type="password" id="key-claude" placeholder="Claude sk-ant-..." /></div>
+      <div class="kr"><div class="kd" style="background:var(--green)"></div><input type="password" id="key-openai" placeholder="OpenAI sk-..." /></div>
+      <div class="kr"><div class="kd" style="background:var(--orange)"></div><input type="password" id="key-gemini" placeholder="Gemini AIza..." /></div>
+      <div class="kr"><div class="kd" style="background:#6366f1"></div><input type="password" id="key-delta" placeholder="Delta API Key" /></div>
+      <div class="kr"><div class="kd" style="background:#8b5cf6"></div><input type="password" id="key-delta-secret" placeholder="Delta API Secret" /></div>
+      <div class="fr" style="margin-top:8px"><label>Balance (USD)</label><input type="number" id="bal-input" value="100" min="10" step="10"/></div>
+      <div class="fr"><label>Lot Size</label><input type="number" id="lot-input" value="0.01" min="0.001" step="0.001"/></div>
+      <button class="btn bo" onclick="saveConfig()">Save Config</button>
     </div>
-
-    <!-- REPLAY -->
-    <div class="card">
-      <div class="card-header"><span class="card-title">Replay Controls</span><span style="font-size:0.6rem;background:var(--orange-light);color:var(--orange);padding:2px 7px;border-radius:10px;font-weight:700;">BACKTEST</span></div>
-      <div class="card-body">
-        <div class="form-row">
-          <label>BTC Pair</label>
-          <select id="btc-pair">
-            <option value="">— Fetch pairs first —</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label>Date</label>
-          <input type="date" id="replay-date" />
-        </div>
-        <div class="form-row">
-          <label>Candle Interval</label>
-          <select id="replay-interval">
-            <option value="1m">1 Minute</option>
-            <option value="5m" selected>5 Minutes</option>
-            <option value="15m">15 Minutes</option>
-            <option value="1h">1 Hour</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label>AI analyses every N candles</label>
-          <select id="analyze-every">
-            <option value="1">Every candle</option>
-            <option value="3" selected>Every 3 candles</option>
-            <option value="5">Every 5 candles</option>
-            <option value="10">Every 10 candles</option>
-          </select>
-        </div>
-        <button class="btn btn-orange" id="fetch-pairs-btn" onclick="fetchPairs()">⬇ Load BTC Pairs</button>
-        <button class="btn btn-outline" id="fetch-btn" onclick="fetchHistoricalData()" disabled>⬇ Fetch Candles</button>
-        <button class="btn btn-outline" id="start-btn" onclick="startReplay()" disabled>▶ Start Replay</button>
-        <button class="btn btn-red" id="stop-btn" onclick="stopReplay()" disabled>■ Stop</button>
-        <button class="btn btn-ghost" onclick="resetAll()">↺ Reset</button>
-
-        <div style="margin-top:10px;">
-          <div style="font-size:0.62rem;font-weight:600;color:var(--text2);margin-bottom:4px;">Replay Speed</div>
-          <div class="speed-row">
-            <div class="spd" onclick="setSpeed(500,this)">1x</div>
-            <div class="spd active" onclick="setSpeed(200,this)">3x</div>
-            <div class="spd" onclick="setSpeed(80,this)">10x</div>
-            <div class="spd" onclick="setSpeed(20,this)">50x</div>
-          </div>
-        </div>
-
-        <div class="progress-wrap" id="progress-wrap" style="display:none">
-          <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-          <div class="progress-label">
-            <span id="candle-idx">0</span> / <span id="candle-total">0</span> candles
-          </div>
-          <div class="candle-ts" id="candle-ts"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- LEADERBOARD -->
-    <div class="card">
-      <div class="card-header"><span class="card-title">Leaderboard</span></div>
-      <div class="card-body" style="padding:10px">
-        <div class="lb-row" id="lb-claude">
-          <div class="lb-left"><div class="lb-dot" style="background:var(--blue)"></div><div><div class="lb-name" style="color:var(--blue)">Claude</div><div class="lb-model">claude-sonnet-4-6</div></div></div>
-          <div><div class="lb-bal" id="lb-bal-claude">$100.00</div><div class="lb-stats" id="lb-stats-claude">0W / 0L</div></div>
-        </div>
-        <div class="lb-row" id="lb-openai">
-          <div class="lb-left"><div class="lb-dot" style="background:var(--green)"></div><div><div class="lb-name" style="color:var(--green)">OpenAI</div><div class="lb-model">gpt-4o</div></div></div>
-          <div><div class="lb-bal" id="lb-bal-openai">$100.00</div><div class="lb-stats" id="lb-stats-openai">0W / 0L</div></div>
-        </div>
-        <div class="lb-row" id="lb-gemini">
-          <div class="lb-left"><div class="lb-dot" style="background:var(--orange)"></div><div><div class="lb-name" style="color:var(--orange)">Gemini</div><div class="lb-model">gemini-2.5-flash</div></div></div>
-          <div><div class="lb-bal" id="lb-bal-gemini">$100.00</div><div class="lb-stats" id="lb-stats-gemini">0W / 0L</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- LOG -->
-    <div class="card">
-      <div class="card-header"><span class="card-title">Activity Log</span></div>
-      <div class="card-body" style="padding:8px 10px">
-        <div class="log-box" id="log-box"></div>
-      </div>
-    </div>
-
-  </aside>
-
-  <!-- MAIN -->
-  <div class="main">
-
-    <!-- TICKER ROW -->
-    <div class="ticker-row" id="ticker-row">
-      <div class="ticker-card">
-        <div class="tc-pair" id="pair-label">Select a pair</div>
-        <div class="tc-price" id="tc-price">—</div>
-        <div class="tc-ohlc" id="tc-ohlc"><span>Waiting for data...</span></div>
-        <div class="tc-indicators" id="tc-indicators"></div>
-      </div>
-      <div class="ticker-card">
-        <div class="tc-pair">CPR Levels</div>
-        <div style="font-size:0.68rem;color:var(--text2);line-height:2;margin-top:4px" id="cpr-display">
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--text3)">TC (Top Central)</span><span id="cpr-tc">—</span></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--orange);font-weight:600">Pivot</span><span id="cpr-pivot" style="font-weight:700;color:var(--orange)">—</span></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--text3)">BC (Bottom Central)</span><span id="cpr-bc">—</span></div>
-        </div>
-      </div>
-      <div class="ticker-card">
-        <div class="tc-pair">Indicators</div>
-        <div style="font-size:0.68rem;color:var(--text2);line-height:2;margin-top:4px">
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--text3)">RSI 14</span><span id="ind-rsi" style="font-weight:700">—</span></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--text3)">EMA 9</span><span id="ind-ema9" style="font-weight:700">—</span></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--text3)">EMA 21</span><span id="ind-ema21" style="font-weight:700">—</span></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--text3)">VWAP</span><span id="ind-vwap" style="font-weight:700">—</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- REASONING -->
-    <div class="reasoning-card">
-      <div class="reasoning-tabs">
-        <div class="r-tab active-claude" id="rtab-claude" onclick="switchTab('claude')">🔵 Claude Reasoning</div>
-        <div class="r-tab" id="rtab-openai" onclick="switchTab('openai')">🟢 OpenAI Reasoning</div>
-        <div class="r-tab" id="rtab-gemini" onclick="switchTab('gemini')">🟠 Gemini Reasoning</div>
-      </div>
-      <div class="r-body" id="r-claude">Waiting for analysis...</div>
-      <div class="r-body" id="r-openai" style="display:none">Waiting for analysis...</div>
-      <div class="r-body" id="r-gemini" style="display:none">Waiting for analysis...</div>
-    </div>
-
-    <!-- OPEN POSITIONS -->
-    <div>
-      <div class="section-head"><h2>Open Positions</h2></div>
-      <div class="ai-cols">
-        <div class="ai-col">
-          <div class="ai-col-head">
-            <div class="ai-col-name claude">Claude</div>
-            <div class="ai-col-meta"><div class="ai-col-bal" id="bal-claude">$100.00</div><div class="ai-col-wr" id="wr-claude">WR: —</div></div>
-          </div>
-          <div class="trade-list" id="open-claude"><div class="empty-col">No open trades</div></div>
-        </div>
-        <div class="ai-col">
-          <div class="ai-col-head">
-            <div class="ai-col-name openai">OpenAI</div>
-            <div class="ai-col-meta"><div class="ai-col-bal" id="bal-openai">$100.00</div><div class="ai-col-wr" id="wr-openai">WR: —</div></div>
-          </div>
-          <div class="trade-list" id="open-openai"><div class="empty-col">No open trades</div></div>
-        </div>
-        <div class="ai-col">
-          <div class="ai-col-head">
-            <div class="ai-col-name gemini">Gemini</div>
-            <div class="ai-col-meta"><div class="ai-col-bal" id="bal-gemini">$100.00</div><div class="ai-col-wr" id="wr-gemini">WR: —</div></div>
-          </div>
-          <div class="trade-list" id="open-gemini"><div class="empty-col">No open trades</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CLOSED TRADES -->
-    <div>
-      <div class="section-head"><h2>Closed Trades</h2></div>
-      <div class="ai-cols">
-        <div class="ai-col">
-          <div class="ai-col-head"><div class="ai-col-name claude">Claude</div><div class="ai-col-wr" id="cc-claude">0 trades</div></div>
-          <div class="trade-list" id="closed-claude"><div class="empty-col">No closed trades</div></div>
-        </div>
-        <div class="ai-col">
-          <div class="ai-col-head"><div class="ai-col-name openai">OpenAI</div><div class="ai-col-wr" id="cc-openai">0 trades</div></div>
-          <div class="trade-list" id="closed-openai"><div class="empty-col">No closed trades</div></div>
-        </div>
-        <div class="ai-col">
-          <div class="ai-col-head"><div class="ai-col-name gemini">Gemini</div><div class="ai-col-wr" id="cc-gemini">0 trades</div></div>
-          <div class="trade-list" id="closed-gemini"><div class="empty-col">No closed trades</div></div>
-        </div>
-      </div>
-    </div>
-
   </div>
+
+  <div class="card">
+    <div class="ch"><span class="ct">Replay Controls</span><span style="font-size:0.58rem;background:var(--orange-l);color:var(--orange);padding:2px 7px;border-radius:8px;font-weight:700;">BACKTEST</span></div>
+    <div class="cb">
+      <div class="fr"><label>BTC Pair</label>
+        <select id="btc-pair"><option value="">— Load pairs first —</option></select>
+      </div>
+      <div class="fr"><label>Date (replay)</label><input type="date" id="replay-date"/></div>
+      <div class="fr"><label>Previous Day Date (for CPR)</label><input type="date" id="prev-date"/></div>
+      <div class="fr"><label>Candle Interval</label>
+        <select id="interval">
+          <option value="1m">1 Minute</option>
+          <option value="5m" selected>5 Minutes</option>
+          <option value="15m">15 Minutes</option>
+          <option value="1h">1 Hour</option>
+        </select>
+      </div>
+      <div class="fr"><label>AI checks every N candles</label>
+        <select id="analyze-every">
+          <option value="1">Every candle</option>
+          <option value="3" selected>Every 3 candles</option>
+          <option value="5">Every 5 candles</option>
+        </select>
+      </div>
+      <button class="btn bo" id="fetch-pairs-btn" onclick="fetchPairs()">⬇ Load BTC Pairs</button>
+      <button class="btn bl" id="fetch-btn" onclick="fetchData()" disabled>⬇ Fetch Candles</button>
+      <button class="btn bl" id="start-btn" onclick="startReplay()" disabled>▶ Start Replay</button>
+      <button class="btn br" id="stop-btn" onclick="stopReplay()" disabled>■ Stop</button>
+      <button class="btn bg" onclick="resetAll()">↺ Reset</button>
+      <div style="margin-top:10px;">
+        <div style="font-size:0.6rem;font-weight:600;color:var(--t2);margin-bottom:4px;">Replay Speed</div>
+        <div class="spd-row">
+          <div class="spd" onclick="setSpeed(500,this)">1x</div>
+          <div class="spd active" onclick="setSpeed(200,this)">3x</div>
+          <div class="spd" onclick="setSpeed(80,this)">10x</div>
+          <div class="spd" onclick="setSpeed(20,this)">50x</div>
+        </div>
+      </div>
+      <div id="prog-wrap" style="display:none;margin-top:8px;">
+        <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+        <div class="prog-info"><span id="c-idx">0</span>/<span id="c-tot">0</span> candles</div>
+        <div class="prog-ts" id="c-ts"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span class="ct">Leaderboard</span></div>
+    <div class="cb" style="padding:10px;">
+      <div class="lb-row" id="lb-claude">
+        <div class="lb-left"><div class="lb-dot" style="background:var(--blue)"></div><div><div class="lb-name" style="color:var(--blue)">Claude</div><div class="lb-model">claude-sonnet-4-6</div></div></div>
+        <div><div class="lb-bal" id="lb-bal-claude">$100.00</div><div class="lb-stats" id="lb-st-claude">0W/0L</div></div>
+      </div>
+      <div class="lb-row" id="lb-openai">
+        <div class="lb-left"><div class="lb-dot" style="background:var(--green)"></div><div><div class="lb-name" style="color:var(--green)">OpenAI</div><div class="lb-model">gpt-4o</div></div></div>
+        <div><div class="lb-bal" id="lb-bal-openai">$100.00</div><div class="lb-stats" id="lb-st-openai">0W/0L</div></div>
+      </div>
+      <div class="lb-row" id="lb-gemini">
+        <div class="lb-left"><div class="lb-dot" style="background:var(--orange)"></div><div><div class="lb-name" style="color:var(--orange)">Gemini</div><div class="lb-model">gemini-2.5-flash</div></div></div>
+        <div><div class="lb-bal" id="lb-bal-gemini">$100.00</div><div class="lb-stats" id="lb-st-gemini">0W/0L</div></div>
+      </div>
+      <div class="lb-row" id="lb-cpr">
+        <div class="lb-left"><div class="lb-dot" style="background:#7c3aed"></div><div><div class="lb-name" style="color:#7c3aed">CPR Pure</div><div class="lb-model">No AI filter</div></div></div>
+        <div><div class="lb-bal" id="lb-bal-cpr">$100.00</div><div class="lb-stats" id="lb-st-cpr">0W/0L</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span class="ct">Activity Log</span></div>
+    <div class="cb" style="padding:8px 10px;"><div class="log-box" id="log-box"></div></div>
+  </div>
+
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- SIGNAL BANNER -->
+  <div class="signal-banner none" id="signal-banner">
+    <div class="sig-left">
+      <div class="sig-type none" id="sig-type">—</div>
+      <div class="sig-detail" id="sig-detail">No signal — waiting for R1/S1 break</div>
+    </div>
+    <div class="sig-rr" id="sig-rr"></div>
+  </div>
+
+  <!-- TICKER + CPR PANEL -->
+  <div class="ticker-row">
+    <div class="tc">
+      <div class="tc-pair" id="tc-pair">Select a pair</div>
+      <div class="tc-price" id="tc-price">—</div>
+      <div class="tc-ohlc" id="tc-ohlc"><span style="color:var(--t3)">Waiting for data...</span></div>
+    </div>
+    <div class="tc" style="padding:14px 16px;">
+      <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--t2);margin-bottom:8px;">Daily CPR Levels</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;" id="cpr-row">
+        <div class="cl s3"><div class="cn">S3</div><div class="cv" id="cv-s3">—</div></div>
+        <div class="cl s2"><div class="cn">S2</div><div class="cv" id="cv-s2">—</div></div>
+        <div class="cl s1"><div class="cn">S1</div><div class="cv" id="cv-s1">—</div></div>
+        <div class="cl bc"><div class="cn">BC</div><div class="cv" id="cv-bc">—</div></div>
+        <div class="cl pv"><div class="cn">Pvt</div><div class="cv" id="cv-pv">—</div></div>
+        <div class="cl tc"><div class="cn">TC</div><div class="cv" id="cv-tc">—</div></div>
+        <div class="cl r1"><div class="cn">R1</div><div class="cv" id="cv-r1">—</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px;">
+        <div class="cl r2"><div class="cn">R2</div><div class="cv" id="cv-r2">—</div></div>
+        <div class="cl r3"><div class="cn">R3</div><div class="cv" id="cv-r3">—</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px;">
+        <div class="cl s2" style="border-top-color:var(--blue)"><div class="cn">S2</div><div class="cv" id="cv-s2b">—</div></div>
+        <div class="cl s3" style="border-top-color:var(--blue)"><div class="cn">S3</div><div class="cv" id="cv-s3b">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REASONING -->
+  <div class="r-card">
+    <div class="r-tabs">
+      <div class="r-tab ac" id="rt-claude" onclick="switchTab('claude')">🔵 Claude</div>
+      <div class="r-tab" id="rt-openai" onclick="switchTab('openai')">🟢 OpenAI</div>
+      <div class="r-tab" id="rt-gemini" onclick="switchTab('gemini')">🟠 Gemini</div>
+      <div class="r-tab" id="rt-cpr" onclick="switchTab('cpr')">🟣 CPR Pure</div>
+    </div>
+    <div class="r-body" id="r-claude">Waiting for analysis...</div>
+    <div class="r-body" id="r-openai" style="display:none">Waiting for analysis...</div>
+    <div class="r-body" id="r-gemini" style="display:none">Waiting for analysis...</div>
+    <div class="r-body" id="r-cpr" style="display:none">CPR Pure mode: trades on R1/S1 break with no AI filter.</div>
+  </div>
+
+  <!-- OPEN POSITIONS -->
+  <div>
+    <div class="sh"><h2>Open Positions</h2></div>
+    <div class="ai-cols">
+      <div class="ai-col">
+        <div class="ai-ch"><div class="ai-name claude">Claude</div><div class="ai-meta"><div class="ai-bal" id="bal-claude">$100.00</div><div class="ai-wr" id="wr-claude">WR: —</div></div></div>
+        <div class="tlist" id="open-claude"><div class="empty-col">No open trades</div></div>
+      </div>
+      <div class="ai-col">
+        <div class="ai-ch"><div class="ai-name openai">OpenAI</div><div class="ai-meta"><div class="ai-bal" id="bal-openai">$100.00</div><div class="ai-wr" id="wr-openai">WR: —</div></div></div>
+        <div class="tlist" id="open-openai"><div class="empty-col">No open trades</div></div>
+      </div>
+      <div class="ai-col">
+        <div class="ai-ch"><div class="ai-name gemini">Gemini</div><div class="ai-meta"><div class="ai-bal" id="bal-gemini">$100.00</div><div class="ai-wr" id="wr-gemini">WR: —</div></div></div>
+        <div class="tlist" id="open-gemini"><div class="empty-col">No open trades</div></div>
+      </div>
+      <div class="ai-col" style="grid-column:1/-1">
+        <div class="ai-ch"><div class="ai-name cpr">CPR Pure</div><div class="ai-meta"><div class="ai-bal" id="bal-cpr">$100.00</div><div class="ai-wr" id="wr-cpr">WR: —</div></div></div>
+        <div class="tlist" id="open-cpr" style="grid-template-columns:1fr 1fr;display:grid;gap:5px;"><div class="empty-col" style="grid-column:1/-1">No open trades</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLOSED TRADES -->
+  <div>
+    <div class="sh"><h2>Closed Trades</h2></div>
+    <div class="ai-cols">
+      <div class="ai-col">
+        <div class="ai-ch"><div class="ai-name claude">Claude</div><div class="ai-wr" id="cc-claude">0 trades</div></div>
+        <div class="tlist" id="closed-claude"><div class="empty-col">No closed trades</div></div>
+      </div>
+      <div class="ai-col">
+        <div class="ai-ch"><div class="ai-name openai">OpenAI</div><div class="ai-wr" id="cc-openai">0 trades</div></div>
+        <div class="tlist" id="closed-openai"><div class="empty-col">No closed trades</div></div>
+      </div>
+      <div class="ai-col">
+        <div class="ai-ch"><div class="ai-name gemini">Gemini</div><div class="ai-wr" id="cc-gemini">0 trades</div></div>
+        <div class="tlist" id="closed-gemini"><div class="empty-col">No closed trades</div></div>
+      </div>
+      <div class="ai-col" style="grid-column:1/-1">
+        <div class="ai-ch"><div class="ai-name cpr">CPR Pure</div><div class="ai-wr" id="cc-cpr">0 trades</div></div>
+        <div class="tlist" id="closed-cpr" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;"><div class="empty-col" style="grid-column:1/-1">No closed trades</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
 </div>
 
 <script>
+// ─── DELTA BASE ───────────────────────────────────────────────
+const DELTA = 'https://api.india.delta.exchange';
+
 // ─── STATE ────────────────────────────────────────────────────
-const state = {
+const S = {
   keys: { claude:'', openai:'', gemini:'', delta:'', deltaSecret:'' },
-  startBalance: 100, lotSize: 0.01, spreadPips: 1,
-  candles: [], cursor: 0, totalCandles: 0,
-  running: false, replayTimer: null, replaySpeed: 200, analyzeEvery: 3,
-  selectedPair: '', indicators: {},
+  startBal: 100, lot: 0.01,
+  candles: [], prevCandles: [],
+  cpr: null,
+  cursor: 0, total: 0,
+  running: false, timer: null, speed: 200, analyzeEvery: 3,
+  pair: '',
+  lastSignal: null, // {dir, entry, sl, tp1, tp2, rr}
   agents: {
-    claude:  { balance:100, openTrades:[], closedTrades:[], reasoning:'Waiting...' },
-    openai:  { balance:100, openTrades:[], closedTrades:[], reasoning:'Waiting...' },
-    gemini:  { balance:100, openTrades:[], closedTrades:[], reasoning:'Waiting...' },
+    claude:  { bal:100, open:[], closed:[], reasoning:'Waiting...' },
+    openai:  { bal:100, open:[], closed:[], reasoning:'Waiting...' },
+    gemini:  { bal:100, open:[], closed:[], reasoning:'Waiting...' },
+    cpr:     { bal:100, open:[], closed:[], reasoning:'CPR Pure — no AI filter.' },
   }
 };
 
-const DELTA_BASE = 'https://api.india.delta.exchange';
-
-window.onload = () => { loadConfig(); setDefaultDate(); };
-
-function setDefaultDate() {
+// ─── INIT ────────────────────────────────────────────────────
+window.onload = () => {
+  loadConfig();
+  // Default dates
   const d = new Date();
-  d.setDate(d.getDate() - ((d.getDay() + 1) % 7 + 1));
-  document.getElementById('replay-date').value = d.toISOString().split('T')[0];
-}
+  const fri = new Date(d); fri.setDate(d.getDate() - ((d.getDay()+1)%7+1));
+  const thu = new Date(fri); thu.setDate(fri.getDate()-1);
+  document.getElementById('replay-date').value = fri.toISOString().split('T')[0];
+  document.getElementById('prev-date').value = thu.toISOString().split('T')[0];
+  updateMode();
+};
 
-// ─── CONFIG ───────────────────────────────────────────────────
+// ─── CONFIG ──────────────────────────────────────────────────
 function saveConfig() {
-  state.keys.claude = document.getElementById('key-claude').value.trim();
-  state.keys.openai = document.getElementById('key-openai').value.trim();
-  state.keys.gemini = document.getElementById('key-gemini').value.trim();
-  state.keys.delta = document.getElementById('key-delta').value.trim();
-  state.keys.deltaSecret = document.getElementById('secret-delta').value.trim();
-  state.startBalance = parseFloat(document.getElementById('balance-input').value) || 100;
-  state.lotSize = parseFloat(document.getElementById('lot-size').value) || 0.01;
-  state.spreadPips = parseFloat(document.getElementById('spread-pips').value) || 1;
-  ['claude','openai','gemini'].forEach(a => state.agents[a].balance = state.startBalance);
-  localStorage.setItem('btc_keys', JSON.stringify(state.keys));
-  localStorage.setItem('btc_bal', state.startBalance);
-  localStorage.setItem('btc_lot', state.lotSize);
-  localStorage.setItem('btc_spread', state.spreadPips);
+  S.keys.claude = document.getElementById('key-claude').value.trim();
+  S.keys.openai = document.getElementById('key-openai').value.trim();
+  S.keys.gemini = document.getElementById('key-gemini').value.trim();
+  S.keys.delta = document.getElementById('key-delta').value.trim();
+  S.keys.deltaSecret = document.getElementById('key-delta-secret').value.trim();
+  S.startBal = parseFloat(document.getElementById('bal-input').value)||100;
+  S.lot = parseFloat(document.getElementById('lot-input').value)||0.01;
+  Object.keys(S.agents).forEach(a => S.agents[a].bal = S.startBal);
+  localStorage.setItem('cpr_keys', JSON.stringify(S.keys));
+  localStorage.setItem('cpr_bal', S.startBal);
+  localStorage.setItem('cpr_lot', S.lot);
+  updateMode();
+  updateLeaderboard();
   log('info', 'Config saved.');
-  updateLeaderboard();
 }
-
 function loadConfig() {
-  try {
-    const k = JSON.parse(localStorage.getItem('btc_keys') || '{}');
-    state.keys = { ...state.keys, ...k };
-    document.getElementById('key-claude').value = state.keys.claude || '';
-    document.getElementById('key-openai').value = state.keys.openai || '';
-    document.getElementById('key-gemini').value = state.keys.gemini || '';
-    document.getElementById('key-delta').value = state.keys.delta || '';
-    document.getElementById('secret-delta').value = state.keys.deltaSecret || '';
-  } catch(e) {}
-  state.startBalance = parseFloat(localStorage.getItem('btc_bal') || '100');
-  state.lotSize = parseFloat(localStorage.getItem('btc_lot') || '0.01');
-  state.spreadPips = parseFloat(localStorage.getItem('btc_spread') || '1');
-  ['claude','openai','gemini'].forEach(a => state.agents[a].balance = state.startBalance);
-  document.getElementById('balance-input').value = state.startBalance;
-  document.getElementById('lot-size').value = state.lotSize;
-  document.getElementById('spread-pips').value = state.spreadPips;
+  try { const k=JSON.parse(localStorage.getItem('cpr_keys')||'{}'); S.keys={...S.keys,...k}; document.getElementById('key-claude').value=S.keys.claude||''; document.getElementById('key-openai').value=S.keys.openai||''; document.getElementById('key-gemini').value=S.keys.gemini||''; document.getElementById('key-delta').value=S.keys.delta||''; document.getElementById('key-delta-secret').value=S.keys.deltaSecret||''; } catch(e){}
+  S.startBal = parseFloat(localStorage.getItem('cpr_bal')||'100');
+  S.lot = parseFloat(localStorage.getItem('cpr_lot')||'0.01');
+  Object.keys(S.agents).forEach(a => S.agents[a].bal = S.startBal);
+  document.getElementById('bal-input').value = S.startBal;
+  document.getElementById('lot-input').value = S.lot;
   updateLeaderboard();
 }
+function updateMode() {
+  const hasAI = S.keys.claude || S.keys.openai || S.keys.gemini;
+  document.getElementById('mode-chip').textContent = hasAI ? 'AI + CPR Mode' : 'CPR Only Mode';
+  document.getElementById('mode-chip').style.background = hasAI ? '#eff6ff' : '#f5f3ff';
+  document.getElementById('mode-chip').style.color = hasAI ? 'var(--blue)' : '#7c3aed';
+  document.getElementById('mode-chip').style.borderColor = hasAI ? '#bfdbfe' : '#ddd6fe';
+}
 
-// ─── DELTA EXCHANGE ───────────────────────────────────────────
+// ─── DELTA PAIRS ─────────────────────────────────────────────
 async function fetchPairs() {
   document.getElementById('fetch-pairs-btn').disabled = true;
-  log('info', 'Fetching BTC pairs from Delta Exchange India...');
+  log('info', 'Loading BTC pairs...');
   try {
-    const res = await fetch(`${DELTA_BASE}/v2/products?contract_types=perpetual_futures,futures&states=live`);
+    const res = await fetch(`${DELTA}/v2/products?contract_types=perpetual_futures,futures&states=live`);
     const data = await res.json();
-    const btcPairs = data.result.filter(p =>
-      p.underlying_asset?.symbol === 'BTC' || p.symbol?.includes('BTC')
-    ).sort((a,b) => a.symbol.localeCompare(b.symbol));
-
-    const select = document.getElementById('btc-pair');
-    select.innerHTML = '<option value="">— Select pair —</option>';
-    btcPairs.forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p.symbol;
-      opt.textContent = `${p.symbol} — ${p.description || p.product_type}`;
-      select.appendChild(opt);
-    });
-    log('success', `${btcPairs.length} BTC pairs loaded.`);
+    const pairs = (data.result||[]).filter(p => (p.underlying_asset?.symbol==='BTC'||p.symbol?.includes('BTC'))).sort((a,b)=>a.symbol.localeCompare(b.symbol));
+    const sel = document.getElementById('btc-pair');
+    sel.innerHTML = '<option value="">— Select —</option>';
+    pairs.forEach(p => { const o=document.createElement('option'); o.value=p.symbol; o.textContent=`${p.symbol} — ${p.description||p.product_type||''}`; sel.appendChild(o); });
+    log('success', `${pairs.length} BTC pairs loaded.`);
     document.getElementById('fetch-btn').disabled = false;
-  } catch(e) {
-    log('error', 'Failed to fetch pairs: ' + e.message);
-  }
+  } catch(e) { log('error','Pairs error: '+e.message); }
   document.getElementById('fetch-pairs-btn').disabled = false;
 }
 
-async function fetchHistoricalData() {
-  const symbol = document.getElementById('btc-pair').value;
-  const dateVal = document.getElementById('replay-date').value;
-  const resolution = document.getElementById('replay-interval').value;
-  if (!symbol) { log('error', 'Select a BTC pair first.'); return; }
-  if (!dateVal) { log('error', 'Select a date.'); return; }
-
-  state.selectedPair = symbol;
-  document.getElementById('pair-label').textContent = symbol;
-  setStatus('thinking', 'Fetching...');
+// ─── FETCH CANDLES ────────────────────────────────────────────
+async function fetchData() {
+  const sym = document.getElementById('btc-pair').value;
+  const date = document.getElementById('replay-date').value;
+  const prev = document.getElementById('prev-date').value;
+  const res = document.getElementById('interval').value;
+  if (!sym||!date||!prev) { log('error','Select pair and both dates.'); return; }
+  S.pair = sym;
+  document.getElementById('tc-pair').textContent = sym;
+  setStatus('thinking','Fetching...');
   document.getElementById('fetch-btn').disabled = true;
-  log('info', `Fetching ${resolution} candles for ${symbol} on ${dateVal}...`);
-
+  log('info', `Fetching candles for ${sym}...`);
   try {
-    const start = Math.floor(new Date(dateVal + 'T00:00:00Z').getTime() / 1000);
-    const end = Math.floor(new Date(dateVal + 'T23:59:59Z').getTime() / 1000);
+    const s1=Math.floor(new Date(date+'T00:00:00Z').getTime()/1000);
+    const e1=Math.floor(new Date(date+'T23:59:59Z').getTime()/1000);
+    const s2=Math.floor(new Date(prev+'T00:00:00Z').getTime()/1000);
+    const e2=Math.floor(new Date(prev+'T23:59:59Z').getTime()/1000);
 
-    // Delta Exchange OHLCV endpoint
-    const url = `${DELTA_BASE}/v2/history/candles?symbol=${symbol}&resolution=${resolution}&start=${start}&end=${end}`;
-    const res = await fetch(url);
-    const data = await res.json();
+    const [r1,r2] = await Promise.all([
+      fetch(`${DELTA}/v2/history/candles?symbol=${sym}&resolution=${res}&start=${s1}&end=${e1}`).then(r=>r.json()),
+      fetch(`${DELTA}/v2/history/candles?symbol=${sym}&resolution=${res}&start=${s2}&end=${e2}`).then(r=>r.json()),
+    ]);
 
-    if (!data.result || data.result.length === 0) {
-      log('error', 'No candle data returned. Try a different date or pair.');
-      document.getElementById('fetch-btn').disabled = false;
-      setStatus('', 'Idle'); return;
-    }
+    if (!r1.result||r1.result.length===0) { log('error','No candles for replay date.'); document.getElementById('fetch-btn').disabled=false; setStatus('','Idle'); return; }
+    if (!r2.result||r2.result.length===0) { log('error','No candles for previous date (needed for CPR).'); document.getElementById('fetch-btn').disabled=false; setStatus('','Idle'); return; }
 
-    // Delta returns: time, open, high, low, close, volume
-    state.candles = data.result.sort((a,b) => a.time - b.time);
-    state.totalCandles = state.candles.length;
-    state.cursor = 0;
+    S.candles = r1.result.sort((a,b)=>a.time-b.time);
+    S.prevCandles = r2.result.sort((a,b)=>a.time-b.time);
+    S.total = S.candles.length;
+    S.cursor = 0;
 
-    document.getElementById('candle-total').textContent = state.totalCandles;
-    document.getElementById('candle-idx').textContent = 0;
-    document.getElementById('progress-wrap').style.display = 'block';
+    // Calculate CPR from previous day
+    S.cpr = calcCPR(S.prevCandles);
+    renderCPR(S.cpr);
+    log('success', `${S.total} candles + CPR calculated from prev day.`);
+    log('cpr', `Pivot:${S.cpr.pivot.toFixed(2)} TC:${S.cpr.tc.toFixed(2)} BC:${S.cpr.bc.toFixed(2)} R1:${S.cpr.r1.toFixed(2)} S1:${S.cpr.s1.toFixed(2)}`);
+
+    document.getElementById('c-tot').textContent = S.total;
+    document.getElementById('c-idx').textContent = 0;
+    document.getElementById('prog-wrap').style.display = 'block';
     document.getElementById('start-btn').disabled = false;
     document.getElementById('fetch-btn').disabled = false;
-    setStatus('', 'Ready');
-    log('success', `${state.totalCandles} candles loaded for ${symbol}.`);
-  } catch(e) {
-    log('error', 'Fetch error: ' + e.message);
-    document.getElementById('fetch-btn').disabled = false;
-    setStatus('', 'Idle');
-  }
+    setStatus('','Ready');
+  } catch(e) { log('error','Fetch error: '+e.message); document.getElementById('fetch-btn').disabled=false; setStatus('','Idle'); }
 }
 
-// ─── INDICATORS ───────────────────────────────────────────────
-function calcEMA(closes, period) {
-  if (closes.length < period) return null;
-  const k = 2 / (period + 1);
-  let ema = closes.slice(0, period).reduce((a,b) => a+b, 0) / period;
-  for (let i = period; i < closes.length; i++) ema = closes[i] * k + ema * (1 - k);
-  return ema;
-}
-
-function calcRSI(closes, period = 14) {
-  if (closes.length < period + 1) return null;
-  const slice = closes.slice(-period - 1);
-  let gains = 0, losses = 0;
-  for (let i = 1; i < slice.length; i++) {
-    const diff = slice[i] - slice[i-1];
-    if (diff > 0) gains += diff; else losses -= diff;
-  }
-  const avgG = gains / period, avgL = losses / period;
-  if (avgL === 0) return 100;
-  return 100 - (100 / (1 + avgG / avgL));
-}
-
-function calcVWAP(candles) {
-  if (candles.length === 0) return null;
-  let sumTP = 0, sumVol = 0;
-  candles.forEach(c => {
-    const tp = (parseFloat(c.high) + parseFloat(c.low) + parseFloat(c.close)) / 3;
-    const vol = parseFloat(c.volume) || 1;
-    sumTP += tp * vol;
-    sumVol += vol;
-  });
-  return sumVol > 0 ? sumTP / sumVol : null;
-}
-
+// ─── CPR CALCULATION ─────────────────────────────────────────
 function calcCPR(candles) {
-  // Use previous day's candles for CPR
-  if (candles.length < 2) return null;
-  const prev = candles[0]; // first candle of day as proxy
-  const H = parseFloat(prev.high), L = parseFloat(prev.low), C = parseFloat(prev.close);
-  const pivot = (H + L + C) / 3;
-  const bc = (H + L) / 2;
-  const tc = pivot + (pivot - bc);
-  return { pivot, bc, tc };
+  const H = Math.max(...candles.map(c=>parseFloat(c.high)));
+  const L = Math.min(...candles.map(c=>parseFloat(c.low)));
+  const C = parseFloat(candles[candles.length-1].close);
+  const pivot = (H+L+C)/3;
+  const bc = (H+L)/2;
+  const tc = pivot+(pivot-bc);
+  const r1 = 2*pivot-L;
+  const r2 = pivot+(H-L);
+  const r3 = H+2*(pivot-L);
+  const s1 = 2*pivot-H;
+  const s2 = pivot-(H-L);
+  const s3 = L-2*(H-pivot);
+  return {pivot,bc,tc,r1,r2,r3,s1,s2,s3,H,L,C};
 }
 
-function computeIndicators(cursorIdx) {
-  const slice = state.candles.slice(0, cursorIdx + 1);
-  const closes = slice.map(c => parseFloat(c.close));
-  const ema9 = calcEMA(closes, 9);
-  const ema21 = calcEMA(closes, 21);
-  const rsi = calcRSI(closes);
-  const vwap = calcVWAP(slice);
-  const cpr = calcCPR(slice);
-  const cur = closes[closes.length - 1];
-  return { ema9, ema21, rsi, vwap, cpr, cur };
+function renderCPR(c) {
+  const fmt = v => v.toFixed(2);
+  document.getElementById('cv-s3').textContent = fmt(c.s3);
+  document.getElementById('cv-s2').textContent = fmt(c.s2);
+  document.getElementById('cv-s1').textContent = fmt(c.s1);
+  document.getElementById('cv-bc').textContent = fmt(c.bc);
+  document.getElementById('cv-pv').textContent = fmt(c.pivot);
+  document.getElementById('cv-tc').textContent = fmt(c.tc);
+  document.getElementById('cv-r1').textContent = fmt(c.r1);
+  document.getElementById('cv-r2').textContent = fmt(c.r2);
+  document.getElementById('cv-r3').textContent = fmt(c.r3);
+  document.getElementById('cv-s2b').textContent = fmt(c.s2);
+  document.getElementById('cv-s3b').textContent = fmt(c.s3);
 }
 
-function updateIndicatorUI(ind) {
-  const fmt = (v) => v ? v.toFixed(2) : '—';
-  const rsiEl = document.getElementById('ind-rsi');
-  const rsiVal = ind.rsi ? ind.rsi.toFixed(1) : '—';
-  rsiEl.textContent = rsiVal;
-  rsiEl.style.color = ind.rsi > 70 ? 'var(--red)' : ind.rsi < 30 ? 'var(--green)' : 'var(--text)';
+// ─── CPR SIGNAL ENGINE ────────────────────────────────────────
+function getCPRSignal(candle, prevCandle) {
+  if (!S.cpr || !prevCandle) return null;
+  const c = S.cpr;
+  const close = parseFloat(candle.close);
+  const prevClose = parseFloat(prevCandle.close);
+  const high = parseFloat(candle.high);
+  const low = parseFloat(candle.low);
 
-  document.getElementById('ind-ema9').textContent = fmt(ind.ema9);
-  document.getElementById('ind-ema9').style.color = ind.ema9 > ind.ema21 ? 'var(--green)' : 'var(--red)';
-  document.getElementById('ind-ema21').textContent = fmt(ind.ema21);
-  document.getElementById('ind-vwap').textContent = fmt(ind.vwap);
-  document.getElementById('ind-vwap').style.color = ind.cur > (ind.vwap||ind.cur) ? 'var(--green)' : 'var(--red)';
+  let signal = null;
 
-  if (ind.cpr) {
-    document.getElementById('cpr-pivot').textContent = fmt(ind.cpr.pivot);
-    document.getElementById('cpr-tc').textContent = fmt(ind.cpr.tc);
-    document.getElementById('cpr-bc').textContent = fmt(ind.cpr.bc);
+  // BUY: candle closes above R1 (breakout)
+  if (close > c.r1 && prevClose <= c.r1) {
+    const entry = close;
+    const sl = c.bc; // SL at BC (bottom of CPR)
+    const tp1 = c.r2;
+    const tp2 = c.r3;
+    const risk = entry - sl;
+    const reward = tp1 - entry;
+    if (risk > 0 && reward/risk >= 2) {
+      signal = { dir:'BUY', entry, sl, tp1, tp2, rr: parseFloat((reward/risk).toFixed(2)), trigger:'R1 Break' };
+    }
   }
-
-  // Indicator pills on ticker
-  const pills = [];
-  if (ind.ema9 && ind.ema21) pills.push(`<span class="ind-pill ${ind.ema9>ind.ema21?'bull':'bear'}">${ind.ema9>ind.ema21?'EMA Bull':'EMA Bear'}</span>`);
-  if (ind.rsi) pills.push(`<span class="ind-pill ${ind.rsi>70?'bear':ind.rsi<30?'bull':'neu'}">${ind.rsi>70?'RSI OB':ind.rsi<30?'RSI OS':'RSI Neu'} ${ind.rsi.toFixed(0)}</span>`);
-  if (ind.vwap && ind.cur) pills.push(`<span class="ind-pill ${ind.cur>ind.vwap?'bull':'bear'}">${ind.cur>ind.vwap?'Above VWAP':'Below VWAP'}</span>`);
-  if (ind.cpr) {
-    const pos = ind.cur > ind.cpr.tc ? 'Above CPR' : ind.cur < ind.cpr.bc ? 'Below CPR' : 'In CPR';
-    pills.push(`<span class="ind-pill ${pos==='Above CPR'?'bull':pos==='Below CPR'?'bear':'orange'}">${pos}</span>`);
+  // SELL: candle closes below S1 (breakout)
+  else if (close < c.s1 && prevClose >= c.s1) {
+    const entry = close;
+    const sl = c.tc; // SL at TC (top of CPR)
+    const tp1 = c.s2;
+    const tp2 = c.s3;
+    const risk = sl - entry;
+    const reward = entry - tp1;
+    if (risk > 0 && reward/risk >= 2) {
+      signal = { dir:'SELL', entry, sl, tp1, tp2, rr: parseFloat((reward/risk).toFixed(2)), trigger:'S1 Break' };
+    }
   }
-  document.getElementById('tc-indicators').innerHTML = pills.join('');
+  return signal;
 }
 
-// ─── REPLAY ───────────────────────────────────────────────────
+function updateSignalBanner(signal) {
+  const banner = document.getElementById('signal-banner');
+  const type = document.getElementById('sig-type');
+  const detail = document.getElementById('sig-detail');
+  const rr = document.getElementById('sig-rr');
+  if (!signal) {
+    banner.className = 'signal-banner none';
+    type.className = 'sig-type none'; type.textContent = '—';
+    detail.textContent = 'No signal — watching for R1/S1 break';
+    rr.textContent = '';
+  } else {
+    banner.className = `signal-banner ${signal.dir.toLowerCase()}`;
+    type.className = `sig-type ${signal.dir.toLowerCase()}`; type.textContent = signal.dir;
+    detail.innerHTML = `${signal.trigger} | Entry: <b>${signal.entry.toFixed(2)}</b> | SL: <b>${signal.sl.toFixed(2)}</b> | TP1: <b>${signal.tp1.toFixed(2)}</b> | TP2: <b>${signal.tp2.toFixed(2)}</b>`;
+    rr.textContent = `R:R ${signal.rr}`;
+    rr.style.color = signal.dir==='BUY' ? 'var(--green)' : 'var(--red)';
+  }
+}
+
+// ─── REPLAY ──────────────────────────────────────────────────
 function startReplay() {
-  if (state.totalCandles === 0) { log('error', 'No candles loaded.'); return; }
-  state.analyzeEvery = parseInt(document.getElementById('analyze-every').value);
-  state.running = true;
+  if (S.total===0) { log('error','No candles.'); return; }
+  S.analyzeEvery = parseInt(document.getElementById('analyze-every').value);
+  S.running = true;
   document.getElementById('start-btn').disabled = true;
   document.getElementById('stop-btn').disabled = false;
   document.getElementById('fetch-btn').disabled = true;
-  setStatus('replay', 'Replaying');
-  log('success', `Replay started — ${state.selectedPair} — all 3 AIs competing.`);
-  tickReplay();
+  setStatus('replay','Replaying');
+  log('success', `Replay started — ${S.pair} — CPR strategy active.`);
+  tick();
 }
-
 function stopReplay() {
-  state.running = false;
-  clearTimeout(state.replayTimer);
+  S.running = false; clearTimeout(S.timer);
   document.getElementById('start-btn').disabled = false;
   document.getElementById('stop-btn').disabled = true;
   document.getElementById('fetch-btn').disabled = false;
-  setStatus('', 'Paused');
-  log('warn', 'Replay paused.');
+  setStatus('','Paused'); log('warn','Paused.');
 }
-
 function resetAll() {
-  stopReplay();
-  state.cursor = 0; state.totalCandles = 0; state.candles = [];
-  ['claude','openai','gemini'].forEach(a => {
-    state.agents[a].balance = state.startBalance;
-    state.agents[a].openTrades = [];
-    state.agents[a].closedTrades = [];
-  });
-  document.getElementById('progress-wrap').style.display = 'none';
-  document.getElementById('start-btn').disabled = true;
-  document.getElementById('tc-price').textContent = '—';
-  document.getElementById('tc-ohlc').innerHTML = '<span>Waiting for data...</span>';
-  document.getElementById('tc-indicators').innerHTML = '';
-  ['claude','openai','gemini'].forEach(a => document.getElementById(`r-${a}`).textContent = 'Waiting...');
-  setStatus('', 'Reset');
-  renderAll(); updateLeaderboard();
-  log('info', 'Reset complete.');
+  stopReplay(); S.cursor=0; S.total=0; S.candles=[]; S.prevCandles=[]; S.cpr=null; S.lastSignal=null;
+  Object.keys(S.agents).forEach(a => { S.agents[a].bal=S.startBal; S.agents[a].open=[]; S.agents[a].closed=[]; });
+  document.getElementById('prog-wrap').style.display='none';
+  document.getElementById('start-btn').disabled=true;
+  document.getElementById('tc-price').textContent='—';
+  document.getElementById('tc-ohlc').innerHTML='<span style="color:var(--t3)">Waiting...</span>';
+  ['claude','openai','gemini'].forEach(a=>document.getElementById(`r-${a}`).textContent='Waiting...');
+  updateSignalBanner(null);
+  setStatus('','Reset'); renderAll(); updateLeaderboard(); log('info','Reset.');
 }
 
-async function tickReplay() {
-  if (!state.running) return;
-  if (state.cursor >= state.totalCandles) {
-    const last = state.candles[state.totalCandles - 1];
-    ['claude','openai','gemini'].forEach(agent => {
-      [...state.agents[agent].openTrades].forEach(t => closeTrade(agent, t, parseFloat(last.close), 'EOD'));
-      state.agents[agent].openTrades = [];
+async function tick() {
+  if (!S.running) return;
+  if (S.cursor >= S.total) {
+    // EOD force close
+    const last = S.candles[S.total-1];
+    Object.keys(S.agents).forEach(agent => {
+      [...S.agents[agent].open].forEach(t => closeTrade(agent,t,parseFloat(last.close),'EOD'));
+      S.agents[agent].open = [];
     });
     renderAll(); updateLeaderboard();
-    setStatus('active', 'Complete');
-    document.getElementById('stop-btn').disabled = true;
-    document.getElementById('fetch-btn').disabled = false;
-    log('success', 'Replay complete!');
-    return;
+    setStatus('active','Complete');
+    document.getElementById('stop-btn').disabled=true;
+    document.getElementById('fetch-btn').disabled=false;
+    log('success','Replay complete!'); return;
   }
 
-  const candle = state.candles[state.cursor];
+  const candle = S.candles[S.cursor];
+  const prevCandle = S.cursor > 0 ? S.candles[S.cursor-1] : null;
   const close = parseFloat(candle.close);
   const open = parseFloat(candle.open);
-  const diff = close - open;
-  const priceEl = document.getElementById('tc-price');
-  priceEl.textContent = close.toFixed(2);
-  priceEl.className = `tc-price ${diff>=0?'up':'dn'}`;
-  document.getElementById('tc-ohlc').innerHTML =
-    `<span><span class="lbl">O</span><span class="${diff>=0?'up':'dn'}">${parseFloat(candle.open).toFixed(2)}</span></span>` +
-    `<span><span class="lbl">H</span><span class="up">${parseFloat(candle.high).toFixed(2)}</span></span>` +
-    `<span><span class="lbl">L</span><span class="dn">${parseFloat(candle.low).toFixed(2)}</span></span>` +
-    `<span><span class="lbl">C</span><span class="${diff>=0?'up':'dn'}">${close.toFixed(2)}</span></span>`;
+  const diff = close-open;
 
-  // Compute indicators
-  const ind = computeIndicators(state.cursor);
-  state.indicators = ind;
-  updateIndicatorUI(ind);
+  // Update ticker
+  const pe = document.getElementById('tc-price');
+  pe.textContent = close.toFixed(2);
+  pe.className = `tc-price ${diff>=0?'up':'dn'}`;
+  document.getElementById('tc-ohlc').innerHTML =
+    `<span>O <span class="${diff>=0?'up':'dn'}">${parseFloat(candle.open).toFixed(2)}</span></span>` +
+    `<span>H <span class="up">${parseFloat(candle.high).toFixed(2)}</span></span>` +
+    `<span>L <span class="dn">${parseFloat(candle.low).toFixed(2)}</span></span>` +
+    `<span>C <span class="${diff>=0?'up':'dn'}">${close.toFixed(2)}</span></span>`;
 
   // Progress
-  const pct = ((state.cursor+1)/state.totalCandles*100).toFixed(1);
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('candle-idx').textContent = state.cursor + 1;
-  const ts = new Date(candle.time * 1000).toLocaleString();
-  document.getElementById('candle-ts').innerHTML = `<b>${ts}</b>`;
+  const pct = ((S.cursor+1)/S.total*100).toFixed(1);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('c-idx').textContent = S.cursor+1;
+  document.getElementById('c-ts').innerHTML = `<b>${new Date(candle.time*1000).toLocaleString()}</b>`;
 
-  // SL/TP check
-  ['claude','openai','gemini'].forEach(a => checkSLTP(a, candle));
+  // Check SL/TP for all agents
+  Object.keys(S.agents).forEach(a => checkSLTP(a, candle));
 
-  // AI analysis every N candles (min 20 candles lookback)
-  if (state.cursor % state.analyzeEvery === 0 && state.cursor >= 20) {
-    setStatus('thinking', 'Analyzing...');
-    await analyzeAgent('claude', state.cursor, ind);
-    await delay(800);
-    await analyzeAgent('openai', state.cursor, ind);
-    await delay(800);
-    await analyzeAgent('gemini', state.cursor, ind);
-    if (state.running) setStatus('replay', 'Replaying');
+  // CPR signal check
+  const signal = getCPRSignal(candle, prevCandle);
+  S.lastSignal = signal;
+  updateSignalBanner(signal);
+
+  if (signal) {
+    log('cpr', `CPR Signal: ${signal.dir} @ ${signal.entry.toFixed(2)} | SL:${signal.sl.toFixed(2)} TP1:${signal.tp1.toFixed(2)} TP2:${signal.tp2.toFixed(2)} R:R ${signal.rr}`);
+
+    // CPR Pure — always take signal if no open trade in same direction
+    const cprAgent = S.agents.cpr;
+    if (!cprAgent.open.find(t=>t.dir===signal.dir)) {
+      openTrade('cpr', signal, S.cursor);
+    }
+
+    // AI agents — take signal only if AI confirms (confidence >= 8)
+    if (S.cursor % S.analyzeEvery === 0) {
+      setStatus('thinking','Analyzing...');
+      for (const agentId of ['claude','openai','gemini']) {
+        if (S.keys[agentId] && !S.agents[agentId].open.find(t=>t.dir===signal.dir)) {
+          await analyzeAgent(agentId, signal, S.cursor);
+          await delay(600);
+        }
+      }
+      if (S.running) setStatus('replay','Replaying');
+    }
   }
 
   renderAll(); updateLeaderboard();
-  state.cursor++;
-  state.replayTimer = setTimeout(tickReplay, state.replaySpeed);
+  S.cursor++;
+  S.timer = setTimeout(tick, S.speed);
 }
 
-const delay = ms => new Promise(r => setTimeout(r, ms));
+const delay = ms => new Promise(r=>setTimeout(r,ms));
 
+// ─── SL/TP ───────────────────────────────────────────────────
 function checkSLTP(agent, candle) {
-  const high = parseFloat(candle.high), low = parseFloat(candle.low);
-  state.agents[agent].openTrades = state.agents[agent].openTrades.filter(t => {
-    let hitSL = false, hitTP = false;
-    if (t.dir === 'BUY') { hitSL = low <= t.sl; hitTP = high >= t.tp; }
-    else { hitSL = high >= t.sl; hitTP = low <= t.tp; }
-    if (hitSL || hitTP) {
-      const reason = (hitSL && hitTP) ? 'SL' : hitTP ? 'TP' : 'SL';
-      closeTrade(agent, t, reason === 'TP' ? t.tp : t.sl, reason);
+  const high=parseFloat(candle.high), low=parseFloat(candle.low);
+  S.agents[agent].open = S.agents[agent].open.filter(t => {
+    let hitSL=false, hitTP=false;
+    if (t.dir==='BUY') { hitSL=low<=t.sl; hitTP=high>=t.tp; }
+    else { hitSL=high>=t.sl; hitTP=low<=t.tp; }
+    if (hitSL||hitTP) {
+      // If both hit same candle → SL (conservative)
+      const reason = (hitSL&&hitTP)?'SL':hitTP?'TP':'SL';
+      // On TP hit, check if TP2 exists and switch target
+      if (reason==='TP' && t.tp===t.tp1 && t.tp2) {
+        t.tp = t.tp2; // upgrade to TP2
+        log(agent, `${agent.toUpperCase()} TP1 hit → trailing to TP2 @ ${t.tp2.toFixed(2)}`);
+        return true; // keep trade open
+      }
+      closeTrade(agent, t, reason==='TP'?t.tp:t.sl, reason);
       return false;
     }
     return true;
   });
 }
 
-// ─── AI ANALYSIS ──────────────────────────────────────────────
-function buildPrompt(agentId, cursorIdx, ind) {
-  const agent = state.agents[agentId];
-  const lookback = 20;
-  const slice = state.candles.slice(Math.max(0, cursorIdx - lookback), cursorIdx + 1);
-  const fmtC = arr => arr.map(c =>
-    `${new Date(c.time*1000).toISOString().substr(11,5)} O:${parseFloat(c.open).toFixed(2)} H:${parseFloat(c.high).toFixed(2)} L:${parseFloat(c.low).toFixed(2)} C:${parseFloat(c.close).toFixed(2)} V:${parseFloat(c.volume||0).toFixed(2)}`
-  ).join('\n');
-  const openSummary = agent.openTrades.map(t => `${t.dir} @ ${t.entry} SL:${t.sl} TP:${t.tp}`).join('; ') || 'None';
-
-  return `You are a professional crypto trader doing BTC paper trading. Analyze and generate signals.
-
-PAIR: ${state.selectedPair}
-CANDLES (last ${slice.length}):
-${fmtC(slice)}
-
-INDICATORS:
-- EMA9: ${ind.ema9?.toFixed(2)||'N/A'} | EMA21: ${ind.ema21?.toFixed(2)||'N/A'} | EMA Cross: ${ind.ema9&&ind.ema21?(ind.ema9>ind.ema21?'BULLISH':'BEARISH'):'N/A'}
-- RSI14: ${ind.rsi?.toFixed(1)||'N/A'} ${ind.rsi>70?'(OVERBOUGHT)':ind.rsi<30?'(OVERSOLD)':''}
-- VWAP: ${ind.vwap?.toFixed(2)||'N/A'} | Price vs VWAP: ${ind.cur&&ind.vwap?(ind.cur>ind.vwap?'ABOVE':'BELOW'):'N/A'}
-- CPR Pivot: ${ind.cpr?.pivot?.toFixed(2)||'N/A'} | BC: ${ind.cpr?.bc?.toFixed(2)||'N/A'} | TC: ${ind.cpr?.tc?.toFixed(2)||'N/A'}
-
-OPEN POSITIONS: ${openSummary}
-BALANCE: $${agent.balance.toFixed(2)} | CANDLE: ${cursorIdx+1}/${state.totalCandles}
-
-STRATEGY RULES:
-- Use EMA cross for trend direction
-- Use RSI for overbought/oversold confirmation
-- Use VWAP as dynamic support/resistance
-- Use CPR levels as key entry/exit zones
-- Only trade if confidence >= 8 (stricter for crypto)
-- Max 2 open trades, skip if already open
-- R:R minimum 2.0 for crypto
-- SL/TP in USD price distance (not pips)
-- Minimum SL: 50 USD for BTC, gives room for volatility
-
-Respond ONLY valid JSON (no markdown, reasoning max 80 chars):
-{"reasoning":"<80 chars","signal":{"pair":"${state.selectedPair}" or null,"direction":"BUY" or "SELL","strategy":"momentum_breakout" or "mean_reversion" or "trend_follow" or "range_fade","entry":number,"sl_distance":number,"tp_distance":number,"rr":number,"confidence":number,"skip_reason":"if null"}}`;
-}
-
-async function analyzeAgent(agentId, cursorIdx, ind) {
-  const key = state.keys[agentId];
+// ─── AI ANALYSIS ─────────────────────────────────────────────
+async function analyzeAgent(agentId, signal, cursorIdx) {
+  const key = S.keys[agentId];
   if (!key) return;
-  const agent = state.agents[agentId];
-  if (agent.openTrades.length >= 2) return;
-  const prompt = buildPrompt(agentId, cursorIdx, ind);
+  const c = S.cpr;
+  const prompt = `You are a CPR-based crypto trader. A CPR breakout signal has fired.
+
+PAIR: ${S.pair}
+SIGNAL: ${signal.dir} — ${signal.trigger}
+ENTRY: ${signal.entry.toFixed(2)}
+STOP LOSS: ${signal.sl.toFixed(2)} (${signal.dir==='BUY'?'BC':'TC'} of CPR)
+TP1: ${signal.tp1.toFixed(2)} | TP2: ${signal.tp2.toFixed(2)}
+R:R: ${signal.rr}
+
+CPR LEVELS — Pivot:${c.pivot.toFixed(2)} TC:${c.tc.toFixed(2)} BC:${c.bc.toFixed(2)}
+R1:${c.r1.toFixed(2)} R2:${c.r2.toFixed(2)} R3:${c.r3.toFixed(2)}
+S1:${c.s1.toFixed(2)} S2:${c.s2.toFixed(2)} S3:${c.s3.toFixed(2)}
+
+CANDLE: ${S.cursor+1}/${S.total}
+CURRENT PRICE: ${signal.entry.toFixed(2)}
+
+Your job: Confirm or reject this CPR signal. Consider:
+- Is the breakout clean (strong close, not a wick)?
+- Is the R:R >= 2? (Already checked: ${signal.rr})
+- Any reason to reject (news, time of day, prior failed breaks)?
+
+Respond ONLY valid JSON (reasoning max 80 chars):
+{"reasoning":"<80 chars","confirm":true or false,"confidence":1-10}`;
+
   try {
     let raw = '';
-    if (agentId === 'claude') {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method:'POST',
-        headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:400,temperature:0.2,messages:[{role:'user',content:prompt}]})
-      });
-      const d = await res.json();
-      if (d.error) { log('error',`Claude: ${d.error.message}`); return; }
-      raw = d.content?.[0]?.text || '';
-    } else if (agentId === 'openai') {
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
-        body:JSON.stringify({model:'gpt-4o',max_tokens:400,temperature:0.2,messages:[{role:'user',content:prompt}]})
-      });
-      const d = await res.json();
-      if (d.error) { log('error',`OpenAI: ${d.error.message}`); return; }
-      raw = d.choices?.[0]?.message?.content || '';
+    if (agentId==='claude') {
+      const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:200,temperature:0.2,messages:[{role:'user',content:prompt}]})});
+      const d=await r.json(); if(d.error){log('error',`Claude: ${d.error.message}`);return;} raw=d.content?.[0]?.text||'';
+    } else if (agentId==='openai') {
+      const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'gpt-4o',max_tokens:200,temperature:0.2,messages:[{role:'user',content:prompt}]})});
+      const d=await r.json(); if(d.error){log('error',`OpenAI: ${d.error.message}`);return;} raw=d.choices?.[0]?.message?.content||'';
     } else {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.2,maxOutputTokens:400}})
-      });
-      const d = await res.json();
-      if (d.error) { log('error',`Gemini: ${d.error.message}`); return; }
-      raw = d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.2,maxOutputTokens:200}})});
+      const d=await r.json(); if(d.error){log('error',`Gemini: ${d.error.message}`);return;} raw=d.candidates?.[0]?.content?.parts?.[0]?.text||'';
     }
 
     const cleaned = raw.replace(/```json|```/g,'').trim();
     const parsed = JSON.parse(cleaned);
-    agent.reasoning = parsed.reasoning || '—';
-    document.getElementById(`r-${agentId}`).textContent = agent.reasoning;
+    S.agents[agentId].reasoning = parsed.reasoning || '—';
+    document.getElementById(`r-${agentId}`).textContent =
+      `[${parsed.confirm?'✅ CONFIRMED':'❌ REJECTED'} — Conf: ${parsed.confidence}/10] ${parsed.reasoning}`;
 
-    const sig = parsed.signal;
-    if (!sig || !sig.pair) { log(agentId, `${agentId.toUpperCase()} skip: ${sig?.skip_reason||'no setup'}`); return; }
-    if (sig.confidence < 8) { log(agentId, `${agentId.toUpperCase()} conf ${sig.confidence}/10 — skip`); return; }
-    if (agent.openTrades.find(t => t.pair === sig.pair)) { log(agentId, `${agentId.toUpperCase()}: already open`); return; }
-    if (agent.openTrades.length >= 2) { log(agentId, `${agentId.toUpperCase()}: max trades`); return; }
-    openTrade(agentId, sig, cursorIdx);
-  } catch(e) {
-    log('error', `${agentId}: ${e.message}`);
-  }
+    if (parsed.confirm && parsed.confidence >= 8) {
+      openTrade(agentId, signal, cursorIdx);
+    } else {
+      log(agentId, `${agentId.toUpperCase()} rejected signal: conf ${parsed.confidence}/10`);
+    }
+  } catch(e) { log('error', `${agentId}: ${e.message}`); }
 }
 
 // ─── TRADE OPS ────────────────────────────────────────────────
-function openTrade(agentId, sig, candleIdx) {
-  const spread = state.spreadPips; // USD for crypto
-  const fillPrice = sig.direction === 'BUY' ? sig.entry + spread : sig.entry - spread;
-  const sl = sig.direction === 'BUY' ? fillPrice - sig.sl_distance : fillPrice + sig.sl_distance;
-  const tp = sig.direction === 'BUY' ? fillPrice + sig.tp_distance : fillPrice - sig.tp_distance;
-
+function openTrade(agentId, signal, candleIdx) {
   const trade = {
-    id: Date.now() + Math.random(),
-    pair: sig.pair, dir: sig.direction, strategy: sig.strategy,
-    entry: parseFloat(fillPrice.toFixed(2)),
-    sl: parseFloat(sl.toFixed(2)), tp: parseFloat(tp.toFixed(2)),
-    rr: sig.rr, lotSize: state.lotSize, spreadCost: spread,
-    confidence: sig.confidence, openCandleIdx: candleIdx,
-    openTime: new Date(state.candles[candleIdx]?.time * 1000).toLocaleTimeString(),
+    id: Date.now()+Math.random(),
+    pair: S.pair, dir: signal.dir,
+    entry: signal.entry, sl: signal.sl,
+    tp: signal.tp1, tp1: signal.tp1, tp2: signal.tp2,
+    rr: signal.rr, lotSize: S.lot,
+    openCandleIdx: candleIdx,
+    openTime: new Date(S.candles[candleIdx]?.time*1000).toLocaleTimeString(),
+    trigger: signal.trigger,
   };
-  state.agents[agentId].openTrades.push(trade);
-  log(agentId, `${agentId.toUpperCase()} OPEN ${trade.dir} ${trade.pair} @ $${trade.entry} | SL:$${trade.sl} TP:$${trade.tp} | R:R ${trade.rr}`);
+  S.agents[agentId].open.push(trade);
+  log(agentId, `${agentId.toUpperCase()} OPEN ${trade.dir} @ $${trade.entry.toFixed(2)} SL:$${trade.sl.toFixed(2)} TP1:$${trade.tp1.toFixed(2)} TP2:$${trade.tp2.toFixed(2)}`);
 }
 
 function closeTrade(agentId, trade, exitPrice, reason) {
-  // BTC P&L: (exit - entry) * lotSize for BUY; (entry - exit) * lotSize for SELL
-  const priceDiff = trade.dir === 'BUY' ? exitPrice - trade.entry : trade.entry - exitPrice;
-  const pnl = priceDiff * trade.lotSize;
-  state.agents[agentId].balance += pnl;
-  const result = pnl > 0 ? 'win' : 'loss';
-  const duration = state.cursor - trade.openCandleIdx;
-  state.agents[agentId].closedTrades.unshift({...trade, exit:parseFloat(exitPrice.toFixed(2)), pnl, result, reason, duration});
+  const diff = trade.dir==='BUY' ? exitPrice-trade.entry : trade.entry-exitPrice;
+  const pnl = diff * trade.lotSize;
+  S.agents[agentId].bal += pnl;
+  const result = pnl>0 ? 'win' : 'loss';
+  const duration = S.cursor - trade.openCandleIdx;
+  S.agents[agentId].closed.unshift({...trade, exit:parseFloat(exitPrice.toFixed(2)), pnl, result, reason, duration});
   log(agentId, `${agentId.toUpperCase()} CLOSE [${reason}] ${pnl>=0?'+':''}$${pnl.toFixed(4)}`);
 }
 
-// ─── RENDER ───────────────────────────────────────────────────
+// ─── RENDER ──────────────────────────────────────────────────
 function renderAll() {
-  ['claude','openai','gemini'].forEach(agentId => {
-    const agent = state.agents[agentId];
-    const cur = state.candles[state.cursor] || state.candles[Math.max(0,state.cursor-1)];
-    const curClose = cur ? parseFloat(cur.close) : 0;
+  const cur = S.candles[S.cursor]||S.candles[Math.max(0,S.cursor-1)];
+  const curClose = cur ? parseFloat(cur.close) : 0;
 
+  Object.keys(S.agents).forEach(agentId => {
+    const agent = S.agents[agentId];
     // Open
     const openEl = document.getElementById(`open-${agentId}`);
-    openEl.innerHTML = agent.openTrades.length === 0
-      ? '<div class="empty-col">No open trades</div>'
-      : agent.openTrades.map(t => {
-          const priceDiff = t.dir === 'BUY' ? curClose - t.entry : t.entry - curClose;
-          const upnl = priceDiff * t.lotSize;
-          return `<div class="t-card">
-            <div class="t-card-top">
-              <span class="t-pair">${t.pair}</span>
-              <span class="t-dir ${t.dir.toLowerCase()}">${t.dir}</span>
-            </div>
-            <div class="t-meta">
-              Entry: $${t.entry} | SL: $${t.sl} | TP: $${t.tp}<br>
-              R:R ${t.rr} | <span class="strat-tag">${t.strategy.replace(/_/g,' ')}</span> | ${t.openTime}
-            </div>
-            <div class="t-pnl ${upnl>=0?'pos':'neg'}">${upnl>=0?'+':''}$${upnl.toFixed(4)}</div>
+    openEl.innerHTML = agent.open.length===0
+      ? `<div class="empty-col" ${agentId==='cpr'?'style="grid-column:1/-1"':''}>No open trades</div>`
+      : agent.open.map(t => {
+          const diff = t.dir==='BUY' ? curClose-t.entry : t.entry-curClose;
+          const upnl = diff*t.lotSize;
+          return `<div class="tcard">
+            <div class="tcard-top"><span class="tpair">${t.pair}</span><span class="tdir ${t.dir.toLowerCase()}">${t.dir}</span></div>
+            <div class="tmeta">$${t.entry.toFixed(2)} | SL:$${t.sl.toFixed(2)} TP1:$${t.tp1.toFixed(2)} TP2:$${t.tp2.toFixed(2)}<br>R:R ${t.rr} | ${t.trigger} | ${t.openTime}</div>
+            <div class="tpnl ${upnl>=0?'pos':'neg'}">${upnl>=0?'+':''}$${upnl.toFixed(4)}</div>
           </div>`;
         }).join('');
 
     // Closed
     const closedEl = document.getElementById(`closed-${agentId}`);
-    closedEl.innerHTML = agent.closedTrades.length === 0
-      ? '<div class="empty-col">No closed trades</div>'
-      : agent.closedTrades.slice(0,15).map(t =>
-          `<div class="t-card">
-            <div class="t-card-top">
-              <span class="t-pair">${t.pair}</span>
-              <span class="t-dir ${t.dir.toLowerCase()}">${t.dir}</span>
-              <span class="t-tag ${t.reason==='TP'?'tp':t.reason==='EOD'?'eod':'sl'}">${t.reason}</span>
-            </div>
-            <div class="t-meta">$${t.entry} → $${t.exit} | ${t.duration}c | <span class="strat-tag">${t.strategy.replace(/_/g,' ')}</span></div>
-            <div class="t-pnl ${t.pnl>=0?'pos':'neg'}">${t.pnl>=0?'+':''}$${t.pnl.toFixed(4)}</div>
+    closedEl.innerHTML = agent.closed.length===0
+      ? `<div class="empty-col" ${agentId==='cpr'?'style="grid-column:1/-1"':''}>No closed trades</div>`
+      : agent.closed.slice(0,15).map(t =>
+          `<div class="tcard">
+            <div class="tcard-top"><span class="tpair">${t.pair}</span><span class="tdir ${t.dir.toLowerCase()}">${t.dir}</span><span class="ttag ${t.reason==='TP'?'tp':t.reason==='EOD'?'eod':'sl'}">${t.reason}</span></div>
+            <div class="tmeta">$${t.entry.toFixed(2)} → $${t.exit.toFixed(2)} | ${t.duration}c | ${t.trigger}</div>
+            <div class="tpnl ${t.pnl>=0?'pos':'neg'}">${t.pnl>=0?'+':''}$${t.pnl.toFixed(4)}</div>
           </div>`
         ).join('');
 
-    document.getElementById(`cc-${agentId}`).textContent = `${agent.closedTrades.length} trades`;
+    document.getElementById(`cc-${agentId}`).textContent = `${agent.closed.length} trades`;
   });
 }
 
 function updateLeaderboard() {
-  const results = ['claude','openai','gemini'].map(id => {
-    const a = state.agents[id];
-    const wins = a.closedTrades.filter(t => t.result==='win').length;
-    const losses = a.closedTrades.filter(t => t.result==='loss').length;
-    const total = wins+losses;
-    const wr = total>0 ? (wins/total*100).toFixed(0)+'%' : '—';
-    return { id, balance:a.balance, pnl:a.balance-state.startBalance, wins, losses, wr };
-  }).sort((a,b) => b.balance-a.balance);
+  const results = Object.keys(S.agents).map(id => {
+    const a=S.agents[id];
+    const wins=a.closed.filter(t=>t.result==='win').length;
+    const losses=a.closed.filter(t=>t.result==='loss').length;
+    const total=wins+losses;
+    const wr=total>0?(wins/total*100).toFixed(0)+'%':'—';
+    return {id, bal:a.bal, pnl:a.bal-S.startBal, wins, losses, wr};
+  }).sort((a,b)=>b.bal-a.bal);
 
-  const leaderId = results[0].id;
+  const leadId = results[0].id;
   results.forEach(r => {
-    const isLeader = r.id===leaderId && r.pnl!==0;
-    document.getElementById(`lb-${r.id}`).className = `lb-row${isLeader?' leader':''}`;
-    const balEl = document.getElementById(`lb-bal-${r.id}`);
-    balEl.textContent = `$${r.balance.toFixed(2)}`;
-    balEl.style.color = r.pnl>=0 ? 'var(--green)' : 'var(--red)';
-    document.getElementById(`lb-stats-${r.id}`).textContent = `${r.wins}W / ${r.losses}L | WR: ${r.wr}`;
-    const balColEl = document.getElementById(`bal-${r.id}`);
-    if(balColEl){ balColEl.textContent=`$${r.balance.toFixed(2)}`; balColEl.style.color=r.pnl>=0?'var(--green)':'var(--red)'; }
-    const wrEl = document.getElementById(`wr-${r.id}`);
-    if(wrEl) wrEl.textContent = `WR: ${r.wr}`;
+    const isLead = r.id===leadId && r.pnl!==0;
+    document.getElementById(`lb-${r.id}`).className = `lb-row${isLead?' leader':''}`;
+    const bEl=document.getElementById(`lb-bal-${r.id}`);
+    bEl.textContent=`$${r.bal.toFixed(2)}`;
+    bEl.style.color=r.pnl>=0?'var(--green)':'var(--red)';
+    document.getElementById(`lb-st-${r.id}`).textContent=`${r.wins}W/${r.losses}L | WR:${r.wr}`;
+    const balEl=document.getElementById(`bal-${r.id}`);
+    if(balEl){balEl.textContent=`$${r.bal.toFixed(2)}`;balEl.style.color=r.pnl>=0?'var(--green)':'var(--red)';}
+    const wrEl=document.getElementById(`wr-${r.id}`);
+    if(wrEl) wrEl.textContent=`WR: ${r.wr}`;
   });
 }
 
-// ─── TABS / SPEED / STATUS / LOG ──────────────────────────────
-let activeTab = 'claude';
+// ─── TABS / SPEED / STATUS / LOG ─────────────────────────────
 function switchTab(id) {
-  ['claude','openai','gemini'].forEach(a => {
-    document.getElementById(`r-${a}`).style.display = 'none';
-    document.getElementById(`rtab-${a}`).className = 'r-tab';
+  ['claude','openai','gemini','cpr'].forEach(a => {
+    document.getElementById(`r-${a}`).style.display='none';
+    document.getElementById(`rt-${a}`).className='r-tab';
   });
-  document.getElementById(`r-${id}`).style.display = 'block';
-  document.getElementById(`rtab-${id}`).className = `r-tab active-${id}`;
-  activeTab = id;
+  document.getElementById(`r-${id}`).style.display='block';
+  const cls = {claude:'ac',openai:'ao',gemini:'ag',cpr:'an'};
+  document.getElementById(`rt-${id}`).className=`r-tab ${cls[id]}`;
 }
-
-function setSpeed(ms, el) {
-  state.replaySpeed = ms;
-  document.querySelectorAll('.spd').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-}
-
-function setStatus(type, text) {
-  const pill = document.getElementById('status-pill');
-  pill.className = 'status-pill' + (type ? ` ${type}` : '');
-  document.getElementById('status-text').textContent = text;
-}
-
-function log(type, msg) {
-  const box = document.getElementById('log-box');
-  const time = new Date().toLocaleTimeString('en-US',{hour12:false});
-  const el = document.createElement('div');
-  el.className = `le ${type}`;
-  el.innerHTML = `<span class="lt">${time}</span><span class="lm">${msg}</span>`;
-  box.insertBefore(el, box.firstChild);
-  if (box.children.length > 150) box.removeChild(box.lastChild);
-}
+function setSpeed(ms,el){S.speed=ms;document.querySelectorAll('.spd').forEach(b=>b.classList.remove('active'));el.classList.add('active');}
+function setStatus(type,text){const p=document.getElementById('status-pill');p.className='spill'+(type?` ${type}`:'');document.getElementById('status-text').textContent=text;}
+function log(type,msg){const box=document.getElementById('log-box');const time=new Date().toLocaleTimeString('en-US',{hour12:false});const el=document.createElement('div');el.className=`le ${type}`;el.innerHTML=`<span class="lt">${time}</span><span class="lm">${msg}</span>`;box.insertBefore(el,box.firstChild);if(box.children.length>200)box.removeChild(box.lastChild);}
 </script>
 </body>
 </html>
