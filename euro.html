@@ -147,7 +147,7 @@ tbody tr:last-child td{border-bottom:none;}
     <div class="brand">CPR Scanner <span>●</span><small>storiesbyachu · 90-Day Backtest</small></div>
     <div class="pill" id="status-pill"><div class="d"></div><span id="status-txt">Idle</span></div>
   </div>
-  <div style="font-size:0.62rem;color:var(--t3)">Pure CPR · R1 Break → R2/R3 · S1 Break → S2/S3</div>
+  <div style="font-size:0.62rem;color:var(--t3)">CPR Fib Strategy · R1/S1 Break → 0.618 Entry → R2/S2</div>
 </div>
 
 <div class="layout">
@@ -263,11 +263,11 @@ tbody tr:last-child td{border-bottom:none;}
 
   <!-- STATS -->
   <div class="stat-row" id="stat-row">
-    <div class="stat"><div class="sl">Total Breaks</div><div class="sv" id="s-trades">—</div><div class="ss" id="s-bal">R1/S1 breaks found</div></div>
+    <div class="stat"><div class="sl">Total Breaks</div><div class="sv" id="s-trades">—</div><div class="ss" id="s-bal">Breaks with fib entry triggered</div></div>
     <div class="stat green"><div class="sl">Target Hit Rate</div><div class="sv" id="s-wr">—</div><div class="wr-bar"><div class="wr-fill" id="s-wr-bar" style="width:0%"></div></div></div>
     <div class="stat orange"><div class="sl">Net P&L</div><div class="sv" id="s-pnl">—</div><div class="ss" id="s-bal">Balance: $100</div></div>
-    <div class="stat blue"><div class="sl">R2/S2 Hits</div><div class="sv" id="s-tp1">—</div><div class="ss" id="s-tp2">TP2: —</div></div>
-    <div class="stat purple"><div class="sl">Hit / Total</div><div class="sv" id="s-rr">—</div><div class="ss" id="s-days">Days scanned: 0</div></div>
+    <div class="stat blue"><div class="sl">TP Hits (R2/S2)</div><div class="sv" id="s-tp1">—</div><div class="ss" id="s-tp2">Fib entries triggered: —</div></div>
+    <div class="stat purple"><div class="sl">Hit / Entered</div><div class="sv" id="s-rr">—</div><div class="ss" id="s-days">Days scanned: 0</div></div>
   </div>
 
   <!-- MONTHLY BREAKDOWN -->
@@ -702,21 +702,19 @@ const delay = ms => new Promise(r=>setTimeout(r,ms));
 function renderResults(noTradeDays, daysScanned) {
   const trades = allTrades;
   if (trades.length === 0) {
-    document.getElementById('trade-tbody').innerHTML = '<tr><td colspan="12" class="empty">No R1/S1 breaks found.</td></tr>';
+    document.getElementById('trade-tbody').innerHTML = '<tr><td colspan="12" class="empty">No Breaks with fib entry triggered.</td></tr>';
     document.getElementById('s-trades').textContent = '0';
     document.getElementById('s-days').textContent = `Days scanned: ${daysScanned} | No break: ${noTradeDays.length}`;
     return;
   }
   const buys = trades.filter(t=>t.dir==='BUY');
   const sells = trades.filter(t=>t.dir==='SELL');
-  const hitR2 = trades.filter(t=>t.dir==='BUY'&&t.hitR2);
-  const hitR3 = trades.filter(t=>t.dir==='BUY'&&t.hitR3);
-  const hitS2 = trades.filter(t=>t.dir==='SELL'&&t.hitS2);
-  const hitS3 = trades.filter(t=>t.dir==='SELL'&&t.hitS3);
-  const anyTarget  = trades.filter(t=>t.hitTP);
-  const eodClosed  = trades.filter(t=>t.result==='EOD Close');
-  const timeExits  = trades.filter(t=>t.result==='Time Exit');
-  const wr = (anyTarget.length/trades.length*100).toFixed(1);
+  const entered   = trades.filter(t=>t.entryTime);
+  const anyTarget = trades.filter(t=>t.hitTP);
+  const eodClosed = trades.filter(t=>t.result==='EOD Close');
+  const timeExits = trades.filter(t=>t.result==='Time Exit');
+  const noEntry   = trades.filter(t=>!t.entryTime);
+  const wr = entered.length>0?(anyTarget.length/entered.length*100).toFixed(1):'0.0';
   const totalPnl = trades.reduce((s,t)=>s+(t.pnl||0),0);
   const finalBal = config.bal + totalPnl;
 
@@ -729,37 +727,40 @@ function renderResults(noTradeDays, daysScanned) {
   pnlEl.style.color = totalPnl>=0?'var(--green)':'var(--red)';
   pnlEl.style.fontSize = '1.3rem';
   document.getElementById('s-bal').textContent = `Final: $${finalBal.toFixed(2)} · ${buys.length}B / ${sells.length}S`;
-  document.getElementById('s-tp1').textContent = `R2:${hitR2.length} S2:${hitS2.length}`;
-  document.getElementById('s-tp2').textContent = `R3:${hitR3.length} S3:${hitS3.length} EOD:${eodClosed.length} TmExit:${timeExits.length}`;
-  document.getElementById('s-rr').textContent = `${anyTarget.length}/${trades.length}`;
+  document.getElementById('s-tp1').textContent = `${anyTarget.length} hits`;
+  document.getElementById('s-tp2').textContent = `Entered:${entered.length} | No entry:${noEntry.length} | EOD:${eodClosed.length}`;
+  document.getElementById('s-rr').textContent = `${anyTarget.length}/${entered.length}`;
   const fLabel = [config.filterSession?'Session✓':'',config.filterCPRWidth?'CPRWidth✓':'',config.filterExitTime?'TimeExit✓':''].filter(Boolean).join(' ');
-  document.getElementById('s-days').textContent = `Scanned:${daysScanned} | No break:${noTradeDays.length} | Filters: ${fLabel||'None'}`;
-  document.getElementById('trade-count').textContent = `(${trades.length} breaks)`;
+  document.getElementById('s-days').textContent = `Scanned:${daysScanned} | No break:${noTradeDays.length} | Filters:${fLabel||'None'}`;
+  document.getElementById('trade-count').textContent = `(${trades.length} breaks, ${entered.length} entered)`;
 
   // Monthly
   const months = {};
   trades.forEach(t => {
     const m = t.day.substr(0,7);
-    if (!months[m]) months[m]={total:0,hit:0,buys:0,sells:0,r2:0,r3:0,s2:0,s3:0};
+    if (!months[m]) months[m]={total:0,hit:0,entered:0,buys:0,sells:0,pnl:0};
     months[m].total++;
-    if(t.dir==='BUY'){months[m].buys++;if(t.hitR2)months[m].r2++;if(t.hitR3)months[m].r3++;}
-    else{months[m].sells++;if(t.hitS2)months[m].s2++;if(t.hitS3)months[m].s3++;}
-    if((t.dir==='BUY'&&t.hitR2)||(t.dir==='SELL'&&t.hitS2))months[m].hit++;
+    months[m].pnl += (t.pnl||0);
+    if(t.dir==='BUY') months[m].buys++;
+    else months[m].sells++;
+    if(t.entryTime) months[m].entered++;
+    if(t.hitTP) months[m].hit++;
   });
   const mKeys=Object.keys(months).sort();
   document.getElementById('month-grid').innerHTML=mKeys.length===0
     ?'<div class="empty" style="grid-column:1/-1">No data</div>'
     :mKeys.map(m=>{
       const mo=months[m];
-      const mwr=mo.total>0?(mo.hit/mo.total*100).toFixed(0)+'%':'—';
+      const mwr=mo.entered>0?(mo.hit/mo.entered*100).toFixed(0)+'%':'—';
       const d=new Date(m+'-01');
       const mn=d.toLocaleString('default',{month:'short',year:'2-digit'});
       const good=parseFloat(mwr)>=50;
+      const mpnl=mo.pnl>=0?'+$'+mo.pnl.toFixed(2):'-$'+Math.abs(mo.pnl).toFixed(2);
       return `<div class="month-card ${good?'pos':'neg'}">
         <div class="mn">${mn}</div>
-        <div class="mp ${good?'pos':'neg'}">${mo.hit}/${mo.total} hit</div>
+        <div class="mp ${good?'pos':'neg'}">${mo.hit}/${mo.entered} hit</div>
+        <div class="ms" style="font-weight:700;color:${mo.pnl>=0?'var(--green)':'var(--red)'}">${mpnl}</div>
         <div class="ms">WR ${mwr} · B:${mo.buys} S:${mo.sells}</div>
-        <div class="ms" style="margin-top:2px">R2:${mo.r2} R3:${mo.r3} S2:${mo.s2} S3:${mo.s3}</div>
       </div>`;
     }).join('');
 
