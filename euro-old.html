@@ -183,14 +183,25 @@ tbody tr:last-child td{border-bottom:none;}
       <div class="fr"><label>Lookback (days)</label>
         <input type="number" id="lookback" value="3000" min="7" max="3000" step="1"/>
       </div>
-      <div class="fr"><label>Stop Loss %</label>
-        <input type="number" id="sl-pct" value="" min="0.1" max="20" step="0.1" placeholder="e.g. 2  (blank = EOD only)"/>
-      </div>
       <div class="fr"><label>Starting Balance (USD)</label>
         <input type="number" id="bal" value="100" min="10" step="10"/>
       </div>
-      <div class="fr"><label>Lot Size</label>
-        <input type="number" id="lot" value="0.01" min="0.001" step="0.001"/>
+      <div style="background:var(--b2);border-radius:6px;padding:6px 9px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:0.6rem;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:0.05em">Lot Size</span>
+        <span style="font-size:0.72rem;font-weight:800;color:var(--text)">0.01 <span style="font-size:0.58rem;color:var(--t3);font-weight:400">fixed</span></span>
+      </div>
+      <div style="background:var(--b2);border-radius:6px;padding:6px 9px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:0.6rem;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:0.05em">Leverage</span>
+        <span style="font-size:0.72rem;font-weight:800;color:var(--orange)">1:200</span>
+      </div>
+      <div style="font-size:0.58rem;color:var(--t3);margin-bottom:6px;padding:0 1px">SL: either condition triggers (whichever hits first)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+        <div class="fr" style="margin-bottom:0"><label>SL %</label>
+          <input type="number" id="sl-pct" value="" min="0.1" max="20" step="0.1" placeholder="e.g. 5"/>
+        </div>
+        <div class="fr" style="margin-bottom:0"><label>Max Loss $</label>
+          <input type="number" id="sl-usd" value="" min="0.1" max="10000" step="0.1" placeholder="e.g. 15"/>
+        </div>
       </div>
       <button class="btn bo" id="scan-btn" onclick="startScan()">▶ Run Scan</button>
       <button class="btn bg" onclick="resetScan()">↺ Reset</button>
@@ -246,12 +257,14 @@ tbody tr:last-child td{border-bottom:none;}
               <th>R1 / S1</th>
               <th>R2 / S2 (TP1)</th>
               <th>R3 / S3 (TP2)</th>
+              <th>SL Trigger</th>
               <th>Result</th>
               <th>P&L ($)</th>
+              <th>Balance</th>
             </tr>
           </thead>
           <tbody id="trade-tbody">
-            <tr><td colspan="12" class="empty">Run the scanner to see trades</td></tr>
+            <tr><td colspan="15" class="empty">Run the scanner to see trades</td></tr>
           </tbody>
         </table>
       </div>
@@ -271,7 +284,9 @@ tbody tr:last-child td{border-bottom:none;}
 
 <script>
 const DELTA = 'https://api.india.delta.exchange';
-let config = { deltaKey:'', deltaSecret:'', pair:'', interval:'15m', lookback:3000, slPct:0, minRR:2, bal:100, lot:0.01 };
+const LEVERAGE = 200;
+const LOT = 0.01;
+let config = { deltaKey:'', deltaSecret:'', pair:'', interval:'15m', lookback:3000, slPct:0, slUsd:0, bal:100 };
 let scanning = false;
 let allTrades = [];
 let runningBal = 100;
@@ -322,8 +337,8 @@ async function startScan() {
   config.interval = document.getElementById('interval').value;
   config.lookback = parseInt(document.getElementById('lookback').value);
   config.bal = parseFloat(document.getElementById('bal').value)||100;
-  config.lot = parseFloat(document.getElementById('lot').value)||0.01;
   config.slPct = parseFloat(document.getElementById('sl-pct').value)||0;
+  config.slUsd = parseFloat(document.getElementById('sl-usd').value)||0;
 
   // Persist last symbol
   localStorage.setItem('cpr_last_symbol', sym);
@@ -335,8 +350,11 @@ async function startScan() {
   document.getElementById('scan-btn').disabled = true;
   document.getElementById('prog-wrap').style.display = 'block';
   setStatus('running', 'Fetching...');
-  const slLabel = config.slPct > 0 ? `, SL ${config.slPct}%` : ', no SL';
-  log('info', `Starting scan: ${sym} (${config.interval}, ${config.lookback} days${slLabel})...`);
+  const slParts = [];
+  if (config.slPct > 0) slParts.push(`SL ${config.slPct}%`);
+  if (config.slUsd > 0) slParts.push(`Max -$${config.slUsd}`);
+  const slLabel = slParts.length ? ` · ${slParts.join(' OR ')}` : ' · EOD only';
+  log('info', `Starting scan: ${sym} (${config.interval}, ${config.lookback} days${slLabel}, 1:${LEVERAGE} lev)...`);
 
   // Always work in UTC dates to match Delta's candle timestamps
   const todayUTC = new Date();
@@ -439,15 +457,24 @@ async function startScan() {
       breakFired.eodTime  = exitTimeStr;
     }
     breakFired.result = result;
+
+    // Determine actual exit price
     const exitPx = result.startsWith('Hit') ? (
       breakFired.dir==='BUY' ? (breakFired.hitR3 ? breakFired.cpr.r3 : breakFired.cpr.r2)
                               : (breakFired.hitS3 ? breakFired.cpr.s3 : breakFired.cpr.s2)
     ) : (breakFired.eodClose || breakFired.entry);
+
+    // P&L with leverage: priceDiff * lot * leverage
     const priceDiff = breakFired.dir==='BUY' ? exitPx - breakFired.entry : breakFired.entry - exitPx;
-    breakFired.pnl = priceDiff * config.lot;
+    breakFired.pnl = priceDiff * LOT * LEVERAGE;
+
+    // Update running balance
+    runningBal += breakFired.pnl;
+    breakFired.balAfter = runningBal;
+
     allTrades.push({...breakFired});
     const logType = result.startsWith('Hit') ? 'success' : result === 'SL Hit' ? 'error' : result === 'EOD Close' ? 'info' : 'warn';
-    log(logType, `${breakFired.day} ${breakFired.dir} → ${result} (entry:${breakFired.entry.toFixed(0)}${exitPrice!=null?' exit:'+exitPrice.toFixed(0):''})`);
+    log(logType, `${breakFired.day} ${breakFired.dir} → ${result} | P&L: ${breakFired.pnl>=0?'+':''}$${breakFired.pnl.toFixed(2)} | Bal: $${runningBal.toFixed(2)}`);
     breakFired = null;
   }
 
@@ -490,15 +517,54 @@ async function startScan() {
       if (breakFired) {
         hadBreakToday = true;
         const bc = breakFired.cpr;
-        const slPct = config.slPct;
 
-        if (slPct > 0) {
-          const slPrice = breakFired.dir === 'BUY'
-            ? breakFired.entry * (1 - slPct / 100)
-            : breakFired.entry * (1 + slPct / 100);
-          const slTriggered = breakFired.dir === 'BUY' ? low <= slPrice : high >= slPrice;
+        // ── SL check: % OR $ — whichever triggers first (closer to entry) ──
+        const hasPctSL = config.slPct > 0;
+        const hasUsdSL = config.slUsd > 0;
+
+        if (hasPctSL || hasUsdSL) {
+          // Price at which SL% would trigger
+          const slPricePct = hasPctSL
+            ? (breakFired.dir === 'BUY'
+                ? breakFired.entry * (1 - config.slPct / 100)
+                : breakFired.entry * (1 + config.slPct / 100))
+            : null;
+
+          // Price at which max-$ loss would trigger
+          // maxLoss = priceDiff * LOT * LEVERAGE  →  priceDiff = maxLoss / (LOT * LEVERAGE)
+          const priceDiffForUsdSL = config.slUsd / (LOT * LEVERAGE);
+          const slPriceUsd = hasUsdSL
+            ? (breakFired.dir === 'BUY'
+                ? breakFired.entry - priceDiffForUsdSL
+                : breakFired.entry + priceDiffForUsdSL)
+            : null;
+
+          // Pick the SL price closest to entry (most conservative = highest for BUY, lowest for SELL)
+          let activeSLPrice = null;
+          let slBy = '';
+          if (slPricePct !== null && slPriceUsd !== null) {
+            if (breakFired.dir === 'BUY') {
+              // BUY: higher SL price = triggers sooner
+              activeSLPrice = Math.max(slPricePct, slPriceUsd);
+              slBy = activeSLPrice === slPriceUsd ? '$' : '%';
+            } else {
+              // SELL: lower SL price = triggers sooner
+              activeSLPrice = Math.min(slPricePct, slPriceUsd);
+              slBy = activeSLPrice === slPriceUsd ? '$' : '%';
+            }
+          } else {
+            activeSLPrice = slPricePct ?? slPriceUsd;
+            slBy = slPricePct !== null ? '%' : '$';
+          }
+
+          const slTriggered = activeSLPrice !== null && (
+            breakFired.dir === 'BUY' ? low <= activeSLPrice : high >= activeSLPrice
+          );
+
           if (slTriggered) {
-            finalizeBreak(slPrice, `${dayStr} ${ts}`, 'sl');
+            breakFired.slBy = slBy;
+            breakFired.slPrice = activeSLPrice;
+            finalizeBreak(activeSLPrice, `${dayStr} ${ts}`, 'sl');
             if (!breakFired) continue;
           }
         }
@@ -587,7 +653,7 @@ const delay = ms => new Promise(r=>setTimeout(r,ms));
 function renderResults(noTradeDays, daysScanned) {
   const trades = allTrades;
   if (trades.length === 0) {
-    document.getElementById('trade-tbody').innerHTML = '<tr><td colspan="12" class="empty">No R1/S1 breaks found.</td></tr>';
+    document.getElementById('trade-tbody').innerHTML = '<tr><td colspan="15" class="empty">No R1/S1 breaks found.</td></tr>';
     document.getElementById('s-trades').textContent = '0';
     document.getElementById('s-days').textContent = `Days scanned: ${daysScanned} | No break: ${noTradeDays.length}`;
     return;
@@ -609,12 +675,11 @@ function renderResults(noTradeDays, daysScanned) {
   document.getElementById('s-wr-bar').style.width = wr+'%';
   document.getElementById('s-wr-bar').style.background = parseFloat(wr)>=50?'var(--green)':parseFloat(wr)>=35?'var(--orange)':'var(--red)';
   const totalPnl = trades.reduce((s,t)=>s+(t.pnl||0), 0);
-  const finalBal = config.bal + totalPnl;
   const pnlEl = document.getElementById('s-pnl');
   pnlEl.textContent = (totalPnl >= 0 ? '+$' : '-$') + Math.abs(totalPnl).toFixed(2);
   pnlEl.style.color = totalPnl >= 0 ? 'var(--green)' : 'var(--red)';
   pnlEl.style.fontSize = '1.3rem';
-  document.getElementById('s-bal2').textContent = `Final bal: $${finalBal.toFixed(2)} (${buys.length}B / ${sells.length}S)`;
+  document.getElementById('s-bal2').textContent = `Final bal: $${runningBal.toFixed(2)} · 1:${LEVERAGE} lev (${buys.length}B / ${sells.length}S)`;
   document.getElementById('s-tp1').textContent = `R2:${hitR2.length} S2:${hitS2.length}`;
   document.getElementById('s-tp2').textContent = `R3:${hitR3.length} S3:${hitS3.length} EOD:${eodClosed.length} SL:${slHits.length}`;
   document.getElementById('s-rr').textContent = `${anyTarget.length}/${trades.length}`;
@@ -671,6 +736,9 @@ function renderResults(noTradeDays, daysScanned) {
     const tp2h = t.dir==='BUY' ? t.hitR3 : t.hitS3;
     const tp1t = t.dir==='BUY' ? t.r2Time : t.s2Time;
     const tp2t = t.dir==='BUY' ? t.r3Time : t.s3Time;
+    const slTriggerLbl = t.result === 'SL Hit'
+      ? (t.slBy === '$' ? `Max $${config.slUsd}` : t.slBy === '%' ? `${config.slPct}%` : 'SL')
+      : '—';
     return `<tr>
       <td style="color:var(--t3);font-weight:600">${i+1}</td>
       <td style="font-weight:600">${t.day}</td>
@@ -682,8 +750,10 @@ function renderResults(noTradeDays, daysScanned) {
       <td style="color:var(--red);font-size:0.62rem">${c.r1.toFixed(0)} / ${c.s1.toFixed(0)}</td>
       <td style="${tp1h?'color:var(--green);font-weight:700':'color:var(--t3)'}">${tp1v}${tp1h?' ✓ '+tp1t:''}</td>
       <td style="${tp2h?'color:#15803d;font-weight:700':'color:var(--t3)'}">${tp2v}${tp2h?' ✓ '+tp2t:''}</td>
+      <td style="font-size:0.6rem;color:${t.result==='SL Hit'?'var(--red)':'var(--t3)'}">${slTriggerLbl}</td>
       <td><span class="tag ${rc}">${lbl}</span></td>
       <td style="font-weight:700;${t.pnl>=0?'color:var(--green)':'color:var(--red)'}">${t.pnl!=null?(t.pnl>=0?'+$':'-$')+Math.abs(t.pnl).toFixed(2):'—'}</td>
+      <td style="font-size:0.65rem;font-weight:700;color:${t.balAfter>=config.bal?'var(--green)':'var(--red)'}">$${t.balAfter!=null?t.balAfter.toFixed(2):'—'}</td>
     </tr>`;
   }).join('');
 
@@ -700,7 +770,7 @@ function resetScan() {
   scanning = false;
   document.getElementById('prog-wrap').style.display='none';
   document.getElementById('prog-fill').style.width='0%';
-  document.getElementById('trade-tbody').innerHTML='<tr><td colspan="12" class="empty">Run the scanner to see trades</td></tr>';
+  document.getElementById('trade-tbody').innerHTML='<tr><td colspan="15" class="empty">Run the scanner to see trades</td></tr>';
   document.getElementById('month-grid').innerHTML='<div class="empty" style="grid-column:1/-1">Run the scanner to see monthly breakdown</div>';
   document.getElementById('no-trade-wrap').innerHTML='<div class="empty">Run the scanner to see no-signal days</div>';
   document.getElementById('trade-count').textContent='';
