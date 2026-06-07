@@ -212,12 +212,12 @@ tbody tr:last-child td{border-bottom:none;}
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
           <div>
             <div style="font-size:0.65rem;font-weight:700;color:var(--text)">CPR Width Filter</div>
-            <div style="font-size:0.58rem;color:var(--t3)">Skip narrow CPR days (ranging market)</div>
+            <div style="font-size:0.58rem;color:var(--t3)">Take trades only when CPR is narrow (coiled)</div>
           </div>
           <label class="toggle"><input type="checkbox" id="f-cpr-width" checked><span class="tslider"></span></label>
         </div>
-        <div id="f-cpr-opts">
-          <div class="fr" style="margin:0"><label>Min CPR Width % of price</label><input type="number" id="f-cpr-min" value="0.5" min="0.1" max="5" step="0.1" placeholder="e.g. 0.5"/></div>
+          <div class="fr" id="f-cpr-opts">
+          <div class="fr" style="margin:0"><label>Max CPR Width % (narrow threshold)</label><input type="number" id="f-cpr-min" value="0.5" min="0.1" max="5" step="0.1" placeholder="e.g. 0.5"/></div>
         </div>
       </div>
 
@@ -298,6 +298,7 @@ tbody tr:last-child td{border-bottom:none;}
               <th>Result</th>
               <th>P&L</th>
               <th>Balance</th>
+              <th>TP After SL?</th>
             </tr>
           </thead>
           <tbody id="trade-tbody">
@@ -417,10 +418,12 @@ function finalizeBreak(exitPrice, exitTimeStr, reason) {
     ? breakFired.tp1
     : (breakFired.eodClose || breakFired.entry);
   const priceDiff = breakFired.dir==='BUY' ? exitPx - breakFired.entry : breakFired.entry - exitPx;
-  const lot = breakFired.lot || config.lot || 0.01;
-  breakFired.pnl = priceDiff * lot;
+  const lot = breakFired.lot || 0.01;
+  // Delta: 1 lot = 0.001 BTC → 0.01 lots = 0.00001 BTC
+  breakFired.pnl = priceDiff * lot * 0.001;
   runningBal += breakFired.pnl;
   breakFired.balAfter = parseFloat(runningBal.toFixed(2));
+  breakFired.tpAfterSL = false; // will be checked after SL hits
   allTrades.push({...breakFired});
   const logType = breakFired.hitTP ? 'success' : result==='SL Hit' ? 'error' : 'info';
   log(logType, `${breakFired.day} ${breakFired.dir} → ${result} P&L:${breakFired.pnl>=0?'+':''}$${breakFired.pnl.toFixed(2)} | Bal:$${runningBal.toFixed(2)}`);
@@ -466,14 +469,7 @@ async function startScan() {
   config.interval = document.getElementById('interval').value;
   config.lookback = parseInt(document.getElementById('lookback').value);
   config.bal      = parseFloat(document.getElementById('bal').value)||25;
-  config.leverage = 200;
-  config.filterSession  = document.getElementById('f-session').checked;
-  config.sessionFrom    = document.getElementById('f-session-from').value;
-  config.sessionTo      = document.getElementById('f-session-to').value;
-  config.filterCPRWidth = document.getElementById('f-cpr-width').checked;
-  config.cprMinPct      = parseFloat(document.getElementById('f-cpr-min').value)||0.5;
-  config.filterExitTime = document.getElementById('f-exit-time').checked;
-  config.exitAt         = document.getElementById('f-exit-at').value;
+  config.cprMaxPct = parseFloat(document.getElementById('f-cpr-min').value)||0.5; // skip if width > this
 
   scanning = true;
   allTrades = [];
@@ -482,7 +478,7 @@ async function startScan() {
   document.getElementById('scan-btn').disabled = true;
   document.getElementById('prog-wrap').style.display = 'block';
   setStatus('running','Fetching...');
-  log('info',`Fetching data for ${sym} (${config.interval}, ${config.lookback} days) | $${config.bal} × ${config.leverage}x leverage...`);
+  log('info',`Fetching ${sym} | ${config.interval} | ${config.lookback} days | Narrow CPR only...`);
 
   const todayUTC = new Date();
   const days = [];
@@ -493,15 +489,15 @@ async function startScan() {
   const periodStart = Math.floor(days[0].getTime()/1000) - 86400;
   const periodEnd   = Math.floor(todayUTC.getTime()/1000);
 
-  async function fetchAllCandles(symbol, resolution, start, end, label) {
-    const resSeconds = {'5m':300,'15m':900,'30m':1800,'1h':3600,'1d':86400}[resolution]||900;
-    const chunkSize  = resSeconds * 480;
+  async function fetchAll(symbol, resolution, start, end, label) {
+    const res = {'5m':300,'15m':900,'30m':1800,'1h':3600,'1d':86400}[resolution]||900;
+    const chunk = res * 480;
     const chunks = [];
-    for (let s = start; s < end; s += chunkSize) chunks.push({s, e:Math.min(s+chunkSize,end)});
+    for (let s = start; s < end; s += chunk) chunks.push({s, e:Math.min(s+chunk,end)});
     const seen = new Set(); let all = [];
     for (let i = 0; i < chunks.length; i++) {
       const {s,e} = chunks[i];
-      document.getElementById('prog-txt').textContent = `${label} chunk ${i+1}/${chunks.length}...`;
+      document.getElementById('prog-txt').textContent = `${label} ${i+1}/${chunks.length}...`;
       document.getElementById('prog-pct').textContent = Math.round((i+1)/chunks.length*100)+'%';
       try {
         const r = await fetch(`${DELTA}/v2/history/candles?symbol=${symbol}&resolution=${resolution}&start=${s}&end=${e}`);
@@ -515,19 +511,19 @@ async function startScan() {
 
   let dailyCandles=[], intradayAll=[];
   try {
-    dailyCandles  = await fetchAllCandles(sym,'1d',periodStart,periodEnd,'Daily');
+    dailyCandles = await fetchAll(sym,'1d',periodStart,periodEnd,'Daily');
     if (dailyCandles.length < 2) { log('error','Not enough daily candles.'); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
-    intradayAll   = await fetchAllCandles(sym,config.interval,periodStart,periodEnd,`${config.interval} candles`);
+    intradayAll  = await fetchAll(sym,config.interval,periodStart,periodEnd,config.interval);
     if (intradayAll.length === 0) { log('error','No intraday candles.'); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
-    log('success',`${dailyCandles.length} daily + ${intradayAll.length} intraday. Processing...`);
-  } catch(e) { log('error','Fetch failed: '+e.message); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
+    log('success',`${dailyCandles.length} daily + ${intradayAll.length} intraday loaded.`);
+  } catch(e) { log('error','Fetch: '+e.message); setStatus('','Error'); document.getElementById('scan-btn').disabled=false; return; }
 
-  const intradayByDay = {};
+  const byDay = {};
   intradayAll.forEach(c => {
     const d = new Date(c.time*1000);
     const ds = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
-    if (!intradayByDay[ds]) intradayByDay[ds]=[];
-    intradayByDay[ds].push(c);
+    if (!byDay[ds]) byDay[ds]=[];
+    byDay[ds].push(c);
   });
 
   const noTradeDays = [];
@@ -539,29 +535,28 @@ async function startScan() {
     const dayStr = `${day.getUTCFullYear()}-${String(day.getUTCMonth()+1).padStart(2,'0')}-${String(day.getUTCDate()).padStart(2,'0')}`;
     const dayTs  = Math.floor(day.getTime()/1000);
 
-    // Margin call check
-    if (runningBal <= 0) {
-      log('error', `MARGIN CALL on ${dayStr} — account blown. Stopping.`);
-      break;
-    }
+    if (runningBal <= 0) { log('error',`MARGIN CALL ${dayStr}`); break; }
 
     const prevDaily = dailyCandles.filter(c=>c.time<dayTs).slice(-1)[0];
     if (!prevDaily) { scanned++; updateProgress(scanned,days.length); continue; }
 
-    const cpr      = calcCPR(parseFloat(prevDaily.high),parseFloat(prevDaily.low),parseFloat(prevDaily.close));
-    const refPrice = parseFloat(prevDaily.close);
-    const intraday = intradayByDay[dayStr]||[];
+    const cpr     = calcCPR(parseFloat(prevDaily.high),parseFloat(prevDaily.low),parseFloat(prevDaily.close));
+    const price   = parseFloat(prevDaily.close);
+    const intraday = byDay[dayStr]||[];
 
-    if (!breakFired && !cprWideEnough(cpr,refPrice)) {
-      noTradeDays.push({day:dayStr, reason:'CPR too narrow', cpr, filtered:'cpr'});
+    // CPR width check — narrow = take, wide = skip
+    const cprWidthPct = (Math.abs(cpr.tc - cpr.bc) / price) * 100;
+    const isNarrow = cprWidthPct <= config.cprMaxPct;
+
+    // If trade already active, keep scanning regardless of CPR width
+    if (!breakFired && !isNarrow) {
+      noTradeDays.push({day:dayStr, reason:`CPR too wide (${cprWidthPct.toFixed(2)}% > ${config.cprMaxPct}%)`, cpr});
       scanned++; updateProgress(scanned,days.length); continue;
     }
     if (intraday.length < 2) {
       if (!breakFired) noTradeDays.push({day:dayStr, reason:'No intraday data', cpr});
       scanned++; updateProgress(scanned,days.length); continue;
     }
-
-    let hadBreakToday = !!breakFired;
 
     for (let ci = 1; ci < intraday.length; ci++) {
       const candle    = intraday[ci];
@@ -573,77 +568,64 @@ async function startScan() {
       const _d = new Date(candle.time*1000);
       const ts = `${String(_d.getUTCHours()).padStart(2,'0')}:${String(_d.getUTCMinutes()).padStart(2,'0')}`;
 
-      // ── Active trade: check TP / SL / time exit ──
+      // ── Active trade: check TP / SL only — NO EOD close, carry forward ──
       if (breakFired) {
-        hadBreakToday = true;
-
-        // Time exit
-        if (config.filterExitTime && pastExitTime(candle.time)) {
-          finalizeBreak(close, `${dayStr} ${ts}`, 'timeexit');
-          continue;
-        }
-
         if (breakFired.dir==='BUY') {
-          if (low  <= breakFired.sl) { finalizeBreak(breakFired.sl, `${dayStr} ${ts}`, 'sl'); continue; }
+          if (low  <= breakFired.sl)  { finalizeBreak(breakFired.sl, `${dayStr} ${ts}`, 'sl'); continue; }
           if (high >= breakFired.tp1) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; finalizeBreak(); }
         } else {
-          if (high >= breakFired.sl) { finalizeBreak(breakFired.sl, `${dayStr} ${ts}`, 'sl'); continue; }
+          if (high >= breakFired.sl)  { finalizeBreak(breakFired.sl, `${dayStr} ${ts}`, 'sl'); continue; }
           if (low  <= breakFired.tp1) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; finalizeBreak(); }
         }
         if (breakFired) continue;
       }
 
-      // ── Look for new R1/S1 break ──
-      if (hadBreakToday) continue;
-      if (!inSession(candle.time)) continue;
-
-      // Fixed lot size 0.01
-      const effectiveLot = 0.01;
+      // ── Look for new signal — only on narrow CPR days ──
+      if (!isNarrow) continue;
 
       // SELL: close below S1
       if (close < cpr.s1 && prevClose >= cpr.s1) {
-        const entry   = close;
-        const tp      = parseFloat(cpr.s2.toFixed(2));
-        const tpDist  = entry - tp;           // how far to TP
-        const slDist  = tpDist / 2;           // 1:2 R:R → SL is half TP distance
-        const sl      = parseFloat((entry + slDist).toFixed(2));
-        if (tpDist <= 0) { log('warn',`${dayStr} ${ts}: SELL skipped — S2 above entry`); continue; }
-        breakFired = { day:dayStr, dir:'SELL', trigger:'S1 Break', entry, sl, tp1:tp, cpr, entryTime:`${dayStr} ${ts}`, hitTP:false, tpTime:null, lot:effectiveLot, rr:'1:2' };
-        hadBreakToday = true;
-        log('cpr',`${dayStr} ${ts}: SELL @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} TP:${tp.toFixed(0)} Lot:${effectiveLot.toFixed(4)} (bal:$${runningBal.toFixed(2)}×200)`);
-        if (low <= tp) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; finalizeBreak(); }
+        const entry  = close;
+        const sl     = parseFloat(candle.high.toString()); // break candle high = SL for SELL
+        const tp     = parseFloat(cpr.s2.toFixed(2));
+        const slDist = sl - entry;
+        const tpDist = entry - tp;
+        if (slDist <= 0 || tpDist <= 0) { log('warn',`${dayStr} ${ts}: SELL skipped — invalid SL/TP`); continue; }
+        if (tpDist / slDist < 2) { log('warn',`${dayStr} ${ts}: SELL skipped — R:R ${(tpDist/slDist).toFixed(2)} < 2`); continue; }
+        breakFired = { day:dayStr, dir:'SELL', trigger:'S1 Break', entry, sl, tp1:tp, cpr, entryTime:`${dayStr} ${ts}`, breakHigh:parseFloat(candle.high), breakLow:parseFloat(candle.low), lot:0.01, rr:(tpDist/slDist).toFixed(2), hitTP:false, tpTime:null };
+        log('cpr',`${dayStr} ${ts}: SELL @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} TP:${tp.toFixed(0)} R:R ${(tpDist/slDist).toFixed(2)}`);
       }
       // BUY: close above R1
       else if (close > cpr.r1 && prevClose <= cpr.r1) {
-        const entry   = close;
-        const tp      = parseFloat(cpr.r2.toFixed(2));
-        const tpDist  = tp - entry;           // how far to TP
-        const slDist  = tpDist / 2;           // 1:2 R:R → SL is half TP distance
-        const sl      = parseFloat((entry - slDist).toFixed(2));
-        if (tpDist <= 0) { log('warn',`${dayStr} ${ts}: BUY skipped — R2 below entry`); continue; }
-        breakFired = { day:dayStr, dir:'BUY', trigger:'R1 Break', entry, sl, tp1:tp, cpr, entryTime:`${dayStr} ${ts}`, hitTP:false, tpTime:null, lot:effectiveLot, rr:'1:2' };
-        hadBreakToday = true;
-        log('cpr',`${dayStr} ${ts}: BUY @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} TP:${tp.toFixed(0)} Lot:${effectiveLot.toFixed(4)} (bal:$${runningBal.toFixed(2)}×200)`);
-        if (high >= tp) { breakFired.hitTP=true; breakFired.tpTime=`${dayStr} ${ts}`; finalizeBreak(); }
+        const entry  = close;
+        const sl     = parseFloat(candle.low.toString());  // break candle low = SL for BUY
+        const tp     = parseFloat(cpr.r2.toFixed(2));
+        const slDist = entry - sl;
+        const tpDist = tp - entry;
+        if (slDist <= 0 || tpDist <= 0) { log('warn',`${dayStr} ${ts}: BUY skipped — invalid SL/TP`); continue; }
+        if (tpDist / slDist < 2) { log('warn',`${dayStr} ${ts}: BUY skipped — R:R ${(tpDist/slDist).toFixed(2)} < 2`); continue; }
+        breakFired = { day:dayStr, dir:'BUY', trigger:'R1 Break', entry, sl, tp1:tp, cpr, entryTime:`${dayStr} ${ts}`, breakHigh:parseFloat(candle.high), breakLow:parseFloat(candle.low), lot:0.01, rr:(tpDist/slDist).toFixed(2), hitTP:false, tpTime:null };
+        log('cpr',`${dayStr} ${ts}: BUY @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} TP:${tp.toFixed(0)} R:R ${(tpDist/slDist).toFixed(2)}`);
       }
     }
 
-    // EOD close
-    if (breakFired) {
-      const last = intraday[intraday.length-1];
-      finalizeBreak(parseFloat(last.close),`${dayStr} EOD`,'eod');
-    }
-    if (!hadBreakToday) noTradeDays.push({day:dayStr,reason:'No R1/S1 break in session',cpr});
+    // NO EOD close — carry forward
     scanned++;
     updateProgress(scanned,days.length);
     await delay(10);
   }
 
-  if (breakFired) finalizeBreak();
+  // Finalize any open trade at end of scan period
+  if (breakFired) {
+    const lastCandle = intradayAll[intradayAll.length-1];
+    log('warn',`Open trade on ${breakFired.day} carried to end of scan — closed at last candle`);
+    finalizeBreak(parseFloat(lastCandle.close), 'End of Scan', 'eod');
+  }
+
   scanning = false;
   setStatus('done','Complete');
   document.getElementById('scan-btn').disabled = false;
-  log('success',`Scan complete. ${allTrades.length} trades | Final bal: $${runningBal.toFixed(2)}`);
+  log('success',`Done. ${allTrades.length} trades | Final: $${runningBal.toFixed(2)}`);
   renderResults(noTradeDays, scanned);
 }
 
@@ -750,6 +732,13 @@ function renderResults(noTradeDays, daysScanned) {
       <td><span class="tag ${rc}">${lbl}</span></td>
       <td style="font-weight:700;${t.pnl>=0?'color:var(--green)':'color:var(--red)'}">${t.pnl!=null?(t.pnl>=0?'+$':'-$')+Math.abs(t.pnl).toFixed(2):'—'}</td>
       <td style="font-weight:700;color:var(--t2)">$${t.balAfter!=null?t.balAfter.toFixed(2):'—'}</td>
+      <td style="font-size:0.62rem;font-weight:600">${
+        t.result==='SL Hit'
+          ? t.tpAfterSL
+            ? `<span style="color:var(--green)">✓ Yes ${t.tpAfterSLTime||''}</span>`
+            : `<span style="color:var(--red)">✗ No</span>`
+          : '<span style="color:var(--t3)">—</span>'
+      }</td>
     </tr>`;
   }).join('');
 
