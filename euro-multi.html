@@ -418,8 +418,9 @@ function finalizeBreak(exitPrice, exitTimeStr, reason) {
     ? breakFired.tp1
     : (breakFired.eodClose || breakFired.entry);
   const priceDiff = breakFired.dir==='BUY' ? exitPx - breakFired.entry : breakFired.entry - exitPx;
-  const lot = breakFired.lot || config.lot || 0.01;
-  breakFired.pnl = priceDiff * lot;
+  const lot = breakFired.lot || 0.01;
+  // Delta: 1 lot = 0.001 BTC → 0.01 lots = 0.00001 BTC
+  breakFired.pnl = priceDiff * lot * 0.001;
   runningBal += breakFired.pnl;
   breakFired.balAfter = parseFloat(runningBal.toFixed(2));
   breakFired.tpAfterSL = false; // will be checked after SL hits
@@ -644,7 +645,7 @@ async function startScan() {
             hitTP: false, tpTime: null
           };
           pendingFib = null;
-          log('success',`${dayStr} ${ts}: ${breakFired.dir} ENTRY @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} TP:${tp.toFixed(0)}`);
+          log('success',`${dayStr} ${ts}: ${breakFired.dir} ENTRY @ ${entry.toFixed(0)} SL:${sl.toFixed(0)} TP:${tp.toFixed(0)} Lots:${breakFired.lot} Bal:$${runningBal.toFixed(2)}`);
 
           // Check TP/SL on same candle
           if (breakFired.dir==='BUY') {
