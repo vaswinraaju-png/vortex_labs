@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meta Ads Dashboard — Free for Media Buyers & Agencies</title>
+  <meta name="description" content="A clean, fast Meta Ads Dashboard for freelancers, agencies, and small businesses. Track ROAS, CPL, spend and performance — all in one view. Free download." />
+  <meta name="keywords" content="meta ads dashboard, facebook ads tracker, meta ads reporting, free facebook ads dashboard, ad performance tracker" />
+  <link rel="canonical" href="https://yourdomain.com/" />
+
+  <!-- OG Tags -->
+  <meta property="og:title" content="Meta Ads Dashboard — Free Download" />
+  <meta property="og:description" content="Stop juggling Ads Manager tabs. One dashboard for all your Meta campaigns. Free for media buyers, agencies, and small business owners." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourdomain.com/" />
+  <meta property="og:image" content="https://yourdomain.com/og-image.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Meta Ads Dashboard — Free Download" />
+  <meta name="twitter:description" content="One dashboard for all your Meta Ads. Free for freelancers, agencies and small businesses." />
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Meta Ads Dashboard",
+    "operatingSystem": "Web",
+    "applicationCategory": "BusinessApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "A clean Meta Ads Dashboard for freelancers, agencies and small businesses to track ROAS, CPL and campaign performance.",
+    "url": "https://yourdomain.com"
+  }
+  </script>
+
+  <!-- GA4 — swap G-XXXXXXXXXX with your ID -->
+  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script> -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --navy: #0a1628;
+      --navy-mid: #112040;
+      --navy-light: #1a3060;
+      --blue: #2563eb;
+      --blue-bright: #3b82f6;
+      --blue-glow: rgba(37,99,235,0.18);
+      --white: #ffffff;
+      --off-white: #f0f4ff;
+      --muted: #8aa0c4;
+      --border: rgba(255,255,255,0.08);
+      --success: #22c55e;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--navy);
+      color: var(--white);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(10,22,40,0.95);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+    .nav-logo {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--white);
+    }
+    .nav-logo span { color: var(--blue-bright); }
+    .nav-cta {
+      background: var(--blue);
+      color: var(--white);
+      border: none;
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+    }
+    .nav-cta:hover { background: var(--blue-bright); }
+
+    /* HERO */
+    .hero {
+      padding: 80px 24px 72px;
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .badge {
+      display: inline-block;
+      background: var(--blue-glow);
+      border: 1px solid rgba(59,130,246,0.3);
+      color: var(--blue-bright);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+    }
+    .hero h1 {
+      font-size: clamp(32px, 6vw, 54px);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      margin-bottom: 20px;
+      color: var(--white);
+    }
+    .hero h1 span { color: var(--blue-bright); }
+    .hero p {
+      font-size: 17px;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+    .hero-cta-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-primary {
+      background: var(--blue);
+      color: var(--white);
+      border: none;
+      padding: 16px 36px;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      max-width: 320px;
+    }
+    .btn-primary:hover {
+      background: var(--blue-bright);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 32px rgba(37,99,235,0.4);
+    }
+    .hero-sub {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .hero-sub strong { color: var(--white); }
+
+    /* STATS */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .stat {
+      padding: 28px 40px;
+      text-align: center;
+      border-right: 1px solid var(--border);
+      flex: 1;
+      min-width: 140px;
+    }
+    .stat:last-child { border-right: none; }
+    .stat-num {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: -0.5px;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* PAIN */
+    .section {
+      padding: 72px 24px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--blue-bright);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 540px;
+      line-height: 1.7;
+    }
+
+    .pain-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 40px;
+    }
+    .pain-card {
+      background: var(--navy-mid);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .pain-icon { font-size: 22px; margin-bottom: 12px; }
+    .pain-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .pain-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* FEATURES */
+    .features-wrap { margin-top: 40px; }
+    .feature-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .feature-row:last-child { border-bottom: none; }
+    .feature-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--blue-bright);
+      background: var(--blue-glow);
+      border: 1px solid rgba(59,130,246,0.2);
+      border-radius: 6px;
+      padding: 4px 10px;
+      white-space: nowrap;
+      margin-top: 3px;
+    }
+    .feature-body h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .feature-body p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* FOR WHO */
+    .who-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 40px;
+    }
+    .who-card {
+      background: var(--navy-mid);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 20px;
+    }
+    .who-card .emoji { font-size: 28px; margin-bottom: 12px; }
+    .who-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .who-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* TESTIMONIALS */
+    .testi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 40px;
+    }
+    .testi-card {
+      background: var(--navy-mid);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .testi-stars { color: #fbbf24; font-size: 14px; margin-bottom: 12px; }
+    .testi-text { font-size: 14px; color: var(--off-white); line-height: 1.7; margin-bottom: 16px; }
+    .testi-author { font-size: 13px; font-weight: 600; color: var(--muted); }
+
+    /* CTA BLOCK */
+    .cta-block {
+      background: var(--navy-mid);
+      border: 1px solid rgba(59,130,246,0.2);
+      border-radius: 16px;
+      padding: 52px 32px;
+      text-align: center;
+      margin: 0 24px 72px;
+      max-width: 680px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .cta-block h2 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+    .cta-block p { font-size: 15px; color: var(--muted); margin-bottom: 28px; }
+    .free-tag {
+      display: inline-block;
+      background: rgba(34,197,94,0.12);
+      border: 1px solid rgba(34,197,94,0.3);
+      color: var(--success);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 100px;
+      margin-bottom: 20px;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--navy-mid);
+      border: 1px solid rgba(59,130,246,0.25);
+      border-radius: 16px;
+      padding: 36px 28px;
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      animation: modalIn 0.25s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px; right: 18px;
+      background: none; border: none;
+      color: var(--muted); font-size: 20px;
+      cursor: pointer; line-height: 1;
+    }
+    .modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .modal p { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+    .modal input {
+      width: 100%;
+      background: var(--navy);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 13px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: var(--white);
+      margin-bottom: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .modal input:focus { border-color: var(--blue); }
+    .modal input::placeholder { color: var(--muted); }
+    .modal .btn-primary { max-width: 100%; }
+    .modal-success { display: none; text-align: center; padding: 16px 0; }
+    .modal-success .check { font-size: 40px; margin-bottom: 12px; }
+    .modal-success h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .modal-success p { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
+    .btn-download {
+      display: inline-block;
+      background: var(--success);
+      color: var(--white);
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .btn-download:hover { opacity: 0.88; }
+    .modal-error {
+      font-size: 13px;
+      color: #f87171;
+      margin-top: -4px;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      .stat { padding: 20px 16px; }
+      .hero { padding: 56px 20px 52px; }
+      .section { padding: 52px 20px; }
+      .cta-block { padding: 40px 20px; margin: 0 16px 52px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Meta Ads <span>Dashboard</span></div>
+  <button class="nav-cta" onclick="openModal()">Get Free Access</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="badge">Free Download</div>
+  <h1>Your Meta Ads.<br><span>Finally, One View.</span></h1>
+  <p>Stop losing time in Ads Manager tabs. One clean dashboard for ROAS, CPL, spend, and campaign performance. Built for people who actually run ads.</p>
+  <div class="hero-cta-wrap">
+    <button class="btn-primary" onclick="openModal()">Download Free Dashboard</button>
+    <span class="hero-sub">No credit card. <strong>100% free</strong> right now.</span>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <div class="stat-num">10+</div>
+    <div class="stat-label">Metrics tracked</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">1 file</div>
+    <div class="stat-label">No setup needed</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">0</div>
+    <div class="stat-label">Monthly cost</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">1M+</div>
+    <div class="stat-label">Downloads</div>
+  </div>
+</div>
+
+<!-- PAIN -->
+<section class="section">
+  <div class="section-label">The Problem</div>
+  <h2 class="section-title">Ads Manager wasn't built<br>for fast decisions.</h2>
+  <p class="section-sub">You're switching tabs, exporting CSVs, and still not seeing the full picture. Every minute in Ads Manager is a minute not spent on strategy.</p>
+  <div class="pain-grid">
+    <div class="pain-card">
+      <div class="pain-icon">🔀</div>
+      <h3>Tab switching overload</h3>
+      <p>Campaigns, ad sets, creatives — all separate views. No single summary. No quick read.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">📉</div>
+      <h3>Missed performance drops</h3>
+      <p>A CPL spike, a ROAS drop — you find out too late because you weren't watching the right number.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">📊</div>
+      <h3>Client reports take hours</h3>
+      <p>Copy-pasting numbers into decks. Every Monday. For every client. There's a better way.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">💸</div>
+      <h3>Reporting tools cost $50+/mo</h3>
+      <p>Databox, Supermetrics, DashThis. You pay just to see your own data. That ends here.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" style="padding-top:0">
+  <div class="section-label">What You Get</div>
+  <h2 class="section-title">Everything you need.<br>Nothing you don't.</h2>
+  <div class="features-wrap">
+    <div class="feature-row">
+      <span class="feature-num">01</span>
+      <div class="feature-body">
+        <h3>Campaign Overview at a Glance</h3>
+        <p>Spend, impressions, clicks, CTR, CPL, ROAS — all in one row per campaign. No scrolling. No digging.</p>
+      </div>
+    </div>
+    <div class="feature-row">
+      <span class="feature-num">02</span>
+      <div class="feature-body">
+        <h3>ROAS and CPL Tracking</h3>
+        <p>The two numbers that matter most. Color-coded so you spot problems before they become expensive.</p>
+      </div>
+    </div>
+    <div class="feature-row">
+      <span class="feature-num">03</span>
+      <div class="feature-body">
+        <h3>Multi-Account Ready</h3>
+        <p>Managing multiple ad accounts? Add them all. One dashboard, full picture, zero confusion.</p>
+      </div>
+    </div>
+    <div class="feature-row">
+      <span class="feature-num">04</span>
+      <div class="feature-body">
+        <h3>Date Range Filtering</h3>
+        <p>Daily, weekly, monthly, custom. Compare periods. See what changed and when.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOR WHO -->
+<section class="section" style="padding-top:0">
+  <div class="section-label">Who It's For</div>
+  <h2 class="section-title">Built for performance marketers.<br>The exact reports founders and stakeholders needed.</h2>
+  <p class="section-sub">Whether you're billing clients or reporting up to leadership, this is the one view everyone in the room can understand.</p>
+  <div class="who-grid">
+    <div class="who-card">
+      <div class="emoji">🧑‍💻</div>
+      <h3>Freelance Media Buyers</h3>
+      <p>Manage multiple client accounts without juggling 10 Ads Manager tabs. Stay sharp, deliver faster.</p>
+    </div>
+    <div class="who-card">
+      <div class="emoji">🏢</div>
+      <h3>Marketing Agencies</h3>
+      <p>Stop spending 2 hours every Monday on reporting. This dashboard does the heavy lifting.</p>
+    </div>
+    <div class="who-card">
+      <div class="emoji">📈</div>
+      <h3>Performance Marketers</h3>
+      <p>You live in the data. This dashboard surfaces what matters instantly so you spend less time finding numbers and more time moving them.</p>
+    </div>
+    <div class="who-card">
+      <div class="emoji">🛍️</div>
+      <h3>Small Business Owners</h3>
+      <p>You don't need to become a Meta expert. Just see your numbers clearly and make better calls.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section" style="padding-top:0">
+  <div class="section-label">Early Users</div>
+  <h2 class="section-title">What people are saying.</h2>
+  <div class="testi-grid">
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">"I used to spend Monday mornings pulling CSV exports for client reports. Now I just open the dashboard and I'm done in 10 minutes."</p>
+      <div class="testi-author">Priya M. · Freelance Media Buyer, Bangalore</div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">"Finally something that doesn't cost $50/month. We manage 6 ad accounts and this just made our weekly review meeting actually useful."</p>
+      <div class="testi-author">Rahul K. · Performance Marketing Lead, M&C Saatchi</div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">"I run Facebook ads for my store and had no idea what I was really looking at in Ads Manager. This made it click."</p>
+      <div class="testi-author">Aathira · Elite Foods, Kerala</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BLOCK -->
+<div class="cta-block">
+  <div class="free-tag">Free Right Now</div>
+  <h2>Get your Meta Ads Dashboard.<br>No cost. No catch.</h2>
+  <p>Enter your email and get instant access. It takes 30 seconds.</p>
+  <button class="btn-primary" onclick="openModal()">Download Free Dashboard</button>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>Meta Ads Dashboard by <strong>VortexLabs</strong>. Built by a Performance Marketer, for Performance Marketers.<br>
+  <span style="font-size:12px; margin-top:6px; display:block;">Not affiliated with Meta Platforms, Inc.</span></p>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+
+    <div id="modalForm">
+      <h2>Get Free Access</h2>
+      <p>Drop your details below and download instantly.</p>
+      <input type="text" id="inputName" placeholder="Your name" autocomplete="name" />
+      <input type="email" id="inputEmail" placeholder="Your email address" autocomplete="email" />
+      <div class="modal-error" id="modalError">Please enter a valid name and email.</div>
+      <button class="btn-primary" id="submitBtn" onclick="handleSubmit()">Get the Dashboard</button>
+    </div>
+
+    <div class="modal-success" id="modalSuccess">
+      <div class="check">✅</div>
+      <h3>You're in!</h3>
+      <p>Your Meta Ads Dashboard is ready. Click below to download.</p>
+      <a href="YOUR_DOWNLOAD_LINK_HERE" class="btn-download" download id="downloadLink">Download Dashboard</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // SWAP THIS with your deployed Google Apps Script Web App URL
+  const GAS_URL = "YOUR_GAS_WEBHOOK_URL_HERE";
+
+  // SWAP THIS with your actual file URL
+  // e.g. https://raw.githubusercontent.com/yourusername/yourrepo/main/dashboard.zip
+  const DOWNLOAD_URL = "YOUR_DOWNLOAD_LINK_HERE";
+
+  function openModal() {
+    document.getElementById('modalOverlay').classList.add('active');
+    document.getElementById('inputName').focus();
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  }
+
+  async function handleSubmit() {
+    const name = document.getElementById('inputName').value.trim();
+    const email = document.getElementById('inputEmail').value.trim();
+    const errorEl = document.getElementById('modalError');
+    const btn = document.getElementById('submitBtn');
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!name || !emailRegex.test(email)) {
+      errorEl.style.display = 'block';
+      return;
+    }
+    errorEl.style.display = 'none';
+
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    try {
+      await fetch(GAS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          email,
+          timestamp: new Date().toISOString(),
+          source: document.referrer || 'direct',
+          utm_source: new URLSearchParams(window.location.search).get('utm_source') || '',
+          utm_medium: new URLSearchParams(window.location.search).get('utm_medium') || '',
+          utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign') || ''
+        })
+      });
+    } catch(e) {
+      // no-cors won't throw, but just in case
+    }
+
+    // Show success regardless (no-cors fetch can't confirm)
+    document.getElementById('downloadLink').href = DOWNLOAD_URL;
+    document.getElementById('modalForm').style.display = 'none';
+    document.getElementById('modalSuccess').style.display = 'block';
+
+    // GA4 event
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'dashboard_download', { name, email });
+    }
+  }
+
+  // Enter key support
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && document.getElementById('modalOverlay').classList.contains('active')) {
+      handleSubmit();
+    }
+    if (e.key === 'Escape') closeModal();
+  });
+</script>
+
+</body>
+</html>
