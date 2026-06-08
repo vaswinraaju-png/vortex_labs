@@ -95,6 +95,12 @@
     .preview-wrap ul,.preview-wrap ol{margin:0 0 14px 18px;}
     .preview-wrap li{font-size:14px;color:var(--off);line-height:1.7;margin-bottom:5px;}
     .preview-wrap strong{color:var(--white);}
+    .preview-wrap .tbl-wrap{overflow-x:auto;margin:20px 0;}
+    .preview-wrap table{width:100%;border-collapse:collapse;font-size:13px;}
+    .preview-wrap th{background:var(--blue);color:#fff;padding:10px 14px;text-align:left;font-weight:700;font-size:12px;}
+    .preview-wrap td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--off);}
+    .preview-wrap tr:nth-child(even) td{background:rgba(255,255,255,0.03);}
+    .preview-wrap tr:hover td{background:rgba(59,130,246,0.07);}
     .preview-cta{background:#fff;border:2px solid var(--blue);border-radius:14px;padding:32px;text-align:center;margin-top:36px;}
     .preview-cta h2{font-size:20px;color:var(--blue);margin-bottom:8px;font-weight:700;}
     .preview-cta p{margin-bottom:18px;color:#475569;font-size:14px;}
@@ -332,8 +338,8 @@ async function writeTopic(idx){
 
   try{
     document.querySelector('.gen-label').textContent='Writing blog post...';
-    const userPrompt=`Write a complete SEO blog post. Use the ${topic.framework} framework as INVISIBLE structural scaffolding only -- never label or mention the framework stages anywhere in the post.\n\nTitle: "${topic.title}"\nFocus keyword: "${seoMeta.focusKeyword}"\nConversion goal: ${topic.angle}\nTarget reader: Performance marketers, media buyers, agencies, small business owners running Meta/Facebook Ads\n\nRequirements:\n- 1200 to 1500 words\n- Framework is invisible structure only -- no stage labels like Attention/Interest/Problem/Solution/Before/After\n- Include focus keyword "${seoMeta.focusKeyword}" in first 100 words, at least 3 H2 headings, and 5+ times total\n- H2s must be questions starting with What/How/Why/Which/When\n- Include at least 1 markdown data table (| Col | Col |)\n- Include 1 expert quote from "VortexLabs Expert"\n- Include a "2026 Industry Context" section with 3-5 stats\n- Include a short "What to Expect in 2027" section\n- End with 5 FAQ items in format **Q:** / **A:**\n- Final CTA referencing: ${LANDING_PAGE}\n- No em dashes anywhere\n- Body content only, use ## for H2 and ### for H3`;
-    const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'gpt-4o',max_tokens:3000,temperature:0.8,messages:[{role:'system',content:sysPrompt},{role:'user',content:userPrompt}]})});
+    const userPrompt=`Write a complete SEO blog post. Use the ${topic.framework} framework as INVISIBLE structural scaffolding only -- never label or mention the framework stages anywhere in the post.\n\nTitle: "${topic.title}"\nFocus keyword: "${seoMeta.focusKeyword}"\nConversion goal: ${topic.angle}\nTarget reader: Performance marketers, media buyers, agencies, small business owners running Meta/Facebook Ads who are obsessed with maximising ROAS and cutting wasted ad spend\n\nREQUIREMENTS -- follow every single one:\n1. 1200 to 1500 words\n2. Framework is invisible structure only -- no stage labels like Attention/Interest/Problem/Solution/Before/After\n3. Include focus keyword "${seoMeta.focusKeyword}" in first 100 words, at least 3 H2 headings, and 5+ times total\n4. H2s must be questions starting with What/How/Why/Which/When AND must contain specific numbers or percentages where possible (e.g. "How to Cut CPL by 40%", "Why 73% of Media Buyers Miss This")\n5. Opening hook must reference a specific stat, dollar amount, or performance metric that hits the reader immediately\n6. Every section must have a "what you are losing by not doing this" angle\n7. Include at least 2 markdown data tables (| Col | Col |)\n8. Include 1 expert quote from "VortexLabs Expert" with a specific insight\n9. Include a ## "2026 Industry Context" section with 3-5 bullet stats\n10. Include a ## "What to Expect in 2027" section with forward predictions\n11. End with exactly 5 FAQ items in format **Q:** question here / **A:** answer here\n12. Final CTA paragraph referencing: ${LANDING_PAGE}\n13. No em dashes anywhere\n14. Body content only, use ## for H2 and ### for H3`;
+    const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'gpt-4o',max_tokens:3000,temperature:0.8,messages:[{role:'system',content:sysPrompt},{role:'user',content:userPrompt}],max_tokens:4500})});
     const data=await res.json();if(!res.ok)throw new Error(data.error?.message||'API error');
     const md=data.choices[0].message.content;
     const html=wrapInHTML(topic,md,seoMeta);
@@ -444,7 +450,7 @@ function wrapInHTML(topic,md,seoMeta){
     SC+' async src="https://www.googletagmanager.com/gtag/js?id=G-3ET2SV2XP5">'+EC,
     SC+'>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-3ET2SV2XP5");'+EC,
     '<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>',
-    '<style>:root{--navy:#0a1628;--navy-mid:#112040;--blue:#2563eb;--blue-bright:#3b82f6;--white:#fff;--off:#d4dff5;--muted:#8aa0c4;--border:rgba(255,255,255,0.08);--success:#22c55e;}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:\'DM Sans\',sans-serif;background:var(--navy);color:var(--off);line-height:1.75;}nav{padding:15px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(10,22,40,0.97);position:sticky;top:0;z-index:100;}.nav-logo{font-size:14px;font-weight:700;color:var(--white);text-decoration:none;}.nav-logo span{color:var(--blue-bright);}.nav-btn{background:var(--blue);color:var(--white);border:none;padding:8px 18px;border-radius:8px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;}.hero{padding:52px 24px 28px;max-width:760px;margin:0 auto;}.meta{font-size:12px;color:var(--muted);margin-bottom:12px;}.meta span{color:var(--blue-bright);font-weight:600;}h1{font-size:clamp(22px,4vw,36px);font-weight:700;letter-spacing:-0.8px;line-height:1.2;color:var(--white);}.body{max-width:760px;margin:0 auto;padding:28px 24px 60px;}.body h2{font-size:20px;font-weight:700;color:var(--white);margin:32px 0 10px;}.body h3{font-size:16px;font-weight:600;color:var(--white);margin:20px 0 7px;}.body p{margin-bottom:16px;font-size:16px;}.body ul,.body ol{margin:0 0 16px 20px;}.body li{margin-bottom:7px;font-size:16px;}.body strong{color:var(--white);font-weight:600;}.cta-block{background:#fff;border:2px solid var(--blue);border-radius:16px;padding:38px 30px;text-align:center;margin-top:44px;}.cta-block h2{font-size:22px;font-weight:700;color:var(--blue);margin-bottom:9px;}.cta-block p{font-size:15px;color:#334155;margin-bottom:22px;}.cta-btn{display:inline-block;background:var(--blue);color:#fff;padding:13px 28px;border-radius:10px;font-family:\'DM Sans\',sans-serif;font-size:15px;font-weight:700;text-decoration:none;}.free-badge{display:inline-block;background:rgba(37,99,235,0.1);border:1px solid rgba(37,99,235,0.3);color:var(--blue);font-size:12px;font-weight:700;padding:3px 12px;border-radius:100px;margin-bottom:13px;}.mid-cta{background:#fff;border:2px solid var(--blue);border-radius:12px;padding:20px 24px;margin:32px 0;}.mid-cta-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}.mid-cta-text{display:flex;flex-direction:column;gap:4px;}.mid-cta-text strong{font-size:15px;font-weight:700;color:var(--blue);}.mid-cta-text span{font-size:13px;color:#475569;}.mid-cta-btn{display:inline-block;background:var(--blue);color:#fff;padding:10px 20px;border-radius:8px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;}footer{border-top:1px solid var(--border);padding:22px;text-align:center;font-size:12px;color:var(--muted);}footer a{color:var(--blue-bright);text-decoration:none;}@media(max-width:600px){.hero,.body{padding-left:18px;padding-right:18px;}}</style>',
+    '<style>:root{--navy:#0a1628;--navy-mid:#112040;--blue:#2563eb;--blue-bright:#3b82f6;--white:#fff;--off:#d4dff5;--muted:#8aa0c4;--border:rgba(255,255,255,0.08);--success:#22c55e;}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:\'DM Sans\',sans-serif;background:var(--navy);color:var(--off);line-height:1.75;}nav{padding:15px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(10,22,40,0.97);position:sticky;top:0;z-index:100;}.nav-logo{font-size:14px;font-weight:700;color:var(--white);text-decoration:none;}.nav-logo span{color:var(--blue-bright);}.nav-btn{background:var(--blue);color:var(--white);border:none;padding:8px 18px;border-radius:8px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;}.hero{padding:52px 24px 28px;max-width:760px;margin:0 auto;}.meta{font-size:12px;color:var(--muted);margin-bottom:12px;}.meta span{color:var(--blue-bright);font-weight:600;}h1{font-size:clamp(22px,4vw,36px);font-weight:700;letter-spacing:-0.8px;line-height:1.2;color:var(--white);}.body{max-width:760px;margin:0 auto;padding:28px 24px 60px;}.body h2{font-size:20px;font-weight:700;color:var(--white);margin:32px 0 10px;}.body h3{font-size:16px;font-weight:600;color:var(--white);margin:20px 0 7px;}.body p{margin-bottom:16px;font-size:16px;}.body ul,.body ol{margin:0 0 16px 20px;}.body li{margin-bottom:7px;font-size:16px;}.body strong{color:var(--white);font-weight:600;}.cta-block{background:#fff;border:2px solid var(--blue);border-radius:16px;padding:38px 30px;text-align:center;margin-top:44px;}.cta-block h2{font-size:22px;font-weight:700;color:var(--blue);margin-bottom:9px;}.cta-block p{font-size:15px;color:#334155;margin-bottom:22px;}.cta-btn{display:inline-block;background:var(--blue);color:#fff;padding:13px 28px;border-radius:10px;font-family:\'DM Sans\',sans-serif;font-size:15px;font-weight:700;text-decoration:none;}.free-badge{display:inline-block;background:rgba(37,99,235,0.1);border:1px solid rgba(37,99,235,0.3);color:var(--blue);font-size:12px;font-weight:700;padding:3px 12px;border-radius:100px;margin-bottom:13px;}.mid-cta{background:#fff;border:2px solid var(--blue);border-radius:12px;padding:20px 24px;margin:32px 0;}.mid-cta-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}.mid-cta-text{display:flex;flex-direction:column;gap:4px;}.mid-cta-text strong{font-size:15px;font-weight:700;color:var(--blue);}.mid-cta-text span{font-size:13px;color:#475569;}.mid-cta-btn{display:inline-block;background:var(--blue);color:#fff;padding:10px 20px;border-radius:8px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;}footer{border-top:1px solid var(--border);padding:22px;text-align:center;font-size:12px;color:var(--muted);}footer a{color:var(--blue-bright);text-decoration:none;}.tbl-wrap{overflow-x:auto;margin:24px 0;}.tbl-wrap table{width:100%;border-collapse:collapse;font-size:14px;}.tbl-wrap th{background:var(--blue);color:#fff;padding:11px 16px;text-align:left;font-weight:700;font-size:13px;letter-spacing:0.2px;}.tbl-wrap td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--off);}.tbl-wrap tr:nth-child(even) td{background:rgba(255,255,255,0.03);}.tbl-wrap tr:hover td{background:rgba(59,130,246,0.07);}@media(max-width:600px){.hero,.body{padding-left:18px;padding-right:18px;}.tbl-wrap{margin:16px -18px;border-radius:0;}}</style>',
     '</head>',
     '<body>',
     '<nav><a href="https://vortexlabs.app" class="nav-logo">Vortex<span>Labs</span></a><a href="'+LANDING_PAGE+'" class="nav-btn">Get the Dashboard</a></nav>',
@@ -461,7 +467,64 @@ function wrapInHTML(topic,md,seoMeta){
 }
 function markdownToHTML(md){
   const MID_CTA=`<div class="mid-cta"><div class="mid-cta-inner"><div class="mid-cta-text"><strong>Want to track all this in one view?</strong><span>The free Meta Ads Dashboard gives you ROAS, CPL, spend and campaign performance at a glance. No $50/month tools. No tab-switching.</span></div><a href="${LANDING_PAGE}" class="mid-cta-btn" target="_blank">Get Free Dashboard</a></div></div>`;
-  const lines=md.replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/^- (.+)$/gm,'<li>$1</li>').replace(/(<li>.*<\/li>\n?)+/g,m=>`<ul>${m}</ul>`).split('\n').map(line=>{line=line.trim();if(!line)return '';if(/^<(h[23]|ul|li)/.test(line))return line;return `<p>${line}</p>`;}).filter(Boolean);
+
+  // Parse markdown tables first
+  function parseTables(text){
+    return text.replace(/((^\|.+\|\s*\n)(^\|[-| :]+\|\s*\n)(^\|.+\|\s*\n?)+)/gm, tableBlock=>{
+      const rows=tableBlock.trim().split('\n').filter(r=>r.trim());
+      const isSeperator=r=>/^\|[-| :]+\|$/.test(r.trim());
+      let html='<div class="tbl-wrap"><table>';
+      let inHead=true;
+      rows.forEach(row=>{
+        if(isSeperator(row)){inHead=false;return;}
+        const cells=row.trim().replace(/^\|/,'').replace(/\|$/,'').split('|').map(c=>c.trim());
+        if(inHead){
+          html+='<thead><tr>'+cells.map(c=>`<th>${c}</th>`).join('')+'</tr></thead><tbody>';
+          inHead=false;
+        } else {
+          html+='<tr>'+cells.map(c=>`<td>${c}</td>`).join('')+'</tr>';
+        }
+      });
+      html+='</tbody></table></div>';
+      return html;
+    });
+  }
+
+  // Split into table blocks and non-table blocks, process separately
+  const TABLE_RE=/((?:^\|.+\|\s*\n){3,})/gm;
+  const segments=[];
+  let last=0,m;
+  const src=md+'\n';
+  while((m=TABLE_RE.exec(src))!==null){
+    if(m.index>last)segments.push({type:'text',content:src.slice(last,m.index)});
+    segments.push({type:'table',content:m[0]});
+    last=m.index+m[0].length;
+  }
+  if(last<src.length)segments.push({type:'text',content:src.slice(last)});
+
+  function processText(text){
+    return text
+      .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+      .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g,'<em>$1</em>')
+      .replace(/^- (.+)$/gm,'<li>$1</li>')
+      .replace(/(<li>.*<\/li>\n?)+/g,x=>`<ul>${x}</ul>`)
+      .split('\n')
+      .map(line=>{
+        line=line.trim();if(!line)return '';
+        if(/^<(h[23]|ul|li|table|thead|tbody|tr|th|td|div)/.test(line))return line;
+        return `<p>${line}</p>`;
+      }).filter(Boolean).join('\n');
+  }
+
+  const processed=segments.map(s=>{
+    if(s.type==='table')return parseTables(s.content);
+    return processText(s.content);
+  }).join('\n');
+
+  // Inject mid-article CTA after 3rd H2
+  const lines=processed.split('\n');
   let h2count=0;const out=[];
   for(const line of lines){
     out.push(line);
@@ -503,32 +566,33 @@ async function optimisePost(){
 
   toast(`Fixing ${issues.length} issue(s)...`,'info');
 
-  const optimisePrompt=`You are rewriting and improving an existing blog post to fix specific SEO and content issues.
+  const optimisePrompt=`You are a senior SEO editor. Your job is to rewrite the blog post below and fix EVERY issue listed. Do not skip any issue. Do not summarise. Return the full improved post.
 
-ORIGINAL POST TITLE: "${currentPost.topic.title}"
+POST TITLE: "${currentPost.topic.title}"
 FOCUS KEYWORD: "${seoMeta.focusKeyword}"
 
-ISSUES TO FIX:
-${issues.map((is,i)=>`${i+1}. ${is}`).join('\n')}
+YOU MUST FIX ALL OF THESE -- one by one, in order:
+${issues.map((is,i)=>`ISSUE ${i+1}: ${is}`).join('\n')}
 
-ORIGINAL POST CONTENT:
+ORIGINAL POST (rewrite and expand this):
 ${md}
 
-INSTRUCTIONS:
-- Fix ALL the issues listed above
-- Keep all existing good content -- only add/improve, do not remove sections that are already working
-- Maintain the same tone, voice, and writing style
-- All years must be 2026 or 2027
-- Never use em dashes
-- Framework stages (Attention/Interest/Problem/Solution etc) must never appear as labels
-- Numbers and specific stats in headlines where possible
-- Return the full improved post body only -- use ## for H2 and ### for H3`;
+STRICT OUTPUT RULES:
+1. Return ONLY the full improved blog post body -- no preamble, no explanation
+2. Use ## for H2 headings and ### for H3 headings
+3. H2 headings must contain specific numbers or percentages where possible
+4. Never use em dashes -- use commas or rewrite the sentence
+5. Never label framework stages (no Attention/Interest/Problem/Solution/Before/After)
+6. All year references must be 2026 or 2027
+7. Reader is a performance marketer obsessed with ROAS and cutting wasted ad spend -- write to that greed
+8. Every section should make the reader feel they are losing money by not acting
+9. Keep all good content from the original -- only add/fix, do not remove working sections`;
 
   try{
     const res=await fetch('https://api.openai.com/v1/chat/completions',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
-      body:JSON.stringify({model:'gpt-4o',max_tokens:4000,temperature:0.7,
+      body:JSON.stringify({model:'gpt-4o',max_tokens:4500,temperature:0.7,
         messages:[{role:'system',content:sysPrompt},{role:'user',content:optimisePrompt}]})
     });
     const data=await res.json();
@@ -623,9 +687,12 @@ ${existingUrls.map(u=>`  <url>
       await fetch(`https://www.google.com/ping?sitemap=https://vortexlabs.app/sitemap.xml`,{mode:'no-cors'});
     }catch(e){/* no-cors always throws, that's fine */}
 
-    toast(`Published + sitemap updated + Google pinged`, 'success');
+    const liveUrl=`https://vortexlabs.app/blogs/${currentPost.slug}.html`;
     const ps=getPublished();ps.add(currentPost.slug);localStorage.setItem('vl_published',JSON.stringify([...ps]));
     renderTopics();
+    // Show live link in toolbar
+    document.getElementById('editorTitle').innerHTML=`${currentPost.topic.title} &nbsp;<a href="${liveUrl}" target="_blank" style="font-size:11px;color:var(--success);font-weight:700;text-decoration:none;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);padding:2px 8px;border-radius:4px;">View Live</a>`;
+    toast(`Published! Sitemap updated + Google pinged`, 'success');
 
   }catch(e){toast('Error: '+e.message,'error');}
   btn.disabled=false;btn.textContent='Publish to GitHub';
