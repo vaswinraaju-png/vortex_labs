@@ -95,10 +95,14 @@
     .preview-wrap ul,.preview-wrap ol{margin:0 0 14px 18px;}
     .preview-wrap li{font-size:14px;color:var(--off);line-height:1.7;margin-bottom:5px;}
     .preview-wrap strong{color:var(--white);}
-    .preview-cta{background:var(--navy-mid);border:1px solid rgba(59,130,246,0.25);border-radius:14px;padding:32px;text-align:center;margin-top:36px;}
-    .preview-cta h2{font-size:20px;color:var(--white);margin-bottom:8px;font-weight:700;}
-    .preview-cta p{margin-bottom:18px;color:var(--muted);font-size:14px;}
-    .preview-cta a{display:inline-block;background:var(--blue);color:var(--white);padding:12px 26px;border-radius:9px;font-weight:700;text-decoration:none;font-size:14px;}
+    .preview-cta{background:#fff;border:2px solid var(--blue);border-radius:14px;padding:32px;text-align:center;margin-top:36px;}
+    .preview-cta h2{font-size:20px;color:var(--blue);margin-bottom:8px;font-weight:700;}
+    .preview-cta p{margin-bottom:18px;color:#475569;font-size:14px;}
+    .preview-cta a{display:inline-block;background:var(--blue);color:#fff;padding:12px 26px;border-radius:9px;font-weight:700;text-decoration:none;font-size:14px;}
+    .preview-mid-cta{background:#fff;border:2px solid var(--blue);border-radius:10px;padding:16px 20px;margin:28px 0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+    .preview-mid-cta strong{font-size:14px;font-weight:700;color:var(--blue);display:block;margin-bottom:3px;}
+    .preview-mid-cta span{font-size:12px;color:#475569;}
+    .preview-mid-cta a{display:inline-block;background:var(--blue);color:#fff;padding:8px 16px;border-radius:7px;font-weight:700;text-decoration:none;font-size:12px;white-space:nowrap;}
     .source-wrap{padding:14px;height:100%;}
     .source-pre{background:var(--navy-mid);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:monospace;font-size:11px;color:var(--off);line-height:1.6;overflow:auto;height:calc(100% - 28px);white-space:pre-wrap;word-break:break-all;}
     .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--muted);}
@@ -398,9 +402,11 @@ function renderSeoAudit(topic,md,seoMeta,html){
   const pct=Math.round((score/max)*100);
   const sc=pct>=80?'good':pct>=60?'ok':'bad';
   const sl=pct>=80?'Strong':pct>=60?'Needs improvement':'Poor';
+  const failedChecks=checks.filter(c=>!c.section&&!c.p).map(c=>c.l+': '+c.n).join('\n');
   document.getElementById('seoContent').innerHTML=`
     <div class="seo-score-bar"><div class="seo-score-num ${sc}">${pct}</div><div><div style="font-size:13px;font-weight:700;color:var(--white)">${sl}</div><div style="font-size:11px;color:var(--muted)">SEO Score / 100</div></div></div>
-    <div style="font-size:11px;color:var(--muted);padding:0 2px">Focus keyword: <strong style="color:var(--white)">${seoMeta.focusKeyword}</strong></div>
+    <div style="font-size:11px;color:var(--muted);padding:0 2px;margin-bottom:8px">Focus keyword: <strong style="color:var(--white)">${seoMeta.focusKeyword}</strong></div>
+    ${pct<100?`<button onclick="optimisePost()" style="width:100%;background:var(--blue);border:none;color:#fff;padding:9px 0;border-radius:8px;font-family:DM Sans,sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:10px;" id="optimiseBtn">Auto-Optimise Failed Checks</button>`:''}
     ${checks.map(c=>c.section
       ?`<div class="seo-section-title">${c.section}</div>`
       :`<div class="seo-item"><div class="seo-dot ${c.p?'pass':c.w?'warn':'fail'}"></div><div><div class="seo-item-label">${c.l}</div><div class="seo-item-val">${c.n}</div></div></div>`
@@ -438,7 +444,7 @@ function wrapInHTML(topic,md,seoMeta){
     SC+' async src="https://www.googletagmanager.com/gtag/js?id=G-3ET2SV2XP5">'+EC,
     SC+'>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-3ET2SV2XP5");'+EC,
     '<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>',
-    '<style>:root{--navy:#0a1628;--navy-mid:#112040;--blue:#2563eb;--blue-bright:#3b82f6;--white:#fff;--off:#d4dff5;--muted:#8aa0c4;--border:rgba(255,255,255,0.08);--success:#22c55e;}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:\'DM Sans\',sans-serif;background:var(--navy);color:var(--off);line-height:1.75;}nav{padding:15px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(10,22,40,0.97);position:sticky;top:0;z-index:100;}.nav-logo{font-size:14px;font-weight:700;color:var(--white);text-decoration:none;}.nav-logo span{color:var(--blue-bright);}.nav-btn{background:var(--blue);color:var(--white);border:none;padding:8px 18px;border-radius:8px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;}.hero{padding:52px 24px 28px;max-width:760px;margin:0 auto;}.meta{font-size:12px;color:var(--muted);margin-bottom:12px;}.meta span{color:var(--blue-bright);font-weight:600;}h1{font-size:clamp(22px,4vw,36px);font-weight:700;letter-spacing:-0.8px;line-height:1.2;color:var(--white);}.body{max-width:760px;margin:0 auto;padding:28px 24px 60px;}.body h2{font-size:20px;font-weight:700;color:var(--white);margin:32px 0 10px;}.body h3{font-size:16px;font-weight:600;color:var(--white);margin:20px 0 7px;}.body p{margin-bottom:16px;font-size:16px;}.body ul,.body ol{margin:0 0 16px 20px;}.body li{margin-bottom:7px;font-size:16px;}.body strong{color:var(--white);font-weight:600;}.cta-block{background:var(--navy-mid);border:1px solid rgba(59,130,246,0.25);border-radius:16px;padding:38px 30px;text-align:center;margin-top:44px;}.cta-block h2{font-size:22px;font-weight:700;color:var(--white);margin-bottom:9px;}.cta-block p{font-size:15px;color:var(--muted);margin-bottom:22px;}.cta-btn{display:inline-block;background:var(--blue);color:var(--white);padding:13px 28px;border-radius:10px;font-family:\'DM Sans\',sans-serif;font-size:15px;font-weight:700;text-decoration:none;}.free-badge{display:inline-block;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);color:var(--success);font-size:12px;font-weight:700;padding:3px 12px;border-radius:100px;margin-bottom:13px;}footer{border-top:1px solid var(--border);padding:22px;text-align:center;font-size:12px;color:var(--muted);}footer a{color:var(--blue-bright);text-decoration:none;}@media(max-width:600px){.hero,.body{padding-left:18px;padding-right:18px;}}</style>',
+    '<style>:root{--navy:#0a1628;--navy-mid:#112040;--blue:#2563eb;--blue-bright:#3b82f6;--white:#fff;--off:#d4dff5;--muted:#8aa0c4;--border:rgba(255,255,255,0.08);--success:#22c55e;}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:\'DM Sans\',sans-serif;background:var(--navy);color:var(--off);line-height:1.75;}nav{padding:15px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(10,22,40,0.97);position:sticky;top:0;z-index:100;}.nav-logo{font-size:14px;font-weight:700;color:var(--white);text-decoration:none;}.nav-logo span{color:var(--blue-bright);}.nav-btn{background:var(--blue);color:var(--white);border:none;padding:8px 18px;border-radius:8px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;}.hero{padding:52px 24px 28px;max-width:760px;margin:0 auto;}.meta{font-size:12px;color:var(--muted);margin-bottom:12px;}.meta span{color:var(--blue-bright);font-weight:600;}h1{font-size:clamp(22px,4vw,36px);font-weight:700;letter-spacing:-0.8px;line-height:1.2;color:var(--white);}.body{max-width:760px;margin:0 auto;padding:28px 24px 60px;}.body h2{font-size:20px;font-weight:700;color:var(--white);margin:32px 0 10px;}.body h3{font-size:16px;font-weight:600;color:var(--white);margin:20px 0 7px;}.body p{margin-bottom:16px;font-size:16px;}.body ul,.body ol{margin:0 0 16px 20px;}.body li{margin-bottom:7px;font-size:16px;}.body strong{color:var(--white);font-weight:600;}.cta-block{background:#fff;border:2px solid var(--blue);border-radius:16px;padding:38px 30px;text-align:center;margin-top:44px;}.cta-block h2{font-size:22px;font-weight:700;color:var(--blue);margin-bottom:9px;}.cta-block p{font-size:15px;color:#334155;margin-bottom:22px;}.cta-btn{display:inline-block;background:var(--blue);color:#fff;padding:13px 28px;border-radius:10px;font-family:\'DM Sans\',sans-serif;font-size:15px;font-weight:700;text-decoration:none;}.free-badge{display:inline-block;background:rgba(37,99,235,0.1);border:1px solid rgba(37,99,235,0.3);color:var(--blue);font-size:12px;font-weight:700;padding:3px 12px;border-radius:100px;margin-bottom:13px;}.mid-cta{background:#fff;border:2px solid var(--blue);border-radius:12px;padding:20px 24px;margin:32px 0;}.mid-cta-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}.mid-cta-text{display:flex;flex-direction:column;gap:4px;}.mid-cta-text strong{font-size:15px;font-weight:700;color:var(--blue);}.mid-cta-text span{font-size:13px;color:#475569;}.mid-cta-btn{display:inline-block;background:var(--blue);color:#fff;padding:10px 20px;border-radius:8px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;}footer{border-top:1px solid var(--border);padding:22px;text-align:center;font-size:12px;color:var(--muted);}footer a{color:var(--blue-bright);text-decoration:none;}@media(max-width:600px){.hero,.body{padding-left:18px;padding-right:18px;}}</style>',
     '</head>',
     '<body>',
     '<nav><a href="https://vortexlabs.app" class="nav-logo">Vortex<span>Labs</span></a><a href="'+LANDING_PAGE+'" class="nav-btn">Get the Dashboard</a></nav>',
@@ -454,7 +460,98 @@ function wrapInHTML(topic,md,seoMeta){
   return parts.join('\n');
 }
 function markdownToHTML(md){
-  return md.replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/^- (.+)$/gm,'<li>$1</li>').replace(/(<li>.*<\/li>\n?)+/g,m=>`<ul>${m}</ul>`).split('\n').map(line=>{line=line.trim();if(!line)return '';if(/^<(h[23]|ul|li)/.test(line))return line;return `<p>${line}</p>`;}).filter(Boolean).join('\n');
+  const MID_CTA=`<div class="mid-cta"><div class="mid-cta-inner"><div class="mid-cta-text"><strong>Want to track all this in one view?</strong><span>The free Meta Ads Dashboard gives you ROAS, CPL, spend and campaign performance at a glance. No $50/month tools. No tab-switching.</span></div><a href="${LANDING_PAGE}" class="mid-cta-btn" target="_blank">Get Free Dashboard</a></div></div>`;
+  const lines=md.replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/^- (.+)$/gm,'<li>$1</li>').replace(/(<li>.*<\/li>\n?)+/g,m=>`<ul>${m}</ul>`).split('\n').map(line=>{line=line.trim();if(!line)return '';if(/^<(h[23]|ul|li)/.test(line))return line;return `<p>${line}</p>`;}).filter(Boolean);
+  let h2count=0;const out=[];
+  for(const line of lines){
+    out.push(line);
+    if(line.startsWith('<h2>')){h2count++;if(h2count===3)out.push(MID_CTA);}
+  }
+  return out.join('\n');
+}
+async function optimisePost(){
+  const key=localStorage.getItem('vl_openai');if(!key){toast('Save your OpenAI key first','error');return;}
+  if(!currentPost){toast('No post loaded','error');return;}
+  const btn=document.getElementById('optimiseBtn');
+  if(btn){btn.disabled=true;btn.textContent='Optimising...';}
+  const sysPrompt=document.getElementById('systemPrompt').value;
+
+  // Build list of failed checks from current post
+  const md=currentPost.md,seoMeta=currentPost.seoMeta,html=currentPost.html;
+  const mdLower=md.toLowerCase();
+  const wordCount=md.split(/\s+/).length;
+  const keyword=seoMeta.focusKeyword.toLowerCase();
+  const kwCount=(mdLower.match(new RegExp(keyword.replace(/\s+/g,'\\s+'),'g'))||[]).length;
+  const h2c=(md.match(/^## /gm)||[]).length;
+  const h3c=(md.match(/^### /gm)||[]).length;
+  const titleLen=seoMeta.metaTitle.length,descLen=seoMeta.metaDescription.length;
+
+  const issues=[];
+  if(wordCount<1200)issues.push(`Word count is only ${wordCount} -- expand to 1200-1500 words by adding a "2026 Industry Context" section with 3-5 stats, a FAQ section with 5 Q&As, and a "What to Expect in 2027" section`);
+  if(h2c<4)issues.push(`Only ${h2c} H2 headings -- add ${4-h2c} more question-format H2 sections (start with What/How/Why/Which/When)`);
+  if(h3c<3)issues.push(`Only ${h3c} H3 headings -- add sub-sections under existing H2s`);
+  if(kwCount<5)issues.push(`Keyword "${seoMeta.focusKeyword}" appears only ${kwCount} times -- add 5 more natural mentions in body paragraphs and H2 headings`);
+  if(!mdLower.slice(0,600).includes(keyword))issues.push(`Keyword "${seoMeta.focusKeyword}" not in first 100 words -- rewrite opening paragraph to include it`);
+  if(!md.includes('|'))issues.push('No data tables -- add at least 1 comparison table in markdown format (| Col | Col |)');
+  if(!md.toLowerCase().includes('faq')&&!md.includes('**Q:'))issues.push('No FAQ section -- add 5 FAQ items at the end in format **Q:** / **A:**');
+  if(!md.includes('2026'))issues.push('No 2026 year references -- add current year context throughout');
+  if(md.includes('—'))issues.push('Em dashes found -- replace all — with commas or rewrite those sentences');
+  if(!mdLower.includes('roas'))issues.push('Missing "ROAS" -- add at least 2 mentions');
+  if(!mdLower.includes('cpl'))issues.push('Missing "CPL" -- add at least 1 mention');
+
+  if(!issues.length){toast('Already fully optimised','success');if(btn){btn.disabled=false;btn.textContent='Auto-Optimise Failed Checks';}return;}
+
+  toast(`Fixing ${issues.length} issue(s)...`,'info');
+
+  const optimisePrompt=`You are rewriting and improving an existing blog post to fix specific SEO and content issues.
+
+ORIGINAL POST TITLE: "${currentPost.topic.title}"
+FOCUS KEYWORD: "${seoMeta.focusKeyword}"
+
+ISSUES TO FIX:
+${issues.map((is,i)=>`${i+1}. ${is}`).join('\n')}
+
+ORIGINAL POST CONTENT:
+${md}
+
+INSTRUCTIONS:
+- Fix ALL the issues listed above
+- Keep all existing good content -- only add/improve, do not remove sections that are already working
+- Maintain the same tone, voice, and writing style
+- All years must be 2026 or 2027
+- Never use em dashes
+- Framework stages (Attention/Interest/Problem/Solution etc) must never appear as labels
+- Numbers and specific stats in headlines where possible
+- Return the full improved post body only -- use ## for H2 and ### for H3`;
+
+  try{
+    const res=await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+      body:JSON.stringify({model:'gpt-4o',max_tokens:4000,temperature:0.7,
+        messages:[{role:'system',content:sysPrompt},{role:'user',content:optimisePrompt}]})
+    });
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error?.message||'API error');
+    const newMd=data.choices[0].message.content;
+    const newHtml=wrapInHTML(currentPost.topic,newMd,seoMeta);
+    currentPost={...currentPost,md:newMd,html:newHtml};
+
+    // Refresh editor view
+    if(currentEditorTab==='preview'){
+      document.getElementById('editorBody').innerHTML=`<div class="preview-wrap">${buildPreview(currentPost.topic,newMd)}</div>`;
+    } else {
+      document.getElementById('editorBody').innerHTML=`<div class="source-wrap"><pre class="source-pre">${escHtml(newHtml)}</pre></div>`;
+    }
+    // Re-run audit
+    renderSeoAudit(currentPost.topic,newMd,seoMeta,newHtml);
+    // Switch to SEO tab to show updated score
+    switchTab('seo');
+    toast('Optimised! SEO score updated','success');
+  }catch(e){
+    toast('Optimise failed: '+e.message,'error');
+  }
+  if(btn){btn.disabled=false;btn.textContent='Auto-Optimise Failed Checks';}
 }
 function downloadCurrent(){
   if(!currentPost)return;
