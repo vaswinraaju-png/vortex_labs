@@ -174,28 +174,51 @@
 const LANDING_PAGE="https://vortexlabs.app/meta-dashboard-free-download.html";
 const GH_USER="vaswinraaju-png",GH_REPO="vortex_labs",GH_BRANCH="main",GH_FOLDER="blogs";
 let currentPost=null,currentEditorTab='preview',topics=[];
-const DEFAULT_PROMPT=`You are an expert performance marketing copywriter for VortexLabs.\n\nRules:\n- Write for performance marketers, media buyers, agencies, small business owners running Meta/Facebook Ads\n- Use PAS, AIDA, or BAB frameworks as specified\n- Open with a powerful hook: bold stat, direct pain point, or confrontational question\n- 900 to 1200 words per post\n- H2 and H3 subheadings throughout\n- 2 to 3 specific realistic scenarios or examples\n- End with a CTA driving urgency, trust, or motivation\n- Never use em dashes\n- No filler phrases like "In today's digital landscape" or "In conclusion"\n- Plain, direct, conversational English\n- Naturally weave the focus keyword into first 100 words, at least 2 H2s, and 3+ times total`;
+const DEFAULT_PROMPT=`You are an expert performance marketing content writer for VortexLabs. The current year is 2026. All content must be written for 2026 with forward-looking context for 2027 where relevant.
+
+STRUCTURE (follow TerraTern-style blog format exactly):
+1. Opening hook: Start with a bold stat, confrontational question, or direct pain point. No filler openers.
+2. Key Highlights: A bullet list of 4-6 things the reader will learn (like a table of contents).
+3. Body: Use H2 questions as section headers (e.g. "What Is X and Why Does It Matter in 2026?", "How Do Performance Marketers Fix X?"). Use H3 for sub-points within sections.
+4. Data tables: Include at least 1-2 comparison or data tables using markdown table format (| Col | Col |).
+5. Expert quote: Include 1 expert quote attributed to "VortexLabs Expert" with a specific insight.
+6. Step-by-step section: At least one numbered step-by-step process (How to do X in N steps).
+7. 2026 context section: A section titled "2026 Industry Context" with 3-5 bullet stats or facts with sources cited in parentheses.
+8. Future outlook: One short section on "What Changes in 2027" or "What to Expect Next" with forward predictions.
+9. FAQ section: 5 questions and answers at the end (markdown format: **Q:** / **A:**).
+10. CTA: End with a persuasive call to action referencing the dashboard.
+
+WRITING RULES:
+- 1200 to 1500 words
+- Never use em dashes
+- No phrases like "In today's digital landscape", "In conclusion", "It goes without saying"
+- All years must be 2026 or 2027 -- never write 2025 as a current reference
+- Use specific numbers, percentages, and data points throughout
+- Write H2s as questions starting with What, How, Why, Which, When
+- Naturally include focus keyword in first 100 words, at least 3 H2s, and 5+ times total
+- LSI keywords to weave in: Meta Ads, Facebook advertising, ROAS, CPL, ad spend, media buyer, campaign performance, ad dashboard
+- Tone: Direct, data-driven, written by someone who actually runs campaigns daily`;
 const SEED=[
-  {slug:"meta-ads-reporting-without-spreadsheets",title:"Why Meta Ads Reporting in Spreadsheets Is Killing Your Productivity",framework:"PAS",angle:"Urgency"},
+  {slug:"meta-ads-reporting-without-spreadsheets",title:"Why Meta Ads Reporting in Spreadsheets Is Killing Your Productivity in 2026",framework:"PAS",angle:"Urgency"},
   {slug:"roas-dropping-meta-ads",title:"Your ROAS Is Dropping and You're the Last to Know It",framework:"PAS",angle:"Fear"},
-  {slug:"meta-ads-dashboard-freelancers",title:"The One Tool Every Freelance Media Buyer Needs in 2025",framework:"AIDA",angle:"Trust"},
-  {slug:"client-reporting-meta-ads",title:"How to Send Meta Ads Reports Clients Actually Understand",framework:"BAB",angle:"Trust"},
-  {slug:"reduce-cpl-meta-ads",title:"5 Reasons Your CPL Is High (And How to Fix It Fast)",framework:"PAS",angle:"Motivation"},
-  {slug:"meta-ads-mistakes-agencies",title:"The Meta Ads Mistakes Most Agencies Make Every Single Month",framework:"PAS",angle:"Fear"},
+  {slug:"meta-ads-dashboard-freelancers",title:"The One Tool Every Freelance Media Buyer Needs in 2026",framework:"AIDA",angle:"Trust"},
+  {slug:"client-reporting-meta-ads",title:"How to Send Meta Ads Reports Clients Actually Understand in 2026",framework:"BAB",angle:"Trust"},
+  {slug:"reduce-cpl-meta-ads",title:"5 Reasons Your CPL Is High in 2026 (And How to Fix It Fast)",framework:"PAS",angle:"Motivation"},
+  {slug:"meta-ads-mistakes-agencies",title:"The Meta Ads Mistakes Most Agencies Are Still Making in 2026",framework:"PAS",angle:"Fear"},
   {slug:"facebook-ads-small-business",title:"Facebook Ads for Small Business Owners Who Don't Have Time to Waste",framework:"BAB",angle:"Empathy"},
-  {slug:"meta-ads-creative-fatigue",title:"Creative Fatigue Is Draining Your Budget. Here's the Fix.",framework:"PAS",angle:"Urgency"},
-  {slug:"scale-meta-ads-campaigns",title:"How to Scale Meta Ads Without Watching Everything Break",framework:"AIDA",angle:"Motivation"},
-  {slug:"meta-ads-account-audit",title:"Run a Meta Ads Account Audit in Under 30 Minutes",framework:"BAB",angle:"Trust"},
+  {slug:"meta-ads-creative-fatigue",title:"Creative Fatigue Is Draining Your 2026 Budget. Here's the Fix.",framework:"PAS",angle:"Urgency"},
+  {slug:"scale-meta-ads-campaigns",title:"How to Scale Meta Ads in 2026 Without Watching Everything Break",framework:"AIDA",angle:"Motivation"},
+  {slug:"meta-ads-account-audit",title:"Run a Complete Meta Ads Account Audit in Under 30 Minutes",framework:"BAB",angle:"Trust"},
   {slug:"media-buyer-productivity",title:"How Top Media Buyers Manage 10 Ad Accounts Without Burning Out",framework:"AIDA",angle:"Aspiration"},
   {slug:"meta-ads-reporting-tools-cost",title:"Why Are You Paying $50 a Month Just to See Your Own Ad Data?",framework:"PAS",angle:"Anger"},
-  {slug:"facebook-ads-metrics-that-matter",title:"The Only 5 Meta Ads Metrics That Actually Matter",framework:"AIDA",angle:"Trust"},
+  {slug:"facebook-ads-metrics-that-matter",title:"The Only 5 Meta Ads Metrics That Actually Matter in 2026",framework:"AIDA",angle:"Trust"},
   {slug:"meta-ads-founders-report",title:"What Your Founder Wants to See in Your Meta Ads Report",framework:"BAB",angle:"Trust"},
-  {slug:"ad-spend-wastage-meta",title:"You're Wasting 30% of Your Ad Spend. Here's the Proof.",framework:"PAS",angle:"Fear"},
+  {slug:"ad-spend-wastage-meta",title:"You're Wasting 30% of Your Ad Spend in 2026. Here's the Proof.",framework:"PAS",angle:"Fear"},
   {slug:"meta-ads-weekly-review",title:"The 15-Minute Weekly Meta Ads Review That Saves Thousands",framework:"BAB",angle:"Motivation"},
-  {slug:"multi-account-meta-ads",title:"Managing Multiple Meta Ad Accounts? You Need a System.",framework:"PAS",angle:"Empathy"},
-  {slug:"meta-ads-vs-ads-manager",title:"Meta Ads Manager vs a Proper Dashboard: What's the Difference?",framework:"AIDA",angle:"Trust"},
-  {slug:"performance-marketing-reporting-2025",title:"Performance Marketing Reporting in 2025: What's Changed",framework:"AIDA",angle:"Authority"},
-  {slug:"meta-ads-ecommerce-losses",title:"Why eCommerce Brands Lose Money on Meta Ads (And How to Stop)",framework:"BAB",angle:"Fear"},
+  {slug:"multi-account-meta-ads",title:"Managing Multiple Meta Ad Accounts in 2026? You Need a System.",framework:"PAS",angle:"Empathy"},
+  {slug:"performance-marketing-reporting-2026",title:"Performance Marketing Reporting in 2026: What's Changed and What's Next",framework:"AIDA",angle:"Authority"},
+  {slug:"meta-ads-ecommerce-losses",title:"Why eCommerce Brands Lose Money on Meta Ads in 2026 (And How to Stop)",framework:"BAB",angle:"Fear"},
+  {slug:"meta-ads-ai-automation-2026",title:"How AI Is Changing Meta Ads Management in 2026 (What You Must Know)",framework:"AIDA",angle:"Authority"},
 ];
 window.onload=()=>{
   const ok=localStorage.getItem('vl_openai'),gk=localStorage.getItem('vl_github');
@@ -205,6 +228,9 @@ window.onload=()=>{
   document.getElementById('systemPrompt').value=localStorage.getItem('vl_system_prompt')||DEFAULT_PROMPT;
   topics=[...SEED];renderTopics();
 };
+function getPublished(){try{return new Set(JSON.parse(localStorage.getItem('vl_published')||'[]'));}catch(e){return new Set();}}
+function markPublished(slug){const s=getPublished();s.add(slug);localStorage.setItem('vl_published',JSON.stringify([...s]));renderTopics();toast('Marked as published','success');}
+function unmarkPublished(slug){const s=getPublished();s.delete(slug);localStorage.setItem('vl_published',JSON.stringify([...s]));renderTopics();toast('Unmarked','info');}
 function saveKeys(){
   const ok=document.getElementById('openaiKey').value.trim(),gk=document.getElementById('githubPat').value.trim();
   if(ok)localStorage.setItem('vl_openai',ok);if(gk)localStorage.setItem('vl_github',gk);
@@ -253,8 +279,26 @@ async function fetchTopics(){
 }
 function renderTopics(){
   const list=document.getElementById('topicsList');
+  const published=getPublished();
   if(!topics.length){list.innerHTML=`<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">No topics yet.</div>`;return;}
-  list.innerHTML=topics.map((t,i)=>`<div class="topic-item" id="ti-${i}"><div class="topic-item-title">${t.title}</div><div class="topic-item-meta"><span class="fw-tag">${t.framework}</span><span>${t.angle}</span></div><div class="topic-actions"><button class="btn-write" onclick="writeTopic(${i})">Write</button></div></div>`).join('');
+  list.innerHTML=topics.map((t,i)=>{
+    const isPub=published.has(t.slug);
+    return `<div class="topic-item${isPub?' published':''}" id="ti-${i}" style="${isPub?'opacity:0.45;':''}">
+      <div class="topic-item-title">${t.title}</div>
+      <div class="topic-item-meta">
+        <span class="fw-tag">${t.framework}</span>
+        <span>${t.angle}</span>
+        ${isPub?'<span style="font-size:10px;font-weight:700;color:var(--success);background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);padding:2px 7px;border-radius:4px;">PUBLISHED</span>':''}
+      </div>
+      <div class="topic-actions">
+        ${isPub
+          ?`<button class="btn-write" style="background:var(--navy-light);font-size:11px;" onclick="unmarkPublished('${t.slug}')">Unmark</button>`
+          :`<button class="btn-write" onclick="writeTopic(${i})">Write</button>
+            <button class="btn-write" style="background:var(--navy-light);font-size:11px;" onclick="markPublished('${t.slug}')">Mark Published</button>`
+        }
+      </div>
+    </div>`;
+  }).join('');
 }
 async function writeTopic(idx){
   const key=localStorage.getItem('vl_openai');if(!key){toast('Save your OpenAI key first','error');return;}
@@ -307,26 +351,42 @@ function renderSeoAudit(topic,md,seoMeta,html){
   const titleLen=seoMeta.metaTitle.length,descLen=seoMeta.metaDescription.length;
   const checks=[
     {section:'TECHNICAL SEO'},
-    {l:'Canonical URL',p:html.includes('rel="canonical"'),n:html.includes('rel="canonical"')?'Present':'Missing'},
-    {l:'JSON-LD Schema (BlogPosting)',p:html.includes('application/ld+json'),n:html.includes('application/ld+json')?'BlogPosting schema present':'Missing'},
-    {l:'Open Graph Tags',p:html.includes('og:title'),n:html.includes('og:title')?'og:title, og:description, og:url set':'Missing OG tags'},
-    {l:'Twitter Card',p:html.includes('twitter:card'),n:html.includes('twitter:card')?'summary_large_image set':'Missing'},
-    {l:'Robots Meta',p:html.includes('name="robots"'),n:html.includes('name="robots"')?'index, follow set':'Missing robots meta'},
+    {l:'Canonical URL',p:html.includes('rel="canonical"'),n:html.includes('rel="canonical"')?'Present':'Missing -- regenerate post to fix'},
+    {l:'JSON-LD Schema',p:html.includes('application/ld+json'),n:html.includes('application/ld+json')?'BlogPosting schema present':'Missing -- regenerate post'},
+    {l:'Open Graph Tags',p:html.includes('og:title'),n:html.includes('og:title')?'og:title, og:description, og:url set':'Missing -- regenerate post'},
+    {l:'Twitter Card',p:html.includes('twitter:card'),n:html.includes('twitter:card')?'summary_large_image set':'Missing -- regenerate post'},
+    {l:'Robots Meta',p:html.includes('name="robots"'),n:html.includes('name="robots"')?'index, follow set':'Missing -- regenerate post'},
     {l:'Mobile Viewport',p:true,n:'Responsive layout baked in'},
     {l:'No Render-Blocking Scripts',p:true,n:'Inline CSS, deferred fonts'},
     {section:'ON-PAGE SEO'},
-    {l:'Meta Title Length',p:titleLen>=50&&titleLen<=60,w:titleLen>=40&&titleLen<50,n:`${titleLen} chars (ideal: 50-60)`},
-    {l:'Meta Description Length',p:descLen>=150&&descLen<=160,w:descLen>=130&&descLen<150,n:`${descLen} chars (ideal: 150-160)`},
-    {l:'Keyword in Meta Title',p:seoMeta.metaTitle.toLowerCase().includes(keyword),n:seoMeta.metaTitle.toLowerCase().includes(keyword)?'Present':'Missing from title'},
-    {l:'Keyword in Meta Description',p:seoMeta.metaDescription.toLowerCase().includes(keyword),n:seoMeta.metaDescription.toLowerCase().includes(keyword)?'Present':'Missing from description'},
-    {l:'Keyword in First 100 Words',p:kwIn100,n:kwIn100?'Present in opening':'Not found in opening paragraph'},
-    {l:'Keyword Density',p:kwCount>=3,w:kwCount>=1,n:`${kwCount} occurrences (ideal: 3+)`},
-    {l:'H2 Count',p:h2c>=3,w:h2c>=2,n:`${h2c} H2 tags (ideal: 3+)`},
-    {l:'H3 Count',p:h3c>=2,w:h3c>=1,n:`${h3c} H3 tags`},
-    {l:'Word Count',p:wordCount>=900,w:wordCount>=700,n:`${wordCount} words (ideal: 900-1200)`},
-    {l:'Internal Link to Landing Page',p:html.includes(LANDING_PAGE),n:html.includes(LANDING_PAGE)?'CTA link present':'Missing internal link'},
-    {l:'No Em Dashes',p:!md.includes('\u2014'),n:md.includes('\u2014')?'Em dashes found - fix before publishing':'Clean'},
-    {l:'LSI Keywords Present',p:mdLower.includes('roas')||mdLower.includes('cpl')||mdLower.includes('ad spend'),n:'ROAS, CPL, ad spend detected in body'},
+    {l:'Meta Title Length',p:titleLen>=50&&titleLen<=60,w:titleLen>=40&&titleLen<50,
+      n:titleLen<50?`${titleLen} chars -- too short. Add ${50-titleLen} to ${60-titleLen} more chars including keyword`:titleLen>60?`${titleLen} chars -- too long. Cut ${titleLen-60} chars`:`${titleLen} chars -- ideal range`},
+    {l:'Meta Description Length',p:descLen>=150&&descLen<=160,w:descLen>=130&&descLen<150,
+      n:descLen<130?`${descLen} chars -- too short. Add ${150-descLen}+ chars with a benefit statement`:descLen>160?`${descLen} chars -- too long by ${descLen-160} chars. Trim last sentence`:descLen<150?`${descLen} chars -- close. Add ${150-descLen} more chars`:`${descLen} chars -- ideal range`},
+    {l:'Keyword in Meta Title',p:seoMeta.metaTitle.toLowerCase().includes(keyword),
+      n:seoMeta.metaTitle.toLowerCase().includes(keyword)?'Present':`Missing -- add "${seoMeta.focusKeyword}" to the meta title`},
+    {l:'Keyword in Meta Description',p:seoMeta.metaDescription.toLowerCase().includes(keyword),
+      n:seoMeta.metaDescription.toLowerCase().includes(keyword)?'Present':`Missing -- include "${seoMeta.focusKeyword}" in first sentence of description`},
+    {l:'Keyword in First 100 Words',p:kwIn100,
+      n:kwIn100?'Present in opening':`Missing -- rewrite opening to include "${seoMeta.focusKeyword}" within first 2 sentences`},
+    {l:'Keyword Density',p:kwCount>=5,w:kwCount>=3,
+      n:kwCount<3?`Only ${kwCount} use(s) -- too low. Aim for 5+. Add to H2s, intro, and conclusion`:kwCount<5?`${kwCount} uses -- add 2 more in H2 headings or body`:`${kwCount} uses -- good`},
+    {l:'H2 Count',p:h2c>=4,w:h2c>=3,
+      n:h2c<3?`Only ${h2c} H2s -- add ${4-h2c} more. Use question format: "How to..." or "What Is..."`:h2c===3?`${h2c} H2s -- add 1 more to reach 4+`:`${h2c} H2s -- ideal`},
+    {l:'H3 Count',p:h3c>=3,w:h3c>=2,
+      n:h3c<2?`Only ${h3c} H3s -- add sub-sections under H2s to improve scannability`:h3c===2?`${h3c} H3s -- add 1 more for better structure`:`${h3c} H3s -- good`},
+    {l:'Word Count',p:wordCount>=1200,w:wordCount>=900,
+      n:wordCount<900?`${wordCount} words -- too thin. Add 2026 context section, FAQ, or expert quote to reach 1200+`:wordCount<1200?`${wordCount} words -- a bit short. Add a FAQ or Industry Context section`:`${wordCount} words -- good`},
+    {l:'2026 Year References',p:md.includes('2026'),w:false,
+      n:md.includes('2026')?'2026 references found -- good':'No 2026 references -- regenerate with updated system prompt'},
+    {l:'Data Tables Present',p:md.includes('|'),w:false,
+      n:md.includes('|')?'Markdown tables detected -- good':'No tables -- add at least 1 comparison table for better dwell time'},
+    {l:'FAQ Section',p:md.toLowerCase().includes('faq')||md.includes('**Q:'),w:false,
+      n:(md.toLowerCase().includes('faq')||md.includes('**Q:'))?'FAQ section detected':'Missing FAQ -- add 5 Q&As to capture featured snippets'},
+    {l:'Internal Link to Landing Page',p:html.includes(LANDING_PAGE),n:html.includes(LANDING_PAGE)?'CTA link present':'Missing -- regenerate post'},
+    {l:'No Em Dashes',p:!md.includes('\u2014'),n:md.includes('\u2014')?'Em dashes found -- search and replace with comma or rewrite':'Clean'},
+    {l:'LSI Keywords (ROAS + CPL)',p:mdLower.includes('roas')&&mdLower.includes('cpl'),
+      n:(mdLower.includes('roas')&&mdLower.includes('cpl'))?'ROAS and CPL both present':!mdLower.includes('roas')?'Missing "ROAS" -- add to at least 2 paragraphs':'Missing "CPL" -- add to at least 1 paragraph'},
   ];
   let score=0,max=0;
   checks.forEach(c=>{if(!c.section){max+=5;if(c.p)score+=5;else if(c.w)score+=2;}});
@@ -462,6 +522,8 @@ ${existingUrls.map(u=>`  <url>
     }catch(e){/* no-cors always throws, that's fine */}
 
     toast(`Published + sitemap updated + Google pinged`, 'success');
+    const ps=getPublished();ps.add(currentPost.slug);localStorage.setItem('vl_published',JSON.stringify([...ps]));
+    renderTopics();
 
   }catch(e){toast('Error: '+e.message,'error');}
   btn.disabled=false;btn.textContent='Publish to GitHub';
