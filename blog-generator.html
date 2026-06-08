@@ -158,7 +158,112 @@
     .reason-tip{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.4;}
     /* scheduled badge */
     .sch-badge{font-size:10px;font-weight:700;background:rgba(245,158,11,0.12);color:var(--warning);border:1px solid rgba(245,158,11,0.25);padding:2px 7px;border-radius:4px;}
-    @media(max-width:700px){.sidebar{width:100%;height:44vh;border-right:none;border-bottom:1px solid var(--border);}.app{flex-direction:column;height:auto;}.editor{height:56vh;}.hdr-field.w200{width:130px;}.hdr-field.w150{width:110px;}}
+    /* ── MOBILE ── */
+    .mob-nav{display:none;}
+    .sidebar-handle{display:none;}
+    @media(max-width:768px){
+      html,body{height:100%;overflow:hidden;}
+      header{padding:10px 12px;gap:6px;flex-wrap:nowrap;}
+      .logo{font-size:13px;}
+      .hdr-field{font-size:12px;padding:6px 9px;}
+      .hdr-field.w200,.hdr-field.w150{width:100px;}
+      .btn-sm{padding:6px 10px;font-size:12px;}
+      .tag{font-size:10px;padding:2px 8px;}
+      /* Full screen app */
+      .app{height:calc(100vh - 46px);flex-direction:row;}
+      /* Sidebar: hidden off-screen bottom drawer */
+      .sidebar{
+        position:fixed;bottom:0;left:0;right:0;
+        width:100% !important;
+        height:70vh;
+        z-index:400;
+        background:var(--navy-mid);
+        border-top:1px solid rgba(59,130,246,0.3);
+        border-radius:20px 20px 0 0;
+        transform:translateY(100%);
+        transition:transform 0.28s ease;
+        flex-direction:column;
+        display:flex !important;
+        overflow:hidden;
+      }
+      .sidebar.open{transform:translateY(0) !important;}
+      .sidebar-handle{
+        display:block;
+        width:40px;height:4px;
+        background:rgba(255,255,255,0.2);
+        border-radius:2px;
+        margin:12px auto 0;
+        flex-shrink:0;
+        cursor:pointer;
+      }
+      /* Editor full screen */
+      .editor{flex:1;width:100%;overflow:hidden;}
+      .editor-toolbar{padding:8px 10px;gap:4px;flex-wrap:wrap;}
+      .editor-title{font-size:11px;width:100%;order:-1;white-space:normal;line-height:1.3;}
+      .editor-tabs{gap:3px;}
+      .etab{padding:4px 8px;font-size:11px;}
+      .editor-actions{display:flex;gap:4px;width:100%;}
+      .btn-dl,.btn-publish,.btn-sm{
+        flex:1;padding:8px 6px;font-size:11px;
+        text-align:center;min-height:36px;
+      }
+      .editor-body{flex:1;overflow-y:auto;padding-bottom:56px;}
+      .preview-wrap{padding:16px 14px;}
+      .preview-wrap h1{font-size:18px;margin-bottom:12px;}
+      .preview-wrap h2{font-size:16px;margin:22px 0 7px;}
+      .preview-wrap h3{font-size:14px;}
+      .preview-wrap p,.preview-wrap li{font-size:13px;}
+      .source-pre{font-size:10px;}
+      /* Bottom nav */
+      .mob-nav{
+        display:flex;
+        position:fixed;bottom:0;left:0;right:0;
+        height:52px;
+        background:rgba(10,22,40,0.98);
+        border-top:1px solid var(--border);
+        z-index:300;
+        padding:0;
+        margin:0;
+      }
+      .mob-nav-btn{
+        flex:1;
+        display:flex;flex-direction:column;
+        align-items:center;justify-content:center;
+        gap:2px;
+        background:none;border:none;
+        color:var(--muted);
+        font-family:'DM Sans',sans-serif;
+        font-size:9px;font-weight:600;
+        cursor:pointer;
+        padding:4px 0;
+        min-width:0;
+      }
+      .mob-nav-btn.active{color:var(--blue-bright);}
+      .mob-nav-btn svg{width:16px;height:16px;flex-shrink:0;}
+      /* Sidebar tabs hidden on mobile (nav handles it) */
+      .sidebar-tabs{display:none;}
+      /* Topic items */
+      .topic-search-bar{padding:8px 10px;gap:6px;}
+      .topic-input{font-size:12px;padding:6px 10px;}
+      .btn-fetch{padding:6px 10px;font-size:12px;}
+      .topics-list{padding:6px;overflow-y:auto;flex:1;}
+      .topic-item{padding:10px 11px;margin-bottom:6px;}
+      .topic-item-title{font-size:12px;}
+      .btn-write{padding:5px 11px;font-size:11px;}
+      /* SEO panel */
+      .seo-score-num{font-size:22px;}
+      .seo-item-label{font-size:11px;}
+      .seo-item-val{font-size:10px;}
+      .seo-fix-btn{font-size:9px;padding:2px 6px;}
+      /* Schedule modal */
+      .sch-box{margin:16px;border-radius:16px;}
+      /* Empty/gen states */
+      .empty-state{padding-bottom:60px;}
+      .gen-state{padding-bottom:60px;}
+      /* Overlay when sidebar open */
+      .sidebar-overlay{display:block !important;}
+    }
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:390;}
   </style>
 </head>
 <body>
@@ -170,6 +275,7 @@
   <button class="btn-sm" onclick="saveKeys()">Save Keys</button>
   <span class="tag missing" id="keyStatus">No keys</span>
 </header>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <div class="app">
   <div class="sidebar" id="sidebar">
     <div class="sidebar-handle" onclick="closeSidebar()"></div>
@@ -912,11 +1018,17 @@ function toast(msg,type='info'){const el=document.getElementById('toast');el.tex
 
 // ── MOBILE NAV ───────────────────────────────────────────────────────────────
 function isMobile(){return window.innerWidth<=768;}
-function openSidebar(){document.getElementById('sidebar').classList.add('open');}
-function closeSidebar(){document.getElementById('sidebar').classList.remove('open');}
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  const ov=document.getElementById('sidebarOverlay');
+  if(ov)ov.style.display='block';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  const ov=document.getElementById('sidebarOverlay');
+  if(ov)ov.style.display='none';
+}
 function mobNav(tab){
-  if(!isMobile())return;
-  // update active state
   ['editor','topics','prompt','seo'].forEach(t=>{
     const b=document.getElementById('mbn-'+t);
     if(b)b.classList.toggle('active',t===tab);
@@ -925,7 +1037,6 @@ function mobNav(tab){
     closeSidebar();
     return;
   }
-  // open sidebar and switch to correct tab
   openSidebar();
   switchTab(tab==='topics'?'topics':tab==='prompt'?'prompt':'seo');
 }
