@@ -440,17 +440,17 @@
 <!-- NAV -->
 <nav>
   <div class="nav-logo">Meta Ads <span>Dashboard</span></div>
-  <button class="nav-cta" onclick="openModal()">Get Free Access</button>
+  <button class="nav-cta" onclick="openModal()">Join Waitlist</button>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="badge">Free Download</div>
+  <div class="badge">Waitlist Open</div>
   <h1>Your Meta Ads.<br><span>Finally, One View.</span></h1>
   <p>Stop losing time in Ads Manager tabs. One clean dashboard for ROAS, CPL, spend, and campaign performance. Built for people who actually run ads.</p>
   <div class="hero-cta-wrap">
-    <button class="btn-primary" onclick="openModal()">Download Free Dashboard</button>
-    <span class="hero-sub">No credit card. <strong>100% free</strong> right now.</span>
+    <button class="btn-primary" onclick="openModal()">Join the Waitlist</button>
+    <span class="hero-sub">Free while it lasts. <strong>Limited early access.</strong></span>
   </div>
 </section>
 
@@ -594,10 +594,10 @@
 
 <!-- CTA BLOCK -->
 <div class="cta-block">
-  <div class="free-tag">Free Right Now</div>
-  <h2>Get your Meta Ads Dashboard.<br>No cost. No catch.</h2>
-  <p>Enter your email and get instant access. It takes 30 seconds.</p>
-  <button class="btn-primary" onclick="openModal()">Download Free Dashboard</button>
+  <div class="free-tag">Waitlist Open</div>
+  <h2>Get early access to Meta Ads Dashboard.<br>Free for the first 500.</h2>
+  <p>Join the waitlist. We'll notify you the moment it's ready.</p>
+  <button class="btn-primary" onclick="openModal()">Join the Waitlist</button>
 </div>
 
 <!-- FOOTER -->
@@ -612,19 +612,18 @@
     <button class="modal-close" onclick="closeModal()">&#x2715;</button>
 
     <div id="modalForm">
-      <h2>Get Free Access</h2>
-      <p>Drop your details below and download instantly.</p>
+      <h2>Join the Waitlist</h2>
+      <p>Be among the first to get access. We'll email you when it's live.</p>
       <input type="text" id="inputName" placeholder="Your name" autocomplete="name" />
       <input type="email" id="inputEmail" placeholder="Your email address" autocomplete="email" />
       <div class="modal-error" id="modalError">Please enter a valid name and email.</div>
-      <button class="btn-primary" id="submitBtn" onclick="handleSubmit()">Get the Dashboard</button>
+      <button class="btn-primary" id="submitBtn" onclick="handleSubmit()">Reserve My Spot</button>
     </div>
 
     <div class="modal-success" id="modalSuccess">
-      <div class="check">✅</div>
-      <h3>You're in!</h3>
-      <p>Your Meta Ads Dashboard is ready. Click below to download.</p>
-      <a href="YOUR_DOWNLOAD_LINK_HERE" class="btn-download" download id="downloadLink">Download Dashboard</a>
+      <div class="check">🎉</div>
+      <h3>You're on the list!</h3>
+      <p>We'll notify you the moment Meta Ads Dashboard goes live. Keep an eye on your inbox.</p>
     </div>
   </div>
 </div>
@@ -633,9 +632,8 @@
   // SWAP THIS with your deployed Google Apps Script Web App URL
   const GAS_URL = "https://script.google.com/macros/s/AKfycbxfYHHjU_UekLqAWvn1ta4Uxv38boV8QgjWNm_jATrX-_CNqhp93Dg3GsnSw72l0wRIbQ/exec";
 
-  // SWAP THIS with your actual file URL
-  // e.g. https://raw.githubusercontent.com/yourusername/yourrepo/main/dashboard.zip
-  const DOWNLOAD_URL = "YOUR_DOWNLOAD_LINK_HERE";
+  // GA4 ID — uncomment and replace when ready
+  // const GA4_ID = "G-XXXXXXXXXX";
 
   function openModal() {
     document.getElementById('modalOverlay').classList.add('active');
@@ -685,8 +683,7 @@
       // no-cors won't throw, but just in case
     }
 
-    // Show success regardless (no-cors fetch can't confirm)
-    document.getElementById('downloadLink').href = DOWNLOAD_URL;
+    // Show success
     document.getElementById('modalForm').style.display = 'none';
     document.getElementById('modalSuccess').style.display = 'block';
 
