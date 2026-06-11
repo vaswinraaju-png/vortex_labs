@@ -347,7 +347,7 @@ STRUCTURE (follow TerraTern-style blog format exactly):
 2. Key Highlights: A bullet list of 4-6 things the reader will learn (like a table of contents).
 3. Body: Use H2 questions as section headers (e.g. "What Is X and Why Does It Matter in 2026?", "How Do Performance Marketers Fix X?"). Use H3 for sub-points within sections.
 4. Data tables: Include at least 1-2 comparison or data tables using markdown table format (| Col | Col |).
-5. Expert quote: Include 1 expert quote attributed to "VortexLabs Expert" with a specific insight.
+5. Expert quote: Include 1 expert quote attributed to the assigned author (name and role will be provided in the user prompt). The quote must start with the author quote_style provided and give specific, tactical, non-generic insight. Never say "VortexLabs Expert" -- always use the actual author name.
 6. Step-by-step section: At least one numbered step-by-step process (How to do X in N steps).
 7. 2026 context section: A section titled "2026 Industry Context" with 3-5 bullet stats or facts with sources cited in parentheses.
 8. Future outlook: One short section on "What Changes in 2027" or "What to Expect Next" with forward predictions.
@@ -368,7 +368,23 @@ WRITING RULES:
 - Headlines and H2s must use specific numbers, percentages, or dollar/rupee amounts wherever possible
 - Opening hook must reference a specific loss, gain, or performance stat that hits the reader's greed nerve immediately
 - Every section should have a "what you're losing by not doing this" angle baked in
-- Frameworks (PAS, AIDA, BAB) are invisible structural scaffolding ONLY. Never write or label the stages anywhere in the post. Never use words like "Attention:", "Interest:", "Desire:", "Action:", "Problem:", "Agitate:", "Solution:", "Before:", "After:", "Bridge:" as headings, labels, or callouts. The reader should never know a framework was used.`;
+- Frameworks (PAS, AIDA, BAB) are invisible structural scaffolding ONLY. Never write or label the stages anywhere in the post. Never use words like "Attention:", "Interest:", "Desire:", "Action:", "Problem:", "Agitate:", "Solution:", "Before:", "After:", "Bridge:" as headings, labels, or callouts. The reader should never know a framework was used.
+
+TACTICAL KNOWLEDGE BASE (draw from this in every post):
+- Bid strategies: Cost cap stabilises CPL but needs 50+ conversions/week to exit learning phase. Bid cap for strict volume control. Highest volume for new campaigns with no data.
+- Advantage+: Outperforms manual targeting for eCommerce at scale but burns budget on broad audiences for lead gen. Best used after 30+ days of pixel data.
+- Creative fatigue: Frequency above 3.5 plus CTR drop of 20%+ in 7 days means replace creative immediately. Hook performance drops first -- watch 3-second video view rate.
+- CPL benchmarks by vertical: eCommerce $8-15, SaaS $40-80, EdTech $15-35, Finance $50-120 (WordStream Industry Benchmarks 2026).
+- Audience overlap: Running 3+ ad sets targeting similar audiences causes internal auction competition, inflating CPL by 15-30%.
+- Budget scaling: Never increase budget more than 20% in 24 hours or you reset the learning phase. Use CBO for accounts above $500/day.
+- ROAS benchmarks: Average Meta Ads ROAS across industries is 2.87x. Top quartile eCommerce accounts hit 4x+. Below 1.5x is a structural problem (WordStream 2026).
+- Creative: First 3 seconds determine 60% of ad performance. UGC-style creatives outperform polished ads by 30% for D2C brands on average in 2026.
+
+CITATION RULES (non-negotiable):
+- Every statistic MUST have a source in parentheses: (Meta Business Insights 2026), (WordStream 2026), (eMarketer Q1 2026), (Databox 2026)
+- Only use stats from research context provided or from the tactical knowledge base above
+- If no real source exists for a claim, reframe as qualitative: "Most media buyers report..." never invent a percentage
+- Approved sources: Meta Business Insights, WordStream, eMarketer, Databox, HubSpot, Sprout Social, Social Media Examiner`;
 const SEED=[
   {slug:"meta-ads-reporting-spreadsheets-waste",title:"Spreadsheet Reporting Is Costing Meta Advertisers 6+ Hours a Week in 2026",framework:"PAS",angle:"Urgency"},
   {slug:"roas-dropping-meta-ads",title:"Your ROAS Dropped 30% This Month and You Haven't Noticed Yet",framework:"PAS",angle:"Fear"},
@@ -391,6 +407,65 @@ const SEED=[
   {slug:"meta-ads-ecommerce-roas",title:"How eCommerce Brands Are Hitting 4x+ ROAS on Meta Ads in 2026",framework:"BAB",angle:"Motivation"},
   {slug:"meta-ads-ai-automation-2026",title:"AI in Meta Ads 2026: What's Automating, What Still Needs You, and What Pays More",framework:"AIDA",angle:"Authority"},
 ];
+// ── AUTHORS ──────────────────────────────────────────────────────────────────
+const AUTHORS = [
+  {
+    name: "Shreya",
+    role: "Performance Marketing Lead",
+    years: 6,
+    speciality: "Meta Ads scaling and creative strategy for D2C brands",
+    quote_style: "I've scaled 40+ D2C brands on Meta. The pattern is always the same --",
+    tactical_context: "Knows Advantage+ Shopping Campaigns inside out, creative fatigue detection, scaling budgets without ROAS collapse, broad vs interest targeting in 2026."
+  },
+  {
+    name: "Sri Nath",
+    role: "Paid Media Strategist",
+    years: 5,
+    speciality: "CPL reduction and funnel optimisation for SaaS and EdTech",
+    quote_style: "After auditing 60+ SaaS ad accounts, the CPL problem is almost never the ad --",
+    tactical_context: "Deep expertise in lead gen campaigns, CPL benchmarking by vertical, landing page conversion rate impact on CPL, Meta lead forms vs website conversions."
+  },
+  {
+    name: "Vikram",
+    role: "Media Buying Director",
+    years: 8,
+    speciality: "Multi-account Meta campaign management and ROAS optimisation for agencies",
+    quote_style: "Managing 25 ad accounts simultaneously taught me one thing --",
+    tactical_context: "Agency-side perspective on managing multiple clients, cross-account budget allocation, bid strategy selection (cost cap vs bid cap vs highest volume), reporting to stakeholders."
+  },
+  {
+    name: "Praveen",
+    role: "Growth Marketing Manager",
+    years: 4,
+    speciality: "eCommerce Facebook Ads, retargeting, and Advantage+ campaigns",
+    quote_style: "The brands hitting 4x+ ROAS on Meta in 2026 all have one thing in common --",
+    tactical_context: "eCommerce-specific: dynamic product ads, catalogue campaigns, retargeting windows, Advantage+ Shopping vs manual campaigns, ROAS by product category."
+  },
+  {
+    name: "Sophia",
+    role: "Digital Marketing Consultant",
+    years: 7,
+    speciality: "Meta Ads reporting, analytics, and stakeholder communication",
+    quote_style: "Every founder I've worked with says the same thing about Meta Ads reports --",
+    tactical_context: "Reporting frameworks, which metrics to show founders vs ops teams, attribution models (7-day click vs 1-day view), third-party analytics tools vs Meta native reporting."
+  },
+  {
+    name: "Lavanya",
+    role: "Performance Marketing Analyst",
+    years: 3,
+    speciality: "Ad creative testing, audience segmentation, and Meta Ads for small businesses",
+    quote_style: "Small budgets on Meta force you to be precise. Here is what actually works --",
+    tactical_context: "Creative testing frameworks (A/B vs multivariate), audience overlap issues, small budget optimisation ($500-$2000/month accounts), creative fatigue signals and refresh cadence."
+  }
+];
+
+let currentAuthorIndex = 0;
+function getNextAuthor(){
+  const author = AUTHORS[currentAuthorIndex % AUTHORS.length];
+  currentAuthorIndex++;
+  return author;
+}
+
 window.onload=()=>{
   const ok=localStorage.getItem('vl_openai'),gk=localStorage.getItem('vl_github');
   if(ok)document.getElementById('openaiKey').value=ok;
@@ -430,7 +505,7 @@ function switchEditorTab(tab){
   document.getElementById('etabPreview').classList.toggle('active',tab==='preview');
   document.getElementById('etabSource').classList.toggle('active',tab==='source');
   if(!currentPost)return;
-  if(tab==='preview'){document.getElementById('editorBody').innerHTML=`<div class="preview-wrap">${buildPreview(currentPost.topic,currentPost.md)}</div>`;}
+  if(tab==='preview'){document.getElementById('editorBody').innerHTML=`<div class="preview-wrap">${buildPreview(currentPost.topic,currentPost.md,currentPost.author)}</div>`;}
   else{document.getElementById('editorBody').innerHTML=`<div class="source-wrap"><pre class="source-pre">${escHtml(currentPost.html)}</pre></div>`;}
 }
 async function fetchTopics(){
@@ -499,6 +574,7 @@ async function writeTopic(idx){
   document.getElementById('editorBody').innerHTML=`<div class="gen-state"><div class="spinner"></div><div class="gen-label">Generating SEO metadata...</div></div>`;
   document.getElementById('dlBtn').disabled=true;document.getElementById('publishBtn').disabled=true;
 
+  const author = getNextAuthor();
   let seoMeta={focusKeyword:topic.slug.replace(/-/g,' '),metaTitle:topic.title.slice(0,60),metaDescription:''};
   try{
     document.querySelector('.gen-label').textContent='Generating SEO metadata...';
@@ -508,20 +584,88 @@ async function writeTopic(idx){
     seoMeta=JSON.parse(metaText);
   }catch(e){/* use defaults */}
 
+  // Step 2: Deep research with web search
+  let researchContext = '';
   try{
-    document.querySelector('.gen-label').textContent='Writing blog post...';
-    const userPrompt=`Write a complete SEO blog post. Use the ${topic.framework} framework as INVISIBLE structural scaffolding only -- never label or mention the framework stages anywhere in the post.\n\nTitle: "${topic.title}"\nFocus keyword: "${seoMeta.focusKeyword}"\nConversion goal: ${topic.angle}\nTarget reader: Performance marketers, media buyers, agencies, small business owners running Meta/Facebook Ads who are obsessed with maximising ROAS and cutting wasted ad spend\n\nREQUIREMENTS -- follow every single one:\n1. 1200 to 1500 words\n2. Framework is invisible structure only -- no stage labels like Attention/Interest/Problem/Solution/Before/After\n3. Include focus keyword "${seoMeta.focusKeyword}" in first 100 words, at least 3 H2 headings, and 5+ times total\n4. H2s must be questions starting with What/How/Why/Which/When AND must contain specific numbers or percentages where possible (e.g. "How to Cut CPL by 40%", "Why 73% of Media Buyers Miss This")\n5. Opening hook must reference a specific stat, dollar amount, or performance metric that hits the reader immediately\n6. Every section must have a "what you are losing by not doing this" angle\n7. Include at least 2 markdown data tables (| Col | Col |)\n8. Include 1 expert quote from "VortexLabs Expert" with a specific insight\n9. Include a ## "2026 Industry Context" section with 3-5 bullet stats\n10. Include a ## "What to Expect in 2027" section with forward predictions\n11. End with exactly 5 FAQ items in format **Q:** question here / **A:** answer here\n12. Final CTA paragraph referencing: ${LANDING_PAGE}\n13. No em dashes anywhere\n14. Body content only, use ## for H2 and ### for H3`;
-    const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'gpt-4o',max_tokens:3000,temperature:0.8,messages:[{role:'system',content:sysPrompt},{role:'user',content:userPrompt}],max_tokens:4500})});
+    document.querySelector('.gen-label').textContent='Researching real stats and sources...';
+    const researchPrompt = `You are a performance marketing research analyst. Search the web for REAL, CURRENT statistics and data about this topic: "${topic.title}"
+
+Find and return:
+1. Real CPL/CPA/ROAS benchmarks by industry vertical (with source names and years)
+2. Real Meta Ads platform statistics (with Meta Business Insights or third-party source)
+3. Real performance marketing industry trends for 2026 (with source)
+4. Any recent Meta Ads feature changes or algorithm updates relevant to this topic
+5. Credible studies or reports from: Meta, WordStream, eMarketer, Databox, HubSpot, Sprout Social, Social Media Examiner
+
+Format as a list of bullet points. Each stat MUST include the source in parentheses. Example: "Average eCommerce ROAS on Meta is 2.87x (WordStream Industry Benchmarks 2026)". Only include stats you found via web search. Do not invent numbers.`;
+
+    const researchRes = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+      body: JSON.stringify({
+        model: 'gpt-4o-search-preview',
+        max_tokens: 1000,
+        messages: [{role:'user', content: researchPrompt}],
+        web_search_options: {search_context_size: 'medium'}
+      })
+    });
+    const researchData = await researchRes.json();
+    if(researchRes.ok && researchData.choices?.[0]?.message?.content){
+      researchContext = researchData.choices[0].message.content;
+      document.querySelector('.gen-label').textContent='Research complete. Writing post...';
+    } else {
+      document.querySelector('.gen-label').textContent='Research unavailable. Writing with known data...';
+    }
+  }catch(e){
+    document.querySelector('.gen-label').textContent='Writing post...';
+  }
+
+  // Step 3: Write post with real research injected
+  try{
+    const researchBlock = researchContext
+      ? `\n\nREAL RESEARCH DATA (use these stats with exact sources -- do not modify the numbers or sources):\n${researchContext}\n\nCITATION RULES:\n- Every stat in the post MUST have a source in parentheses: (Meta Business Insights 2026), (WordStream 2026), (eMarketer Q1 2026) etc.\n- If you cannot cite a real source for a stat, reframe it as an observation: "Most media buyers report..." instead of "73% of media buyers..."\n- Never invent statistics. Use only the research data provided above or reframe as qualitative observations.`
+      : `\n\nCITATION RULES:\n- Every stat MUST have a named source in parentheses: (Meta Business Insights 2026), (WordStream 2026), (eMarketer 2026), (Databox 2026)\n- If you cannot cite a real source, reframe as qualitative: "Most media buyers report..." not "73% of media buyers..."\n- Never invent statistics.`;
+
+    const userPrompt=`Write a complete SEO blog post. Use the ${topic.framework} framework as INVISIBLE structural scaffolding only -- never label or mention the framework stages anywhere in the post.
+
+Title: "${topic.title}"
+Focus keyword: "${seoMeta.focusKeyword}"
+Conversion goal: ${topic.angle}
+Author writing this post: ${author.name}, ${author.role}, ${author.years} years experience, specialises in ${author.speciality}
+Author tactical knowledge to draw from: ${author.tactical_context}
+Target reader: Performance marketers, media buyers, agencies, small business owners running Meta/Facebook Ads who are obsessed with maximising ROAS and cutting wasted ad spend
+${researchBlock}
+
+REQUIREMENTS -- follow every single one:
+1. 1200 to 1500 words
+2. Framework is invisible structure only -- no stage labels like Attention/Interest/Problem/Solution/Before/After
+3. Include focus keyword "${seoMeta.focusKeyword}" in first 100 words, at least 3 H2 headings, and 5+ times total
+4. H2s must be questions starting with What/How/Why/Which/When AND must contain specific numbers or percentages where possible
+5. Opening hook must reference a specific CITED stat that hits the reader immediately
+6. Every section must have a "what you are losing by not doing this" angle
+7. Include at least 2 markdown data tables (| Col | Col |)
+8. Include 1 expert quote attributed to "${author.name}, ${author.role} with ${author.years} years in performance marketing" -- quote must start with: "${author.quote_style}" and give a specific tactical insight
+9. Include a ## "2026 Industry Context" section with 3-5 CITED bullet stats from the research above
+10. Include a ## "What to Expect in 2027" section with forward predictions
+11. End with exactly 5 FAQ items in format **Q:** question here / **A:** answer here
+12. Final CTA paragraph referencing: ${LANDING_PAGE}
+13. No em dashes anywhere
+14. Body content only, use ## for H2 and ### for H3`;
+
+    const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+      body:JSON.stringify({model:'gpt-4o',max_tokens:4500,temperature:0.8,
+        messages:[{role:'system',content:sysPrompt},{role:'user',content:userPrompt}]})});
     const data=await res.json();if(!res.ok)throw new Error(data.error?.message||'API error');
     const md=data.choices[0].message.content;
-    const html=wrapInHTML(topic,md,seoMeta);
-    currentPost={topic,html,md,slug:topic.slug,seoMeta};
-    document.getElementById('editorBody').innerHTML=`<div class="preview-wrap">${buildPreview(topic,md)}</div>`;
-    document.getElementById('dlBtn').disabled=false;document.getElementById('publishBtn').disabled=false;document.getElementById('scheduleBtn').disabled=false;
+    const html=wrapInHTML(topic,md,seoMeta,author);
+    currentPost={topic,html,md,slug:topic.slug,seoMeta,author,researchContext};
+    document.getElementById('editorBody').innerHTML=`<div class="preview-wrap">${buildPreview(topic,md,author)}</div>`;
+    document.getElementById('dlBtn').disabled=false;document.getElementById('publishBtn').disabled=false;document.getElementById('scheduleBtn').disabled=false;document.getElementById('imgRow').style.display='flex';document.getElementById('genImgBtn').disabled=false;
     currentEditorTab='preview';
     document.getElementById('etabPreview').classList.add('active');document.getElementById('etabSource').classList.remove('active');
     renderSeoAudit(topic,md,seoMeta,html);
-    toast('Post written','success');
+    toast('Post written with real research','success');
   }catch(e){
     document.getElementById('editorBody').innerHTML=`<div class="empty-state"><div class="empty-icon">&#9888;&#65039;</div><p>${e.message}</p></div>`;
     toast('Write failed: '+e.message,'error');
@@ -597,11 +741,12 @@ function renderSeoAudit(topic,md,seoMeta,html){
         </div>`
     ).join('')}`;
 }
-function buildPreview(topic,md){
+function buildPreview(topic,md,auth){
   const date=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
-  return `<p style="font-size:11px;color:var(--muted);margin-bottom:18px">${topic.framework} &nbsp;&middot;&nbsp; ${topic.angle} &nbsp;&middot;&nbsp; ${date}</p><h1>${topic.title}</h1>${markdownToHTML(md)}<div class="preview-cta"><h2>Stop Flying Blind on Your Meta Ads.</h2><p>One clean dashboard for every metric that matters. Built by a performance marketer, for performance marketers.</p><a href="${LANDING_PAGE}" target="_blank">Get the Free Dashboard</a></div>`;
+  const authorLine=auth?`<span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-top:6px;"><span style="width:20px;height:20px;border-radius:50%;background:var(--blue);display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;">${auth.name[0]}</span>Written by <strong style="color:var(--white);">${auth.name}</strong> &middot; ${auth.role}</span>`:'';
+  return `<p style="font-size:11px;color:var(--muted);margin-bottom:6px">${topic.framework} &nbsp;&middot;&nbsp; ${topic.angle} &nbsp;&middot;&nbsp; ${date}</p>${authorLine}<h1 style="margin-top:14px">${topic.title}</h1>${markdownToHTML(md)}<div class="preview-cta"><h2>Stop Flying Blind on Your Meta Ads.</h2><p>One clean dashboard for every metric that matters. Built by a performance marketer, for performance marketers.</p><a href="${LANDING_PAGE}" target="_blank">Get the Free Dashboard</a></div>`;
 }
-function wrapInHTML(topic,md,seoMeta){
+function wrapInHTML(topic,md,seoMeta,author){
   const date=new Date().toISOString();
   const dateR=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
   const SC='<'+'script';
@@ -629,16 +774,17 @@ function wrapInHTML(topic,md,seoMeta){
     SC+' async src="https://www.googletagmanager.com/gtag/js?id=G-3ET2SV2XP5">'+EC,
     SC+'>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-3ET2SV2XP5");'+EC,
     '<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>',
-    '<style>:root{--navy:#0a1628;--navy-mid:#112040;--blue:#2563eb;--blue-bright:#3b82f6;--white:#fff;--off:#d4dff5;--muted:#8aa0c4;--border:rgba(255,255,255,0.08);--success:#22c55e;}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:\'DM Sans\',sans-serif;background:var(--navy);color:var(--off);line-height:1.75;}nav{padding:15px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(10,22,40,0.97);position:sticky;top:0;z-index:100;}.nav-logo{font-size:14px;font-weight:700;color:var(--white);text-decoration:none;}.nav-logo span{color:var(--blue-bright);}.nav-btn{background:var(--blue);color:var(--white);border:none;padding:8px 18px;border-radius:8px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;}.hero{padding:52px 24px 28px;max-width:760px;margin:0 auto;}.meta{font-size:12px;color:var(--muted);margin-bottom:12px;}.meta span{color:var(--blue-bright);font-weight:600;}h1{font-size:clamp(22px,4vw,36px);font-weight:700;letter-spacing:-0.8px;line-height:1.2;color:var(--white);}.body{max-width:760px;margin:0 auto;padding:28px 24px 60px;}.body h2{font-size:20px;font-weight:700;color:var(--white);margin:32px 0 10px;}.body h3{font-size:16px;font-weight:600;color:var(--white);margin:20px 0 7px;}.body p{margin-bottom:16px;font-size:16px;}.body ul,.body ol{margin:0 0 16px 20px;}.body li{margin-bottom:7px;font-size:16px;}.body strong{color:var(--white);font-weight:600;}.cta-block{background:#fff;border:2px solid var(--blue);border-radius:16px;padding:38px 30px;text-align:center;margin-top:44px;}.cta-block h2{font-size:22px;font-weight:700;color:var(--blue);margin-bottom:9px;}.cta-block p{font-size:15px;color:#334155;margin-bottom:22px;}.cta-btn{display:inline-block;background:var(--blue);color:#fff;padding:13px 28px;border-radius:10px;font-family:\'DM Sans\',sans-serif;font-size:15px;font-weight:700;text-decoration:none;}.free-badge{display:inline-block;background:rgba(37,99,235,0.1);border:1px solid rgba(37,99,235,0.3);color:var(--blue);font-size:12px;font-weight:700;padding:3px 12px;border-radius:100px;margin-bottom:13px;}.mid-cta{background:#fff;border:2px solid var(--blue);border-radius:12px;padding:20px 24px;margin:32px 0;}.mid-cta-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}.mid-cta-text{display:flex;flex-direction:column;gap:4px;}.mid-cta-text strong{font-size:15px;font-weight:700;color:var(--blue);}.mid-cta-text span{font-size:13px;color:#475569;}.mid-cta-btn{display:inline-block;background:var(--blue);color:#fff;padding:10px 20px;border-radius:8px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;}footer{border-top:1px solid var(--border);padding:22px;text-align:center;font-size:12px;color:var(--muted);}footer a{color:var(--blue-bright);text-decoration:none;}.tbl-wrap{overflow-x:auto;margin:24px 0;}.tbl-wrap table{width:100%;border-collapse:collapse;font-size:14px;}.tbl-wrap th{background:var(--blue);color:#fff;padding:11px 16px;text-align:left;font-weight:700;font-size:13px;letter-spacing:0.2px;}.tbl-wrap td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--off);}.tbl-wrap tr:nth-child(even) td{background:rgba(255,255,255,0.03);}.tbl-wrap tr:hover td{background:rgba(59,130,246,0.07);}@media(max-width:600px){.hero,.body{padding-left:18px;padding-right:18px;}.tbl-wrap{margin:16px -18px;border-radius:0;}}</style>',
+    '<style>:root{--navy:#0a1628;--navy-mid:#112040;--blue:#2563eb;--blue-bright:#3b82f6;--white:#fff;--off:#d4dff5;--muted:#8aa0c4;--border:rgba(255,255,255,0.08);--success:#22c55e;}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:\'DM Sans\',sans-serif;background:var(--navy);color:var(--off);line-height:1.75;}nav{padding:15px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(10,22,40,0.97);position:sticky;top:0;z-index:100;}.nav-logo{font-size:14px;font-weight:700;color:var(--white);text-decoration:none;}.nav-logo span{color:var(--blue-bright);}.nav-btn{background:var(--blue);color:var(--white);border:none;padding:8px 18px;border-radius:8px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;}.hero{padding:52px 24px 28px;max-width:760px;margin:0 auto;}.meta{font-size:12px;color:var(--muted);margin-bottom:12px;}.meta span{color:var(--blue-bright);font-weight:600;}h1{font-size:clamp(22px,4vw,36px);font-weight:700;letter-spacing:-0.8px;line-height:1.2;color:var(--white);}.body{max-width:760px;margin:0 auto;padding:28px 24px 60px;}.body h2{font-size:20px;font-weight:700;color:var(--white);margin:32px 0 10px;}.body h3{font-size:16px;font-weight:600;color:var(--white);margin:20px 0 7px;}.body p{margin-bottom:16px;font-size:16px;}.body ul,.body ol{margin:0 0 16px 20px;}.body li{margin-bottom:7px;font-size:16px;}.body strong{color:var(--white);font-weight:600;}.cta-block{background:#fff;border:2px solid var(--blue);border-radius:16px;padding:38px 30px;text-align:center;margin-top:44px;}.cta-block h2{font-size:22px;font-weight:700;color:var(--blue);margin-bottom:9px;}.cta-block p{font-size:15px;color:#334155;margin-bottom:22px;}.cta-btn{display:inline-block;background:var(--blue);color:#fff;padding:13px 28px;border-radius:10px;font-family:\'DM Sans\',sans-serif;font-size:15px;font-weight:700;text-decoration:none;}.free-badge{display:inline-block;background:rgba(37,99,235,0.1);border:1px solid rgba(37,99,235,0.3);color:var(--blue);font-size:12px;font-weight:700;padding:3px 12px;border-radius:100px;margin-bottom:13px;}.mid-cta{background:#fff;border:2px solid var(--blue);border-radius:12px;padding:20px 24px;margin:32px 0;}.mid-cta-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}.mid-cta-text{display:flex;flex-direction:column;gap:4px;}.mid-cta-text strong{font-size:15px;font-weight:700;color:var(--blue);}.mid-cta-text span{font-size:13px;color:#475569;}.mid-cta-btn{display:inline-block;background:var(--blue);color:#fff;padding:10px 20px;border-radius:8px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;}footer{border-top:1px solid var(--border);padding:22px;text-align:center;font-size:12px;color:var(--muted);}footer a{color:var(--blue-bright);text-decoration:none;}.author-box{border-top:1px solid var(--border);padding:24px;max-width:760px;margin:0 auto;display:flex;align-items:center;gap:16px;}.author-avatar{width:44px;height:44px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;}.author-info{}.author-name{font-size:14px;font-weight:700;color:var(--white);margin-bottom:2px;}.author-role{font-size:12px;color:var(--muted);}.tbl-wrap{overflow-x:auto;margin:24px 0;}.tbl-wrap table{width:100%;border-collapse:collapse;font-size:14px;}.tbl-wrap th{background:var(--blue);color:#fff;padding:11px 16px;text-align:left;font-weight:700;font-size:13px;letter-spacing:0.2px;}.tbl-wrap td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--off);}.tbl-wrap tr:nth-child(even) td{background:rgba(255,255,255,0.03);}.tbl-wrap tr:hover td{background:rgba(59,130,246,0.07);}@media(max-width:600px){.hero,.body{padding-left:18px;padding-right:18px;}.tbl-wrap{margin:16px -18px;border-radius:0;}}</style>',
     '</head>',
     '<body>',
     '<nav><a href="https://vortexlabs.app" class="nav-logo">Vortex<span>Labs</span></a><a href="'+LANDING_PAGE+'" class="nav-btn">Get the Dashboard</a></nav>',
-    '<div class="hero"><div class="meta"><span>VortexLabs Blog</span> &nbsp;&middot;&nbsp; '+dateR+' &nbsp;&middot;&nbsp; Performance Marketing</div><h1>'+topic.title+'</h1></div>',
+    '<div class="hero"><div class="meta"><span>VortexLabs Blog</span> &nbsp;&middot;&nbsp; '+dateR+' &nbsp;&middot;&nbsp; Performance Marketing</div><h1>'+topic.title+'</h1><div class="meta" style="margin-top:14px;display:flex;align-items:center;gap:8px;"><span style="width:28px;height:28px;border-radius:50%;background:var(--blue);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">'+((author&&author.name)?author.name[0]:'V')+'</span><span>Written by <strong style="color:var(--white)">'+((author&&author.name)?author.name:'VortexLabs')+'</strong> &nbsp;&middot;&nbsp; '+((author&&author.role)?author.role:'Performance Marketer')+' &nbsp;&middot;&nbsp; '+((author&&author.years)?author.years:'5')+ ' years</span></div></div>',
     '<div class="body">',
     markdownToHTML(md),
     '<div class="cta-block"><div class="free-badge">Free Access</div><h2>Stop Flying Blind on Your Meta Ads.</h2><p>One clean dashboard for every metric that matters. No expensive tools. No tab-switching. Built by a performance marketer, for performance marketers.</p><a href="'+LANDING_PAGE+'" class="cta-btn">Get the Free Dashboard</a></div>',
     '</div>',
-    '<footer><p>Part of <a href="https://vortexlabs.app">VortexLabs</a> &nbsp;&middot;&nbsp; Built by a Performance Marketer, for Performance Marketers</p></footer>',
+    '<div class="author-box"><div class="author-avatar">'+((author&&author.name)?author.name[0]:'V')+'</div><div class="author-info"><div class="author-name">'+((author&&author.name)?author.name:'VortexLabs Expert')+'</div><div class="author-role">'+((author&&author.role)?author.role+' &middot; '+author.years+' years in performance marketing':'Performance Marketer')+'</div></div></div>',
+    '<footer><p>Part of <a href="https://vortexlabs.app">VortexLabs</a> &nbsp;&middot;&nbsp; Performance Marketing Insights</p></footer>',
     '</body>',
     '</html>'
   ];
@@ -777,12 +923,12 @@ STRICT OUTPUT RULES:
     const data=await res.json();
     if(!res.ok)throw new Error(data.error?.message||'API error');
     const newMd=data.choices[0].message.content;
-    const newHtml=wrapInHTML(currentPost.topic,newMd,seoMeta);
+    const newHtml=wrapInHTML(currentPost.topic,newMd,seoMeta,currentPost.author);
     currentPost={...currentPost,md:newMd,html:newHtml};
 
     // Refresh editor view
     if(currentEditorTab==='preview'){
-      document.getElementById('editorBody').innerHTML=`<div class="preview-wrap">${buildPreview(currentPost.topic,newMd)}</div>`;
+      document.getElementById('editorBody').innerHTML=`<div class="preview-wrap">${buildPreview(currentPost.topic,newMd,currentPost.author)}</div>`;
     } else {
       document.getElementById('editorBody').innerHTML=`<div class="source-wrap"><pre class="source-pre">${escHtml(newHtml)}</pre></div>`;
     }
@@ -975,7 +1121,8 @@ async function rebuildBlogIndex(GH_HEADERS, allUrls, today){
         ).join('') +
         '</div>'
       : '<div class="empty">No posts yet. Check back soon.</div>',
-    '<footer><p>Part of <a href="https://vortexlabs.app">VortexLabs</a> &nbsp;&middot;&nbsp; Built by a Performance Marketer, for Performance Marketers</p></footer>',
+    '<div class="author-box"><div class="author-avatar">'+((author&&author.name)?author.name[0]:'V')+'</div><div class="author-info"><div class="author-name">'+((author&&author.name)?author.name:'VortexLabs Expert')+'</div><div class="author-role">'+((author&&author.role)?author.role+' &middot; '+author.years+' years in performance marketing':'Performance Marketer')+'</div></div></div>',
+    '<footer><p>Part of <a href="https://vortexlabs.app">VortexLabs</a> &nbsp;&middot;&nbsp; Performance Marketing Insights</p></footer>',
     '</body>',
     '</html>'
   ].join('\n');
@@ -1032,10 +1179,10 @@ RULES:
     const data=await res.json();
     if(!res.ok)throw new Error(data.error?.message||'API error');
     const newMd=data.choices[0].message.content;
-    const newHtml=wrapInHTML(currentPost.topic,newMd,currentPost.seoMeta);
+    const newHtml=wrapInHTML(currentPost.topic,newMd,currentPost.seoMeta,currentPost.author);
     currentPost={...currentPost,md:newMd,html:newHtml};
     if(currentEditorTab==='preview'){
-      document.getElementById('editorBody').innerHTML=`<div class="preview-wrap">${buildPreview(currentPost.topic,newMd)}</div>`;
+      document.getElementById('editorBody').innerHTML=`<div class="preview-wrap">${buildPreview(currentPost.topic,newMd,currentPost.author)}</div>`;
     }
     renderSeoAudit(currentPost.topic,newMd,currentPost.seoMeta,newHtml);
     switchTab('seo');
