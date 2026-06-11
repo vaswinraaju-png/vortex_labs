@@ -317,6 +317,12 @@
         <button class="btn-publish" id="publishBtn" onclick="publishToGitHub()" disabled>Publish to GitHub</button>
       </div>
     </div>
+    <div class="img-row" id="imgRow" style="display:none;">
+      <button class="btn-gen-img" id="genImgBtn" onclick="generateImage()">Generate Image</button>
+      <img class="gen-img-preview" id="genImgPreview" alt="Generated" />
+      <a class="img-dl-link" id="imgDlLink" download="blog-image.png">Download PNG</a>
+      <span style="font-size:11px;color:var(--muted);margin-left:4px;" id="imgNote"></span>
+    </div>
 <div class="editor-body" id="editorBody">
       <div class="empty-state"><div class="empty-icon">&#9997;&#65039;</div><p>Pick a topic from the left and click Write</p></div>
     </div>
@@ -661,7 +667,7 @@ REQUIREMENTS -- follow every single one:
     const html=wrapInHTML(topic,md,seoMeta,author);
     currentPost={topic,html,md,slug:topic.slug,seoMeta,author,researchContext};
     document.getElementById('editorBody').innerHTML=`<div class="preview-wrap">${buildPreview(topic,md,author)}</div>`;
-    document.getElementById('dlBtn').disabled=false;document.getElementById('publishBtn').disabled=false;document.getElementById('scheduleBtn').disabled=false;document.getElementById('imgRow').style.display='flex';document.getElementById('genImgBtn').disabled=false;
+    document.getElementById('dlBtn').disabled=false;document.getElementById('publishBtn').disabled=false;document.getElementById('scheduleBtn').disabled=false;if(document.getElementById('imgRow'))document.getElementById('imgRow').style.display='flex';if(document.getElementById('genImgBtn'))document.getElementById('genImgBtn').disabled=false;
     currentEditorTab='preview';
     document.getElementById('etabPreview').classList.add('active');document.getElementById('etabSource').classList.remove('active');
     renderSeoAudit(topic,md,seoMeta,html);
