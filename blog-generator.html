@@ -35,6 +35,10 @@
     .btn-fetch{background:var(--blue);border:none;color:var(--white);padding:7px 13px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
     .btn-fetch:hover{background:var(--blue-bright);}
     .btn-fetch:disabled{opacity:0.4;cursor:not-allowed;}
+    .seo-type-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+    .seo-type-btn{background:var(--navy-mid);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.15s;}
+    .seo-type-btn:hover{border-color:var(--blue);color:var(--off);}
+    .seo-type-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;}
     .topics-list{flex:1;overflow-y:auto;padding:8px;}
     .topic-item{background:var(--navy-mid);border:1px solid var(--border);border-radius:9px;padding:11px 13px;margin-bottom:7px;cursor:pointer;transition:border-color 0.15s;}
     .topic-item:hover{border-color:rgba(59,130,246,0.35);}
@@ -290,6 +294,13 @@
         <button class="btn-fetch" id="fetchBtn" onclick="fetchTopics()">Fetch</button>
         <button class="btn-fetch" id="refreshBtn" onclick="refreshIdeas()" style="background:var(--navy-light);border:1px solid var(--border);" title="Refresh with trend reasoning">&#8635;</button>
       </div>
+      <div class="seo-type-row" id="seoTypeRow">
+        <button class="seo-type-btn" id="seoTypeBtn-seo" onclick="toggleSeoType('seo')">SEO</button>
+        <button class="seo-type-btn" id="seoTypeBtn-aeo" onclick="toggleSeoType('aeo')">AEO</button>
+        <button class="seo-type-btn" id="seoTypeBtn-geo" onclick="toggleSeoType('geo')">GEO SEO</button>
+        <button class="seo-type-btn" id="seoTypeBtn-aiseo" onclick="toggleSeoType('aiseo')">AI SEO</button>
+      </div>
+      <input type="text" class="topic-input" id="geoLocationInput" placeholder="Country / State / Province / Zipcode..." style="display:none;margin-top:6px;width:100%;" />
       <div class="topics-list" id="topicsList"></div>
     </div>
     <div class="prompt-panel" id="promptPanel">
@@ -421,6 +432,7 @@ window.onload=()=>{
   updateKeyStatus();
   document.getElementById('systemPrompt').value=localStorage.getItem('vl_system_prompt')||DEFAULT_PROMPT;
   topics=[...SEED];renderTopics();
+  document.getElementById('seoTypeBtn-seo').classList.add('active');
 };
 function getPublished(){try{return new Set(JSON.parse(localStorage.getItem('vl_published')||'[]'));}catch(e){return new Set();}}
 function markPublished(slug){const s=getPublished();s.add(slug);localStorage.setItem('vl_published',JSON.stringify([...s]));renderTopics();toast('Marked as published','success');}
@@ -510,6 +522,42 @@ function renderTopics(){
     </div>`;
   }).join('');
 }
+// ── SEO TYPE TOGGLES ─────────────────────────────────────────────────────────
+let activeSeoTypes = new Set(['seo']); // SEO on by default
+function toggleSeoType(type){
+  if(activeSeoTypes.has(type)){
+    if(activeSeoTypes.size>1) activeSeoTypes.delete(type); // never allow zero selected
+  } else {
+    activeSeoTypes.add(type);
+  }
+  document.getElementById(`seoTypeBtn-${type}`).classList.toggle('active', activeSeoTypes.has(type));
+  document.getElementById('geoLocationInput').style.display = activeSeoTypes.has('geo') ? 'block' : 'none';
+}
+function buildSeoTypeInstructions(){
+  const blocks=[];
+  if(activeSeoTypes.has('aeo')){
+    blocks.push(`AEO (Answer Engine Optimization) RULES:
+- Right after each H2 question heading, give a direct 40-60 word answer in the very next sentence before expanding
+- Use definition-style openers where relevant: "X is..." / "X means..."
+- Write so the first 1-2 sentences under each heading could stand alone as a voice assistant answer`);
+  }
+  if(activeSeoTypes.has('geo')){
+    const loc=document.getElementById('geoLocationInput').value.trim() || 'the target region';
+    blocks.push(`GEO SEO RULES:
+- Naturally mention "${loc}" in the title or first 100 words
+- Include one dedicated subsection addressing marketers/businesses specifically in ${loc}
+- Reference region-relevant context (currency, business norms, market conditions) where natural -- do not force it if irrelevant`);
+  }
+  if(activeSeoTypes.has('aiseo')){
+    blocks.push(`AI SEO RULES (optimise for being cited by ChatGPT, Perplexity, Claude, Gemini):
+- Lead with the factual answer before any narrative buildup
+- Use explicit, quotable, standalone factual statements (no pronouns referring back vaguely)
+- Prefer numbered/listicle breakdowns for processes or comparisons
+- Avoid filler sentences that add no new information`);
+  }
+  return blocks.length ? '\n\n' + blocks.join('\n\n') : '';
+}
+
 async function writeTopic(idx){
   const key=localStorage.getItem('vl_openai');if(!key){toast('Save your OpenAI key first','error');return;}
   const topic=topics[idx];const sysPrompt=document.getElementById('systemPrompt').value;
@@ -579,7 +627,7 @@ Title: "${topic.title}"
 Focus keyword: "${seoMeta.focusKeyword}"
 Conversion goal: ${topic.angle}
 Target reader: Performance marketers, media buyers, agencies, small business owners running Meta/Facebook Ads who are obsessed with maximising ROAS and cutting wasted ad spend
-${researchBlock}
+${researchBlock}${buildSeoTypeInstructions()}
 
 REQUIREMENTS -- follow every single one:
 1. 1200 to 1500 words
