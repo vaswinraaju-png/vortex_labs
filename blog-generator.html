@@ -758,8 +758,8 @@ function buildPreview(topic,md,auth){
   const authorLine=auth?`<span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-top:6px;"><span style="width:20px;height:20px;border-radius:50%;background:var(--blue);display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;">${auth.name[0]}</span>Written by <strong style="color:var(--white);">${auth.name}</strong> &middot; ${auth.role}</span>`:'';
   return `<p style="font-size:11px;color:var(--muted);margin-bottom:6px">${topic.framework} &nbsp;&middot;&nbsp; ${topic.angle} &nbsp;&middot;&nbsp; ${date}</p>${authorLine}<h1 style="margin-top:14px">${topic.title}</h1>${markdownToHTML(md)}<div class="preview-cta"><h2>Stop Flying Blind on Your Meta Ads.</h2><p>One clean dashboard for every metric that matters. Built by a performance marketer, for performance marketers.</p><a href="${LANDING_PAGE}" target="_blank">Get the Free Dashboard</a></div>`;
 }
-function wrapInHTML(topic,md,seoMeta,author){
-  if(!author)author=AUTHORS[0]; // fallback to first author if undefined
+function wrapInHTML(topic,md,seoMeta,authorArg){
+  const author = (typeof authorArg!=='undefined' && authorArg) ? authorArg : AUTHORS[0];
   const date=new Date().toISOString();
   const dateR=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
   const SC='<'+'script';
