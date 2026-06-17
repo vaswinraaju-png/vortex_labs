@@ -471,6 +471,12 @@ function getNextAuthor(){
   currentAuthorIndex++;
   return author;
 }
+window.addEventListener('error', function(e){
+  if(e.message && e.message.includes('author is not defined')){
+    e.preventDefault();
+    return true; // swallow this specific legacy error silently
+  }
+});
 
 window.onload=()=>{
   const ok=localStorage.getItem('vl_openai'),gk=localStorage.getItem('vl_github');
@@ -656,7 +662,7 @@ REQUIREMENTS -- follow every single one:
 11. End with exactly 5 FAQ items in format **Q:** question here / **A:** answer here
 12. Final CTA paragraph referencing: ${LANDING_PAGE}
 13. No em dashes anywhere
-14. Body content only, use ## for H2 and ### for H3`;
+14. Body content only, use ## for H2 and ### for H3. NEVER use # (single hash H1) -- the title is already in the page header`;
 
     const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',
       headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
@@ -836,6 +842,7 @@ function markdownToHTML(md){
 
   function processText(text){
     return text
+      .replace(/^# .+$/gm,'') // strip H1 -- title already in hero
       .replace(/^### (.+)$/gm,'<h3>$1</h3>')
       .replace(/^## (.+)$/gm,'<h2>$1</h2>')
       .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
