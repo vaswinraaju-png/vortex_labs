@@ -46,7 +46,7 @@
     .topic-item-title{font-size:12px;font-weight:600;line-height:1.4;margin-bottom:5px;}
     .topic-item-meta{font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
     .fw-tag{font-size:10px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:var(--blue-bright);background:var(--blue-glow);border:1px solid rgba(59,130,246,0.2);padding:2px 6px;border-radius:4px;}
-    .topic-actions{display:flex;gap:6px;margin-top:8px;}
+    .topic-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
     .btn-write{background:var(--blue);border:none;color:var(--white);padding:5px 13px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
     .btn-write:hover{background:var(--blue-bright);}
     .btn-write:disabled{opacity:0.4;cursor:not-allowed;}
@@ -128,12 +128,9 @@
     .toast.error{border-color:rgba(239,68,68,0.35);color:var(--danger);}
     .toast.info{border-color:rgba(59,130,246,0.35);color:var(--blue-bright);}
     ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--navy-light);border-radius:4px;}
-    /* fix btn per seo item */
     .seo-fix-btn{background:none;border:1px solid rgba(239,68,68,0.4);color:var(--danger);padding:2px 8px;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;cursor:pointer;margin-left:auto;flex-shrink:0;white-space:nowrap;}
     .seo-fix-btn:hover{background:rgba(239,68,68,0.1);}
     .seo-fix-btn.fixing{opacity:0.5;cursor:not-allowed;}
-    .seo-item{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;background:var(--navy-mid);border:1px solid var(--border);border-radius:7px;}
-    /* schedule modal */
     .sch-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:500;align-items:center;justify-content:center;padding:20px;}
     .sch-modal.open{display:flex;}
     .sch-box{background:var(--navy-mid);border:1px solid rgba(59,130,246,0.25);border-radius:14px;padding:28px;width:100%;max-width:380px;}
@@ -144,14 +141,12 @@
     .sch-actions{display:flex;gap:8px;}
     .btn-sch-confirm{background:var(--blue);border:none;color:#fff;padding:9px 20px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;flex:1;}
     .btn-sch-cancel{background:none;border:1px solid var(--border);color:var(--muted);padding:9px 16px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;}
-    /* image panel in editor */
     .img-row{padding:10px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
     .btn-gen-img{background:var(--navy-light);border:1px solid var(--border);color:var(--white);padding:6px 14px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
     .btn-gen-img:hover{background:var(--blue);border-color:var(--blue);}
     .btn-gen-img:disabled{opacity:0.4;cursor:not-allowed;}
     .gen-img-preview{width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--border);display:none;}
     .img-dl-link{font-size:11px;color:var(--blue-bright);text-decoration:none;display:none;}
-    /* topic reasoning badge */
     .reason-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
     .reason-tag{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;}
     .reason-tag.intent{background:rgba(59,130,246,0.12);color:var(--blue-bright);border:1px solid rgba(59,130,246,0.2);}
@@ -160,9 +155,10 @@
     .reason-tag.comp.high{background:rgba(239,68,68,0.1);color:var(--danger);border:1px solid rgba(239,68,68,0.2);}
     .reason-tag.score{background:rgba(168,85,247,0.12);color:#c084fc;border:1px solid rgba(168,85,247,0.2);}
     .reason-tip{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.4;}
-    /* scheduled badge */
     .sch-badge{font-size:10px;font-weight:700;background:rgba(245,158,11,0.12);color:var(--warning);border:1px solid rgba(245,158,11,0.25);padding:2px 7px;border-radius:4px;}
-    /* ── MOBILE ── */
+    /* published item rewrite badge */
+    .btn-rewrite{background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:var(--blue-bright);padding:5px 11px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;}
+    .btn-rewrite:hover{background:var(--blue);color:#fff;border-color:var(--blue);}
     .mob-nav{display:none;}
     .sidebar-handle{display:none;}
     @media(max-width:768px){
@@ -173,44 +169,17 @@
       .hdr-field.w200,.hdr-field.w150{width:100px;}
       .btn-sm{padding:6px 10px;font-size:12px;}
       .tag{font-size:10px;padding:2px 8px;}
-      /* Full screen app */
       .app{height:calc(100vh - 46px);flex-direction:row;}
-      /* Sidebar: hidden off-screen bottom drawer */
-      .sidebar{
-        position:fixed;bottom:0;left:0;right:0;
-        width:100% !important;
-        height:70vh;
-        z-index:400;
-        background:var(--navy-mid);
-        border-top:1px solid rgba(59,130,246,0.3);
-        border-radius:20px 20px 0 0;
-        transform:translateY(100%);
-        transition:transform 0.28s ease;
-        flex-direction:column;
-        display:flex !important;
-        overflow:hidden;
-      }
+      .sidebar{position:fixed;bottom:0;left:0;right:0;width:100% !important;height:70vh;z-index:400;background:var(--navy-mid);border-top:1px solid rgba(59,130,246,0.3);border-radius:20px 20px 0 0;transform:translateY(100%);transition:transform 0.28s ease;flex-direction:column;display:flex !important;overflow:hidden;}
       .sidebar.open{transform:translateY(0) !important;}
-      .sidebar-handle{
-        display:block;
-        width:40px;height:4px;
-        background:rgba(255,255,255,0.2);
-        border-radius:2px;
-        margin:12px auto 0;
-        flex-shrink:0;
-        cursor:pointer;
-      }
-      /* Editor full screen */
+      .sidebar-handle{display:block;width:40px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;margin:12px auto 0;flex-shrink:0;cursor:pointer;}
       .editor{flex:1;width:100%;overflow:hidden;}
       .editor-toolbar{padding:8px 10px;gap:4px;flex-wrap:wrap;}
       .editor-title{font-size:11px;width:100%;order:-1;white-space:normal;line-height:1.3;}
       .editor-tabs{gap:3px;}
       .etab{padding:4px 8px;font-size:11px;}
       .editor-actions{display:flex;gap:4px;width:100%;}
-      .btn-dl,.btn-publish,.btn-sm{
-        flex:1;padding:8px 6px;font-size:11px;
-        text-align:center;min-height:36px;
-      }
+      .btn-dl,.btn-publish,.btn-sm{flex:1;padding:8px 6px;font-size:11px;text-align:center;min-height:36px;}
       .editor-body{flex:1;overflow-y:auto;padding-bottom:56px;}
       .preview-wrap{padding:16px 14px;}
       .preview-wrap h1{font-size:18px;margin-bottom:12px;}
@@ -218,35 +187,11 @@
       .preview-wrap h3{font-size:14px;}
       .preview-wrap p,.preview-wrap li{font-size:13px;}
       .source-pre{font-size:10px;}
-      /* Bottom nav */
-      .mob-nav{
-        display:flex;
-        position:fixed;bottom:0;left:0;right:0;
-        height:52px;
-        background:rgba(10,22,40,0.98);
-        border-top:1px solid var(--border);
-        z-index:300;
-        padding:0;
-        margin:0;
-      }
-      .mob-nav-btn{
-        flex:1;
-        display:flex;flex-direction:column;
-        align-items:center;justify-content:center;
-        gap:2px;
-        background:none;border:none;
-        color:var(--muted);
-        font-family:'DM Sans',sans-serif;
-        font-size:9px;font-weight:600;
-        cursor:pointer;
-        padding:4px 0;
-        min-width:0;
-      }
+      .mob-nav{display:flex;position:fixed;bottom:0;left:0;right:0;height:52px;background:rgba(10,22,40,0.98);border-top:1px solid var(--border);z-index:300;padding:0;margin:0;}
+      .mob-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:9px;font-weight:600;cursor:pointer;padding:4px 0;min-width:0;}
       .mob-nav-btn.active{color:var(--blue-bright);}
       .mob-nav-btn svg{width:16px;height:16px;flex-shrink:0;}
-      /* Sidebar tabs hidden on mobile (nav handles it) */
       .sidebar-tabs{display:none;}
-      /* Topic items */
       .topic-search-bar{padding:8px 10px;gap:6px;}
       .topic-input{font-size:12px;padding:6px 10px;}
       .btn-fetch{padding:6px 10px;font-size:12px;}
@@ -254,17 +199,13 @@
       .topic-item{padding:10px 11px;margin-bottom:6px;}
       .topic-item-title{font-size:12px;}
       .btn-write{padding:5px 11px;font-size:11px;}
-      /* SEO panel */
       .seo-score-num{font-size:22px;}
       .seo-item-label{font-size:11px;}
       .seo-item-val{font-size:10px;}
       .seo-fix-btn{font-size:9px;padding:2px 6px;}
-      /* Schedule modal */
       .sch-box{margin:16px;border-radius:16px;}
-      /* Empty/gen states */
       .empty-state{padding-bottom:60px;}
       .gen-state{padding-bottom:60px;}
-      /* Overlay when sidebar open */
       .sidebar-overlay{display:block !important;}
     }
     .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:390;}
@@ -278,6 +219,8 @@
   <input type="password" class="hdr-field w150" id="githubPat" placeholder="GitHub PAT" />
   <button class="btn-sm" onclick="saveKeys()">Save Keys</button>
   <span class="tag missing" id="keyStatus">No keys</span>
+  <div class="hdr-sep"></div>
+  <button class="btn-sm" onclick="publishRobotsTxt()" title="Publish robots.txt to GitHub">Publish robots.txt</button>
 </header>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <div class="app">
@@ -334,7 +277,7 @@
       <a class="img-dl-link" id="imgDlLink" download="blog-image.png">Download PNG</a>
       <span style="font-size:11px;color:var(--muted);margin-left:4px;" id="imgNote"></span>
     </div>
-<div class="editor-body" id="editorBody">
+    <div class="editor-body" id="editorBody">
       <div class="empty-state"><div class="empty-icon">&#9997;&#65039;</div><p>Pick a topic from the left and click Write</p></div>
     </div>
   </div>
@@ -386,6 +329,7 @@ WRITING RULES:
 - Opening hook must reference a specific loss, gain, or performance stat that hits the reader's greed nerve immediately
 - Every section should have a "what you're losing by not doing this" angle baked in
 - Frameworks (PAS, AIDA, BAB) are invisible structural scaffolding ONLY. Never write or label the stages anywhere in the post. Never use words like "Attention:", "Interest:", "Desire:", "Action:", "Problem:", "Agitate:", "Solution:", "Before:", "After:", "Bridge:" as headings, labels, or callouts. The reader should never know a framework was used.
+- If blog mentions other company/organisation, find the link and redirect them to their website with a utm_source = vortexlabs.app
 
 TACTICAL KNOWLEDGE BASE (draw from this in every post):
 - Bid strategies: Cost cap stabilises CPL but needs 50+ conversions/week to exit learning phase. Bid cap for strict volume control. Highest volume for new campaigns with no data.
@@ -402,6 +346,7 @@ CITATION RULES (non-negotiable):
 - Only use stats from research context provided or from the tactical knowledge base above
 - If no real source exists for a claim, reframe as qualitative: "Most media buyers report..." never invent a percentage
 - Approved sources: Meta Business Insights, WordStream, eMarketer, Databox, HubSpot, Sprout Social, Social Media Examiner`;
+
 const SEED=[
   {slug:"meta-ads-reporting-spreadsheets-waste",title:"Spreadsheet Reporting Is Costing Meta Advertisers 6+ Hours a Week in 2026",framework:"PAS",angle:"Urgency"},
   {slug:"roas-dropping-meta-ads",title:"Your ROAS Dropped 30% This Month and You Haven't Noticed Yet",framework:"PAS",angle:"Fear"},
@@ -423,6 +368,10 @@ const SEED=[
   {slug:"performance-marketing-reporting-2026",title:"Meta Ads Reporting in 2026: What Changed, What's Coming in 2027",framework:"AIDA",angle:"Authority"},
   {slug:"meta-ads-ecommerce-roas",title:"How eCommerce Brands Are Hitting 4x+ ROAS on Meta Ads in 2026",framework:"BAB",angle:"Motivation"},
   {slug:"meta-ads-ai-automation-2026",title:"AI in Meta Ads 2026: What's Automating, What Still Needs You, and What Pays More",framework:"AIDA",angle:"Authority"},
+  // The 3 weak early posts -- kept in SEED so they always appear for rewriting
+  {slug:"facebook-ads-for-ecommerce",title:"Facebook Ads for Ecommerce: The 2026 Performance Playbook",framework:"PAS",angle:"Motivation"},
+  {slug:"meta-ads-reporting-spreadsheets-waste",title:"Why Meta Ads Reporting in Spreadsheets Is Killing Your Agency Margins in 2026",framework:"PAS",angle:"Fear"},
+  {slug:"ai-bidding-meta-ads",title:"AI Bidding on Meta Ads in 2026: Which Strategy Cuts CPL Without Losing Volume",framework:"AIDA",angle:"Trust"},
 ];
 
 window.onload=()=>{
@@ -434,9 +383,24 @@ window.onload=()=>{
   topics=[...SEED];renderTopics();
   document.getElementById('seoTypeBtn-seo').classList.add('active');
 };
+
+// ── PUBLISHED META PERSISTENCE ───────────────────────────────────────────────
 function getPublished(){try{return new Set(JSON.parse(localStorage.getItem('vl_published')||'[]'));}catch(e){return new Set();}}
 function markPublished(slug){const s=getPublished();s.add(slug);localStorage.setItem('vl_published',JSON.stringify([...s]));renderTopics();toast('Marked as published','success');}
 function unmarkPublished(slug){const s=getPublished();s.delete(slug);localStorage.setItem('vl_published',JSON.stringify([...s]));renderTopics();toast('Unmarked','info');}
+
+// Persist title to published meta so blog index always has it
+function savePublishedMeta(slug, title){
+  try{
+    const meta=JSON.parse(localStorage.getItem('vl_published_meta')||'{}');
+    meta[slug]=title;
+    localStorage.setItem('vl_published_meta',JSON.stringify(meta));
+  }catch(e){}
+}
+function getPublishedMeta(){
+  try{return JSON.parse(localStorage.getItem('vl_published_meta')||'{}');}catch(e){return {};}
+}
+
 function saveKeys(){
   const ok=document.getElementById('openaiKey').value.trim(),gk=document.getElementById('githubPat').value.trim();
   if(ok)localStorage.setItem('vl_openai',ok);if(gk)localStorage.setItem('vl_github',gk);
@@ -451,6 +415,7 @@ function updateKeyStatus(){
 }
 function savePrompt(){localStorage.setItem('vl_system_prompt',document.getElementById('systemPrompt').value);toast('Prompt saved','success');}
 function resetPrompt(){document.getElementById('systemPrompt').value=DEFAULT_PROMPT;localStorage.setItem('vl_system_prompt',DEFAULT_PROMPT);toast('Reset to default','info');}
+
 function switchTab(tab){
   ['Topics','Prompt','Seo'].forEach(t=>{
     const k=t.toLowerCase();
@@ -468,6 +433,7 @@ function switchEditorTab(tab){
   if(tab==='preview'){document.getElementById('editorBody').innerHTML=`<div class="preview-wrap">${buildPreview(currentPost.topic,currentPost.md)}</div>`;}
   else{document.getElementById('editorBody').innerHTML=`<div class="source-wrap"><pre class="source-pre">${escHtml(currentPost.html)}</pre></div>`;}
 }
+
 async function fetchTopics(){
   const key=localStorage.getItem('vl_openai');if(!key){toast('Save your OpenAI key first','error');return;}
   const custom=document.getElementById('customInput').value.trim();
@@ -483,6 +449,7 @@ async function fetchTopics(){
   }catch(e){toast('Fetch failed: '+e.message,'error');}
   btn.disabled=false;btn.textContent='Fetch';
 }
+
 function renderTopics(){
   const list=document.getElementById('topicsList');
   const published=getPublished();
@@ -494,7 +461,7 @@ function renderTopics(){
     const schTime=isSch?new Date(scheduled[t.slug].ts).toLocaleString('en-IN',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
     const compClass=t.competition?t.competition.toLowerCase():'';
     const hasReason=t.intent||t.relevanceScore||t.whyItWillRank;
-    return `<div class="topic-item${isPub?' published':''}" id="ti-${i}" style="${isPub?'opacity:0.45;':''}">
+    return `<div class="topic-item${isPub?' published':''}" id="ti-${i}" style="${isPub?'opacity:0.55;':''}">
       <div class="topic-item-title">${t.title}</div>
       <div class="topic-item-meta">
         <span class="fw-tag">${t.framework}</span>
@@ -513,7 +480,8 @@ function renderTopics(){
       `:''}
       <div class="topic-actions">
         ${isPub
-          ?`<button class="btn-write" style="background:var(--navy-light);font-size:11px;" onclick="unmarkPublished('${t.slug}')">Unmark</button>`
+          ?`<button class="btn-rewrite" onclick="writeTopic(${i})">Rewrite</button>
+            <button class="btn-write" style="background:var(--navy-light);font-size:11px;" onclick="unmarkPublished('${t.slug}')">Unmark</button>`
           :`<button class="btn-write" onclick="writeTopic(${i})">Write</button>
             <button class="btn-write" style="background:var(--navy-light);font-size:11px;" onclick="markPublished('${t.slug}')">Mark Published</button>
             ${isSch?`<button class="btn-write" style="background:rgba(239,68,68,0.2);font-size:11px;color:var(--danger);" onclick="cancelSchedule('${t.slug}')">Cancel Schedule</button>`:''}`
@@ -522,16 +490,17 @@ function renderTopics(){
     </div>`;
   }).join('');
 }
+
 // ── SEO TYPE TOGGLES ─────────────────────────────────────────────────────────
-let activeSeoTypes = new Set(['seo']); // SEO on by default
+let activeSeoTypes=new Set(['seo']);
 function toggleSeoType(type){
   if(activeSeoTypes.has(type)){
-    if(activeSeoTypes.size>1) activeSeoTypes.delete(type); // never allow zero selected
-  } else {
+    if(activeSeoTypes.size>1)activeSeoTypes.delete(type);
+  }else{
     activeSeoTypes.add(type);
   }
-  document.getElementById(`seoTypeBtn-${type}`).classList.toggle('active', activeSeoTypes.has(type));
-  document.getElementById('geoLocationInput').style.display = activeSeoTypes.has('geo') ? 'block' : 'none';
+  document.getElementById(`seoTypeBtn-${type}`).classList.toggle('active',activeSeoTypes.has(type));
+  document.getElementById('geoLocationInput').style.display=activeSeoTypes.has('geo')?'block':'none';
 }
 function buildSeoTypeInstructions(){
   const blocks=[];
@@ -542,7 +511,7 @@ function buildSeoTypeInstructions(){
 - Write so the first 1-2 sentences under each heading could stand alone as a voice assistant answer`);
   }
   if(activeSeoTypes.has('geo')){
-    const loc=document.getElementById('geoLocationInput').value.trim() || 'the target region';
+    const loc=document.getElementById('geoLocationInput').value.trim()||'the target region';
     blocks.push(`GEO SEO RULES:
 - Naturally mention "${loc}" in the title or first 100 words
 - Include one dedicated subsection addressing marketers/businesses specifically in ${loc}
@@ -555,7 +524,7 @@ function buildSeoTypeInstructions(){
 - Prefer numbered/listicle breakdowns for processes or comparisons
 - Avoid filler sentences that add no new information`);
   }
-  return blocks.length ? '\n\n' + blocks.join('\n\n') : '';
+  return blocks.length?'\n\n'+blocks.join('\n\n'):'';
 }
 
 async function writeTopic(idx){
@@ -563,7 +532,7 @@ async function writeTopic(idx){
   const topic=topics[idx];const sysPrompt=document.getElementById('systemPrompt').value;
   document.querySelectorAll('.topic-item').forEach(el=>el.classList.remove('active'));
   document.getElementById(`ti-${idx}`)?.classList.add('active');
-  const btn=document.querySelector(`#ti-${idx} .btn-write`);
+  const btn=document.querySelector(`#ti-${idx} .btn-write, #ti-${idx} .btn-rewrite`);
   if(btn){btn.disabled=true;btn.textContent='Writing...';}
   document.getElementById('editorTitle').textContent=topic.title;
   document.getElementById('editorTitle').className='editor-title active';
@@ -580,10 +549,10 @@ async function writeTopic(idx){
   }catch(e){/* use defaults */}
 
   // Step 2: Deep research with web search
-  let researchContext = '';
+  let researchContext='';
   try{
     document.querySelector('.gen-label').textContent='Researching real stats and sources...';
-    const researchPrompt = `You are a performance marketing research analyst. Search the web for REAL, CURRENT statistics and data about this topic: "${topic.title}"
+    const researchPrompt=`You are a performance marketing research analyst. Search the web for REAL, CURRENT statistics and data about this topic: "${topic.title}"
 
 Find and return:
 1. Real CPL/CPA/ROAS benchmarks by industry vertical (with source names and years)
@@ -594,21 +563,21 @@ Find and return:
 
 Format as a list of bullet points. Each stat MUST include the source in parentheses. Example: "Average eCommerce ROAS on Meta is 2.87x (WordStream Industry Benchmarks 2026)". Only include stats you found via web search. Do not invent numbers.`;
 
-    const researchRes = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json','Authorization':`Bearer ${key}`},
-      body: JSON.stringify({
-        model: 'gpt-4o-search-preview',
-        max_tokens: 1000,
-        messages: [{role:'user', content: researchPrompt}],
-        web_search_options: {search_context_size: 'medium'}
+    const researchRes=await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+      body:JSON.stringify({
+        model:'gpt-4o-search-preview',
+        max_tokens:1000,
+        messages:[{role:'user',content:researchPrompt}],
+        web_search_options:{search_context_size:'medium'}
       })
     });
-    const researchData = await researchRes.json();
-    if(researchRes.ok && researchData.choices?.[0]?.message?.content){
-      researchContext = researchData.choices[0].message.content;
+    const researchData=await researchRes.json();
+    if(researchRes.ok&&researchData.choices?.[0]?.message?.content){
+      researchContext=researchData.choices[0].message.content;
       document.querySelector('.gen-label').textContent='Research complete. Writing post...';
-    } else {
+    }else{
       document.querySelector('.gen-label').textContent='Research unavailable. Writing with known data...';
     }
   }catch(e){
@@ -617,9 +586,9 @@ Format as a list of bullet points. Each stat MUST include the source in parenthe
 
   // Step 3: Write post with real research injected
   try{
-    const researchBlock = researchContext
-      ? `\n\nREAL RESEARCH DATA (use these stats with exact sources -- do not modify the numbers or sources):\n${researchContext}\n\nCITATION RULES:\n- Every stat in the post MUST have a source in parentheses: (Meta Business Insights 2026), (WordStream 2026), (eMarketer Q1 2026) etc.\n- If you cannot cite a real source for a stat, reframe it as an observation: "Most media buyers report..." instead of "73% of media buyers..."\n- Never invent statistics. Use only the research data provided above or reframe as qualitative observations.`
-      : `\n\nCITATION RULES:\n- Every stat MUST have a named source in parentheses: (Meta Business Insights 2026), (WordStream 2026), (eMarketer 2026), (Databox 2026)\n- If you cannot cite a real source, reframe as qualitative: "Most media buyers report..." not "73% of media buyers..."\n- Never invent statistics.`;
+    const researchBlock=researchContext
+      ?`\n\nREAL RESEARCH DATA (use these stats with exact sources -- do not modify the numbers or sources):\n${researchContext}\n\nCITATION RULES:\n- Every stat in the post MUST have a source in parentheses: (Meta Business Insights 2026), (WordStream 2026), (eMarketer Q1 2026) etc.\n- If you cannot cite a real source for a stat, reframe it as an observation: "Most media buyers report..." instead of "73% of media buyers..."\n- Never invent statistics. Use only the research data provided above or reframe as qualitative observations.`
+      :`\n\nCITATION RULES:\n- Every stat MUST have a named source in parentheses: (Meta Business Insights 2026), (WordStream 2026), (eMarketer 2026), (Databox 2026)\n- If you cannot cite a real source, reframe as qualitative: "Most media buyers report..." not "73% of media buyers..."\n- Never invent statistics.`;
 
     const userPrompt=`Write a complete SEO blog post. Use the ${topic.framework} framework as INVISIBLE structural scaffolding only -- never label or mention the framework stages anywhere in the post.
 
@@ -654,7 +623,9 @@ REQUIREMENTS -- follow every single one:
     const html=wrapInHTML(topic,md,seoMeta);
     currentPost={topic,html,md,slug:topic.slug,seoMeta,researchContext};
     document.getElementById('editorBody').innerHTML=`<div class="preview-wrap">${buildPreview(topic,md)}</div>`;
-    document.getElementById('dlBtn').disabled=false;document.getElementById('publishBtn').disabled=false;document.getElementById('scheduleBtn').disabled=false;if(document.getElementById('imgRow'))document.getElementById('imgRow').style.display='flex';if(document.getElementById('genImgBtn'))document.getElementById('genImgBtn').disabled=false;
+    document.getElementById('dlBtn').disabled=false;document.getElementById('publishBtn').disabled=false;document.getElementById('scheduleBtn').disabled=false;
+    if(document.getElementById('imgRow'))document.getElementById('imgRow').style.display='flex';
+    if(document.getElementById('genImgBtn'))document.getElementById('genImgBtn').disabled=false;
     currentEditorTab='preview';
     document.getElementById('etabPreview').classList.add('active');document.getElementById('etabSource').classList.remove('active');
     renderSeoAudit(topic,md,seoMeta,html);
@@ -663,8 +634,9 @@ REQUIREMENTS -- follow every single one:
     document.getElementById('editorBody').innerHTML=`<div class="empty-state"><div class="empty-icon">&#9888;&#65039;</div><p>${e.message}</p></div>`;
     toast('Write failed: '+e.message,'error');
   }
-  if(btn){btn.disabled=false;btn.textContent='Write';}
+  if(btn){btn.disabled=false;btn.textContent=btn.classList.contains('btn-rewrite')?'Rewrite':'Write';}
 }
+
 function renderSeoAudit(topic,md,seoMeta,html){
   const wordCount=md.split(/\s+/).length;
   const keyword=seoMeta.focusKeyword.toLowerCase();
@@ -717,7 +689,6 @@ function renderSeoAudit(topic,md,seoMeta,html){
   const pct=Math.round((score/max)*100);
   const sc=pct>=80?'good':pct>=60?'ok':'bad';
   const sl=pct>=80?'Strong':pct>=60?'Needs improvement':'Poor';
-  const failedChecks=checks.filter(c=>!c.section&&!c.p).map(c=>c.l+': '+c.n).join('\n');
   document.getElementById('seoContent').innerHTML=`
     <div class="seo-score-bar"><div class="seo-score-num ${sc}">${pct}</div><div><div style="font-size:13px;font-weight:700;color:var(--white)">${sl}</div><div style="font-size:11px;color:var(--muted)">SEO Score / 100</div></div></div>
     <div style="font-size:11px;color:var(--muted);padding:0 2px;margin-bottom:8px">Focus keyword: <strong style="color:var(--white)">${seoMeta.focusKeyword}</strong></div>
@@ -734,10 +705,12 @@ function renderSeoAudit(topic,md,seoMeta,html){
         </div>`
     ).join('')}`;
 }
+
 function buildPreview(topic,md){
   const date=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
   return `<p style="font-size:11px;color:var(--muted);margin-bottom:6px">${topic.framework} &nbsp;&middot;&nbsp; ${topic.angle} &nbsp;&middot;&nbsp; ${date}</p><h1 style="margin-top:14px">${topic.title}</h1>${markdownToHTML(md)}<div class="preview-cta"><h2>Stop Flying Blind on Your Meta Ads.</h2><p>One clean dashboard for every metric that matters. Built by a performance marketer, for performance marketers.</p><a href="${LANDING_PAGE}" target="_blank">Get the Free Dashboard</a></div>`;
 }
+
 function wrapInHTML(topic,md,seoMeta){
   const date=new Date().toISOString();
   const dateR=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
@@ -781,12 +754,11 @@ function wrapInHTML(topic,md,seoMeta){
   ];
   return parts.join('\n');
 }
+
 function markdownToHTML(md){
   const MID_CTA=`<div class="mid-cta"><div class="mid-cta-inner"><div class="mid-cta-text"><strong>Want to track all this in one view?</strong><span>The free Meta Ads Dashboard gives you ROAS, CPL, spend and campaign performance at a glance. No $50/month tools. No tab-switching.</span></div><a href="${LANDING_PAGE}" class="mid-cta-btn" target="_blank">Get Free Dashboard</a></div></div>`;
-
-  // Parse markdown tables first
   function parseTables(text){
-    return text.replace(/((^\|.+\|\s*\n)(^\|[-| :]+\|\s*\n)(^\|.+\|\s*\n?)+)/gm, tableBlock=>{
+    return text.replace(/((^\|.+\|\s*\n)(^\|[-| :]+\|\s*\n)(^\|.+\|\s*\n?)+)/gm,tableBlock=>{
       const rows=tableBlock.trim().split('\n').filter(r=>r.trim());
       const isSeperator=r=>/^\|[-| :]+\|$/.test(r.trim());
       let html='<div class="tbl-wrap"><table>';
@@ -797,7 +769,7 @@ function markdownToHTML(md){
         if(inHead){
           html+='<thead><tr>'+cells.map(c=>`<th>${c}</th>`).join('')+'</tr></thead><tbody>';
           inHead=false;
-        } else {
+        }else{
           html+='<tr>'+cells.map(c=>`<td>${c}</td>`).join('')+'</tr>';
         }
       });
@@ -805,8 +777,6 @@ function markdownToHTML(md){
       return html;
     });
   }
-
-  // Split into table blocks and non-table blocks, process separately
   const TABLE_RE=/((?:^\|.+\|\s*\n){3,})/gm;
   const segments=[];
   let last=0,m;
@@ -817,14 +787,14 @@ function markdownToHTML(md){
     last=m.index+m[0].length;
   }
   if(last<src.length)segments.push({type:'text',content:src.slice(last)});
-
   function processText(text){
     return text
-      .replace(/^# .+$/gm,'') // strip H1 -- title already in hero
+      .replace(/^# .+$/gm,'')
       .replace(/^### (.+)$/gm,'<h3>$1</h3>')
       .replace(/^## (.+)$/gm,'<h2>$1</h2>')
       .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" style="color:var(--blue-bright);text-decoration:underline;">$1</a>')
+      .replace(/\*(.+?)\*/g,'<em>$1</em>')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" style="color:var(--blue-bright);text-decoration:underline;">$1</a>')
       .replace(/^- (.+)$/gm,'<li>$1</li>')
       .replace(/(<li>.*<\/li>\n?)+/g,x=>`<ul>${x}</ul>`)
       .split('\n')
@@ -834,13 +804,10 @@ function markdownToHTML(md){
         return `<p>${line}</p>`;
       }).filter(Boolean).join('\n');
   }
-
   const processed=segments.map(s=>{
     if(s.type==='table')return parseTables(s.content);
     return processText(s.content);
   }).join('\n');
-
-  // Inject mid-article CTA after 3rd H2
   const lines=processed.split('\n');
   let h2count=0;const out=[];
   for(const line of lines){
@@ -849,14 +816,13 @@ function markdownToHTML(md){
   }
   return out.join('\n');
 }
+
 async function optimisePost(){
   const key=localStorage.getItem('vl_openai');if(!key){toast('Save your OpenAI key first','error');return;}
   if(!currentPost){toast('No post loaded','error');return;}
   const btn=document.getElementById('optimiseBtn');
   if(btn){btn.disabled=true;btn.textContent='Optimising...';}
   const sysPrompt=document.getElementById('systemPrompt').value;
-
-  // Build list of failed checks from current post
   const md=currentPost.md,seoMeta=currentPost.seoMeta,html=currentPost.html;
   const mdLower=md.toLowerCase();
   const wordCount=md.split(/\s+/).length;
@@ -864,8 +830,6 @@ async function optimisePost(){
   const kwCount=(mdLower.match(new RegExp(keyword.replace(/\s+/g,'\\s+'),'g'))||[]).length;
   const h2c=(md.match(/^## /gm)||[]).length;
   const h3c=(md.match(/^### /gm)||[]).length;
-  const titleLen=seoMeta.metaTitle.length,descLen=seoMeta.metaDescription.length;
-
   const issues=[];
   if(wordCount<1200)issues.push(`Word count is only ${wordCount} -- expand to 1200-1500 words by adding a "2026 Industry Context" section with 3-5 stats, a FAQ section with 5 Q&As, and a "What to Expect in 2027" section`);
   if(h2c<4)issues.push(`Only ${h2c} H2 headings -- add ${4-h2c} more question-format H2 sections (start with What/How/Why/Which/When)`);
@@ -878,11 +842,8 @@ async function optimisePost(){
   if(md.includes('—'))issues.push('Em dashes found -- replace all — with commas or rewrite those sentences');
   if(!mdLower.includes('roas'))issues.push('Missing "ROAS" -- add at least 2 mentions');
   if(!mdLower.includes('cpl'))issues.push('Missing "CPL" -- add at least 1 mention');
-
   if(!issues.length){toast('Already fully optimised','success');if(btn){btn.disabled=false;btn.textContent='Auto-Optimise Failed Checks';}return;}
-
   toast(`Fixing ${issues.length} issue(s)...`,'info');
-
   const optimisePrompt=`You are a senior SEO editor. Your job is to rewrite the blog post below and fix EVERY issue listed. Do not skip any issue. Do not summarise. Return the full improved post.
 
 POST TITLE: "${currentPost.topic.title}"
@@ -904,50 +865,44 @@ STRICT OUTPUT RULES:
 7. Reader is a performance marketer obsessed with ROAS and cutting wasted ad spend -- write to that greed
 8. Every section should make the reader feel they are losing money by not acting
 9. Keep all good content from the original -- only add/fix, do not remove working sections`;
-
   try{
-    const res=await fetch('https://api.openai.com/v1/chat/completions',{
-      method:'POST',
+    const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',
       headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
       body:JSON.stringify({model:'gpt-4o',max_tokens:4500,temperature:0.7,
-        messages:[{role:'system',content:sysPrompt},{role:'user',content:optimisePrompt}]})
-    });
+        messages:[{role:'system',content:sysPrompt},{role:'user',content:optimisePrompt}]})});
     const data=await res.json();
     if(!res.ok)throw new Error(data.error?.message||'API error');
     const newMd=data.choices[0].message.content;
     const newHtml=wrapInHTML(currentPost.topic,newMd,seoMeta);
     currentPost={...currentPost,md:newMd,html:newHtml};
-
-    // Refresh editor view
     if(currentEditorTab==='preview'){
       document.getElementById('editorBody').innerHTML=`<div class="preview-wrap">${buildPreview(currentPost.topic,newMd)}</div>`;
-    } else {
+    }else{
       document.getElementById('editorBody').innerHTML=`<div class="source-wrap"><pre class="source-pre">${escHtml(newHtml)}</pre></div>`;
     }
-    // Re-run audit
     renderSeoAudit(currentPost.topic,newMd,seoMeta,newHtml);
-    // Switch to SEO tab to show updated score
     switchTab('seo');
     toast('Optimised! SEO score updated','success');
-  }catch(e){
-    toast('Optimise failed: '+e.message,'error');
-  }
+  }catch(e){toast('Optimise failed: '+e.message,'error');}
   if(btn){btn.disabled=false;btn.textContent='Auto-Optimise Failed Checks';}
 }
+
 function downloadCurrent(){
   if(!currentPost)return;
   const blob=new Blob([currentPost.html],{type:'text/html'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${currentPost.slug}.html`;a.click();
 }
+
 async function publishToGitHub(silent=false){
   const pat=localStorage.getItem('vl_github');if(!pat){toast('Save your GitHub PAT first','error');return;}
   if(!currentPost)return;
   const btn=document.getElementById('publishBtn');if(!silent){btn.disabled=true;btn.textContent='Publishing...';}
-
   const GH_HEADERS={'Authorization':`Bearer ${pat}`,'Accept':'application/vnd.github+json','Content-Type':'application/json'};
-
   try{
-    // 1. Publish blog post
+    // 1. Save title to persistent meta BEFORE publishing
+    savePublishedMeta(currentPost.slug, currentPost.topic.title);
+
+    // 2. Publish blog post
     btn.textContent='Publishing post...';
     const postPath=`${GH_FOLDER}/${currentPost.slug}.html`;
     const postUrl=`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${postPath}`;
@@ -958,7 +913,7 @@ async function publishToGitHub(silent=false){
     const postRes=await fetch(postUrl,{method:'PUT',headers:GH_HEADERS,body:JSON.stringify({message:`Add blog: ${currentPost.topic.title}`,content:postContent,branch:GH_BRANCH,...(postSha?{sha:postSha}:{})})});
     if(!postRes.ok){const err=await postRes.json();throw new Error(err.message||'Post publish failed');}
 
-    // 2. Update sitemap.xml
+    // 3. Update sitemap.xml -- includes homepage + blog index
     btn.textContent='Updating sitemap...';
     const sitemapPath='sitemap.xml';
     const sitemapUrl=`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${sitemapPath}`;
@@ -966,90 +921,113 @@ async function publishToGitHub(silent=false){
     const today=new Date().toISOString().split('T')[0];
     let sitemapSha=null;
     let existingUrls=[];
-
     const sitemapCheck=await fetch(sitemapUrl,{headers:GH_HEADERS});
     if(sitemapCheck.ok){
       const sitemapData=await sitemapCheck.json();
       sitemapSha=sitemapData.sha;
       const decoded=decodeURIComponent(escape(atob(sitemapData.content.replace(/\n/g,''))));
-      // Extract existing <loc> URLs
       const matches=decoded.match(/<loc>(.*?)<\/loc>/g)||[];
       existingUrls=matches.map(m=>m.replace(/<\/?loc>/g,''));
     }
 
-    // Add new URL if not already present
-    if(!existingUrls.includes(newPostUrl)) existingUrls.push(newPostUrl);
-
-    // Always include landing page
+    // Ensure these canonical URLs are always in the sitemap
+    const homepageUrl='https://vortexlabs.app/';
     const landingUrl='https://vortexlabs.app/meta-dashboard-free-download.html';
-    if(!existingUrls.includes(landingUrl)) existingUrls.unshift(landingUrl);
+    const blogIndexUrl='https://vortexlabs.app/blogs/';
+
+    // Remove old www/http variants if present, then add canonical set
+    const cleanUrls=existingUrls.filter(u=>
+      !u.startsWith('http://') &&
+      !u.includes('www.vortexlabs') &&
+      u!==homepageUrl && u!==landingUrl && u!==blogIndexUrl
+    );
+
+    // Build final URL list: homepage first, landing, blog index, then all posts
+    const finalUrls=[homepageUrl, landingUrl, blogIndexUrl, ...cleanUrls];
+    if(!finalUrls.includes(newPostUrl))finalUrls.push(newPostUrl);
 
     const sitemapXml=`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${existingUrls.map(u=>`  <url>
+${finalUrls.map(u=>{
+  let cf='monthly',pr='0.7';
+  if(u===homepageUrl){cf='weekly';pr='1.0';}
+  else if(u===landingUrl){cf='weekly';pr='1.0';}
+  else if(u===blogIndexUrl){cf='daily';pr='0.9';}
+  else if(u.includes('/blogs/')){cf='monthly';pr='0.8';}
+  return `  <url>
     <loc>${u}</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>${u.includes('/blogs/')?'monthly':'weekly'}</changefreq>
-    <priority>${u===landingUrl?'1.0':u.includes('/blogs/')?'0.8':'0.7'}</priority>
-  </url>`).join('\n')}
+    <changefreq>${cf}</changefreq>
+    <priority>${pr}</priority>
+  </url>`;
+}).join('\n')}
 </urlset>`;
 
     const sitemapContent=btoa(unescape(encodeURIComponent(sitemapXml)));
     const sitemapRes=await fetch(sitemapUrl,{method:'PUT',headers:GH_HEADERS,body:JSON.stringify({message:`Update sitemap: add ${currentPost.slug}`,content:sitemapContent,branch:GH_BRANCH,...(sitemapSha?{sha:sitemapSha}:{})})});
     if(!sitemapRes.ok){const err=await sitemapRes.json();throw new Error('Sitemap update failed: '+err.message);}
 
-    // 3. Rebuild blog index
+    // 4. Rebuild blog index
     btn.textContent='Updating blog index...';
-    await rebuildBlogIndex(GH_HEADERS, existingUrls, today);
+    await rebuildBlogIndex(GH_HEADERS,finalUrls,today);
 
-    // 4. Ping Google
+    // 5. Ping Google
     btn.textContent='Pinging Google...';
-    try{
-      await fetch(`https://www.google.com/ping?sitemap=https://vortexlabs.app/sitemap.xml`,{mode:'no-cors'});
-    }catch(e){/* no-cors always throws, that's fine */}
+    try{await fetch(`https://www.google.com/ping?sitemap=https://vortexlabs.app/sitemap.xml`,{mode:'no-cors'});}catch(e){}
 
     const liveUrl=`https://vortexlabs.app/blogs/${currentPost.slug}.html`;
     const ps=getPublished();ps.add(currentPost.slug);localStorage.setItem('vl_published',JSON.stringify([...ps]));
     renderTopics();
     document.getElementById('editorTitle').innerHTML=`${currentPost.topic.title} &nbsp;<a href="${liveUrl}" target="_blank" style="font-size:11px;color:var(--success);font-weight:700;text-decoration:none;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);padding:2px 8px;border-radius:4px;">View Live</a>`;
-    toast(`Published! Index + Sitemap updated + Google pinged`, 'success');
-
+    toast(`Published! Sitemap + Blog index + Google pinged`,'success');
   }catch(e){toast('Error: '+e.message,'error');}
   if(!silent){btn.disabled=false;btn.textContent='Publish to GitHub';}
 }
+
+// ── ROBOTS.TXT PUBLISHER ────────────────────────────────────────────────────
+async function publishRobotsTxt(){
+  const pat=localStorage.getItem('vl_github');
+  if(!pat){toast('Save your GitHub PAT first','error');return;}
+  const GH_HEADERS={'Authorization':`Bearer ${pat}`,'Accept':'application/vnd.github+json','Content-Type':'application/json'};
+  const robotsContent=`User-agent: *
+Allow: /
+
+Sitemap: https://vortexlabs.app/sitemap.xml`;
+  const path='robots.txt';
+  const url=`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${path}`;
+  let sha=null;
+  try{
+    const check=await fetch(url,{headers:GH_HEADERS});
+    if(check.ok){const ex=await check.json();sha=ex.sha;}
+    const content=btoa(unescape(encodeURIComponent(robotsContent)));
+    const res=await fetch(url,{method:'PUT',headers:GH_HEADERS,body:JSON.stringify({
+      message:'Add robots.txt with sitemap reference',
+      content,
+      branch:GH_BRANCH,
+      ...(sha?{sha}:{})
+    })});
+    if(!res.ok){const err=await res.json();throw new Error(err.message);}
+    toast('robots.txt published to GitHub!','success');
+  }catch(e){toast('robots.txt failed: '+e.message,'error');}
+}
+
 // ── BLOG INDEX BUILDER ───────────────────────────────────────────────────────
-async function rebuildBlogIndex(GH_HEADERS, allUrls, today){
-  // Extract blog post URLs only
-  const blogUrls = allUrls.filter(u => u.includes('/blogs/') && u.endsWith('.html'));
+async function rebuildBlogIndex(GH_HEADERS,allUrls,today){
+  const blogUrls=allUrls.filter(u=>u.includes('/blogs/')&&u.endsWith('.html'));
+  // Use persistent meta for titles -- never loses titles even if localStorage cleared
+  const slugTitleMap={...getPublishedMeta()};
+  topics.forEach(t=>{slugTitleMap[t.slug]=t.title;});
+  if(currentPost){slugTitleMap[currentPost.slug]=currentPost.topic.title;}
 
-  // Build post metadata from topic slugs + published store
-  // Map slug -> topic title from current topics list + published localStorage
-  const slugTitleMap = {};
-  topics.forEach(t => { slugTitleMap[t.slug] = t.title; });
-  // Also check stored published data
-  try {
-    const stored = JSON.parse(localStorage.getItem('vl_published_meta') || '{}');
-    Object.assign(slugTitleMap, stored);
-  } catch(e){}
+  const SC='<'+'script';
+  const EC='<'+'/script>';
+  const postCards=blogUrls.map(url=>{
+    const slug=url.split('/').pop().replace('.html','');
+    const title=slugTitleMap[slug]||slug.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+    return{slug,title,url};
+  }).reverse();
 
-  // Store current post title in published meta
-  if(currentPost){
-    const meta = JSON.parse(localStorage.getItem('vl_published_meta') || '{}');
-    meta[currentPost.slug] = currentPost.topic.title;
-    localStorage.setItem('vl_published_meta', JSON.stringify(meta));
-    slugTitleMap[currentPost.slug] = currentPost.topic.title;
-  }
-
-  const SC = '<' + 'script';
-  const EC = '<' + '/script>';
-
-  const postCards = blogUrls.map(url => {
-    const slug = url.split('/').pop().replace('.html','');
-    const title = slugTitleMap[slug] || slug.replace(/-/g,' ').replace(/\w/g,c=>c.toUpperCase());
-    return { slug, title, url };
-  }).reverse(); // newest first
-
-  const indexHtml = [
+  const indexHtml=[
     '<!DOCTYPE html>',
     '<html lang="en">',
     '<head>',
@@ -1063,10 +1041,10 @@ async function rebuildBlogIndex(GH_HEADERS, allUrls, today){
     '<meta property="og:description" content="Expert Meta Ads guides for performance marketers, media buyers and agencies."/>',
     '<meta property="og:type" content="website"/>',
     '<meta property="og:url" content="https://vortexlabs.app/blogs/"/>',
-    SC + ' type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"VortexLabs Performance Marketing Blog","url":"https://vortexlabs.app/blogs/","description":"Expert Meta Ads guides for performance marketers and media buyers.",' + '"publisher":{"@type":"Organization","name":"VortexLabs","url":"https://vortexlabs.app"}}' + EC,
+    SC+' type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"VortexLabs Performance Marketing Blog","url":"https://vortexlabs.app/blogs/","description":"Expert Meta Ads guides for performance marketers and media buyers.","publisher":{"@type":"Organization","name":"VortexLabs","url":"https://vortexlabs.app"}}'+EC,
     '<!-- Google tag (gtag.js) -->',
-    SC + ' async src="https://www.googletagmanager.com/gtag/js?id=G-3ET2SV2XP5">' + EC,
-    SC + '>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-3ET2SV2XP5");' + EC,
+    SC+' async src="https://www.googletagmanager.com/gtag/js?id=G-3ET2SV2XP5">'+EC,
+    SC+'>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-3ET2SV2XP5");'+EC,
     '<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>',
     '<style>',
     ':root{--navy:#0a1628;--navy-mid:#112040;--blue:#2563eb;--blue-bright:#3b82f6;--white:#fff;--off:#d4dff5;--muted:#8aa0c4;--border:rgba(255,255,255,0.08);--success:#22c55e;}',
@@ -1102,42 +1080,41 @@ async function rebuildBlogIndex(GH_HEADERS, allUrls, today){
     '<h1>Guides That Make Your Meta Ads Actually Work</h1>',
     '<p class="hero-sub">Tactical breakdowns on ROAS, CPL, creative strategy, and campaign performance. No fluff. Written for people who actually run ads.</p>',
     '</div>',
-    postCards.length > 0
-      ? '<div class="grid">' +
-        postCards.map((p,i) =>
-          `<a href="${p.url}" class="card">` +
-          `<div class="card-num">#${String(postCards.length - i).padStart(2,'0')}</div>` +
-          `<div class="card-title">${p.title}</div>` +
-          `<div class="card-cta">Read article &rarr;</div>` +
+    postCards.length>0
+      ?'<div class="grid">'+
+        postCards.map((p,i)=>
+          `<a href="${p.url}" class="card">`+
+          `<div class="card-num">#${String(postCards.length-i).padStart(2,'0')}</div>`+
+          `<div class="card-title">${p.title}</div>`+
+          `<div class="card-cta">Read article &rarr;</div>`+
           `</a>`
-        ).join('') +
+        ).join('')+
         '</div>'
-      : '<div class="empty">No posts yet. Check back soon.</div>',
+      :'<div class="empty">No posts yet. Check back soon.</div>',
     '<footer><p>Part of <a href="https://vortexlabs.app">VortexLabs</a> &nbsp;&middot;&nbsp; Performance Marketing Insights</p></footer>',
     '</body>',
     '</html>'
   ].join('\n');
 
-  // Commit blogs/index.html to GitHub
-  const indexPath = 'blogs/index.html';
-  const indexUrl = `https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${indexPath}`;
-  const indexContent = btoa(unescape(encodeURIComponent(indexHtml)));
-  let indexSha = null;
-  const indexCheck = await fetch(indexUrl, {headers: GH_HEADERS});
-  if(indexCheck.ok){ const ex = await indexCheck.json(); indexSha = ex.sha; }
-  await fetch(indexUrl, {
-    method:'PUT', headers: GH_HEADERS,
-    body: JSON.stringify({
-      message: `Rebuild blog index (${postCards.length} posts)`,
-      content: indexContent,
-      branch: GH_BRANCH,
-      ...(indexSha ? {sha: indexSha} : {})
+  const indexPath='blogs/index.html';
+  const indexUrl=`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${indexPath}`;
+  const indexContent=btoa(unescape(encodeURIComponent(indexHtml)));
+  let indexSha=null;
+  const indexCheck=await fetch(indexUrl,{headers:GH_HEADERS});
+  if(indexCheck.ok){const ex=await indexCheck.json();indexSha=ex.sha;}
+  await fetch(indexUrl,{
+    method:'PUT',headers:GH_HEADERS,
+    body:JSON.stringify({
+      message:`Rebuild blog index (${postCards.length} posts)`,
+      content:indexContent,
+      branch:GH_BRANCH,
+      ...(indexSha?{sha:indexSha}:{})
     })
   });
 }
 
-// ── PER-METRIC FIX ──────────────────────────────────────────────────────────
-async function fixMetric(issueText, btnId){
+// ── PER-METRIC FIX ───────────────────────────────────────────────────────────
+async function fixMetric(issueText,btnId){
   const key=localStorage.getItem('vl_openai');
   if(!key){toast('Save your OpenAI key first','error');return;}
   if(!currentPost){toast('No post loaded','error');return;}
@@ -1182,7 +1159,7 @@ RULES:
   if(btn){btn.disabled=false;btn.textContent='Fix';btn.className='seo-fix-btn';}
 }
 
-// ── SCHEDULE ─────────────────────────────────────────────────────────────────
+// ── SCHEDULE ──────────────────────────────────────────────────────────────────
 let scheduleTarget=null;
 function openSchedule(){
   if(!currentPost){toast('Write a post first','error');return;}
@@ -1208,7 +1185,6 @@ function confirmSchedule(){
 function getScheduledJobs(){try{return JSON.parse(localStorage.getItem('vl_scheduled')||'{}')}catch(e){return {};}}
 function cancelSchedule(slug){const j=getScheduledJobs();delete j[slug];localStorage.setItem('vl_scheduled',JSON.stringify(j));renderTopics();toast('Schedule cancelled','info');}
 
-// Background scheduler -- checks every 60s
 setInterval(async()=>{
   const jobs=getScheduledJobs();
   const now=Date.now();
@@ -1217,7 +1193,6 @@ setInterval(async()=>{
     if(job.ts<=now){
       const pat=localStorage.getItem('vl_github');
       if(!pat)continue;
-      // restore currentPost temporarily for publish
       const saved=currentPost;
       currentPost={slug:job.slug,topic:job.topic,html:job.html,seoMeta:job.seoMeta,md:job.md};
       await publishToGitHub(true);
@@ -1230,7 +1205,7 @@ setInterval(async()=>{
   }
 },60000);
 
-// ── REFRESH IDEAS WITH TREND REASONING ───────────────────────────────────────
+// ── REFRESH IDEAS ─────────────────────────────────────────────────────────────
 async function refreshIdeas(){
   const key=localStorage.getItem('vl_openai');
   if(!key){toast('Save your OpenAI key first','error');return;}
@@ -1276,7 +1251,7 @@ For each topic return detailed reasoning. Return JSON array only, no markdown:
 function escHtml(str){return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function toast(msg,type='info'){const el=document.getElementById('toast');el.textContent=msg;el.className=`toast show ${type}`;setTimeout(()=>{el.className='toast';},3000);}
 
-// ── MOBILE NAV ───────────────────────────────────────────────────────────────
+// ── MOBILE NAV ────────────────────────────────────────────────────────────────
 function isMobile(){return window.innerWidth<=768;}
 function openSidebar(){
   document.getElementById('sidebar').classList.add('open');
@@ -1293,14 +1268,10 @@ function mobNav(tab){
     const b=document.getElementById('mbn-'+t);
     if(b)b.classList.toggle('active',t===tab);
   });
-  if(tab==='editor'){
-    closeSidebar();
-    return;
-  }
+  if(tab==='editor'){closeSidebar();return;}
   openSidebar();
   switchTab(tab==='topics'?'topics':tab==='prompt'?'prompt':'seo');
 }
-// Close sidebar when tapping outside
 document.addEventListener('click',e=>{
   if(!isMobile())return;
   const sb=document.getElementById('sidebar');
@@ -1308,7 +1279,6 @@ document.addEventListener('click',e=>{
     closeSidebar();
   }
 });
-// Touch swipe down on sidebar handle to close
 (()=>{
   let startY=0;
   document.addEventListener('touchstart',e=>{startY=e.touches[0].clientY;},{passive:true});
