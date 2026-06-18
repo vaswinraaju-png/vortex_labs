@@ -700,8 +700,12 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       return;
     }
 
-    document.getElementById('modalForm').style.display = 'none';
-    document.getElementById('modalSuccess').style.display = 'block';
+   document.getElementById('modalForm').style.display = 'none';
+document.getElementById('modalSuccess').style.display = 'block';
+
+setTimeout(() => {
+  window.location.href = 'https://chat.whatsapp.com/H6AwlcAktjS0VpZ5MS8hLo';
+}, 2000);
 
     if (typeof gtag !== 'undefined') {
       gtag('event', 'waitlist_signup', { name, email });
