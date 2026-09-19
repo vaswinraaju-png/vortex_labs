@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog Generator — VortexLabs</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--navy:#0a1628;--navy-mid:#112040;--navy-light:#1a3060;--blue:#2563eb;--blue-bright:#3b82f6;--blue-glow:rgba(37,99,235,0.15);--white:#fff;--off:#d4dff5;--muted:#8aa0c4;--border:rgba(255,255,255,0.08);--success:#22c55e;--warning:#f59e0b;--danger:#ef4444;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);min-height:100vh;}
+    header{padding:12px 20px;border-bottom:1px solid var(--border);background:rgba(10,22,40,0.98);position:sticky;top:0;z-index:200;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .logo{font-size:14px;font-weight:700;margin-right:4px;white-space:nowrap;}
+    .logo span{color:var(--blue-bright);}
+    .hdr-field{background:var(--navy-mid);border:1px solid var(--border);border-radius:7px;padding:7px 11px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--white);outline:none;}
+    .hdr-field:focus{border-color:var(--blue);}
+    .hdr-field::placeholder{color:var(--muted);}
+    .hdr-field.w200{width:200px;}.hdr-field.w150{width:150px;}
+    .btn-sm{padding:7px 13px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--navy-light);color:var(--white);transition:all 0.15s;white-space:nowrap;}
+    .btn-sm:hover{background:var(--blue);border-color:var(--blue);}
+    .tag{font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;}
+    .tag.saved{background:rgba(34,197,94,0.12);color:var(--success);border:1px solid rgba(34,197,94,0.25);}
+    .tag.missing{background:rgba(239,68,68,0.1);color:var(--danger);border:1px solid rgba(239,68,68,0.2);}
+    .hdr-sep{width:1px;height:22px;background:var(--border);flex-shrink:0;}
+    .app{display:flex;height:calc(100vh - 53px);}
+    .sidebar{width:320px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+    .sidebar-tabs{display:flex;border-bottom:1px solid var(--border);}
+    .stab{flex:1;padding:10px 0;text-align:center;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;background:none;border-top:none;border-left:none;border-right:none;font-family:'DM Sans',sans-serif;}
+    .stab.active{color:var(--white);border-bottom-color:var(--blue);}
+    .topics-panel{display:flex;flex-direction:column;flex:1;overflow:hidden;}
+    .topic-search-bar{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;gap:7px;align-items:center;}
+    .topic-input{flex:1;background:var(--navy-mid);border:1px solid var(--border);border-radius:7px;padding:7px 11px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--white);outline:none;}
+    .topic-input:focus{border-color:var(--blue);}
+    .topic-input::placeholder{color:var(--muted);}
+    .btn-fetch{background:var(--blue);border:none;color:var(--white);padding:7px 13px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+    .btn-fetch:hover{background:var(--blue-bright);}
+    .btn-fetch:disabled{opacity:0.4;cursor:not-allowed;}
+    .seo-type-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+    .seo-type-btn{background:var(--navy-mid);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.15s;}
+    .seo-type-btn:hover{border-color:var(--blue);color:var(--off);}
+    .seo-type-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+    .topics-list{flex:1;overflow-y:auto;padding:8px;}
+    .topic-item{background:var(--navy-mid);border:1px solid var(--border);border-radius:9px;padding:11px 13px;margin-bottom:7px;cursor:pointer;transition:border-color 0.15s;}
+    .topic-item:hover{border-color:rgba(59,130,246,0.35);}
+    .topic-item.active{border-color:var(--blue);background:var(--blue-glow);}
+    .topic-item-title{font-size:12px;font-weight:600;line-height:1.4;margin-bottom:5px;}
+    .topic-item-meta{font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+    .fw-tag{font-size:10px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:var(--blue-bright);background:var(--blue-glow);border:1px solid rgba(59,130,246,0.2);padding:2px 6px;border-radius:4px;}
+    .topic-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+    .btn-write{background:var(--blue);border:none;color:var(--white);padding:5px 13px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+    .btn-write:hover{background:var(--blue-bright);}
+    .btn-write:disabled{opacity:0.4;cursor:not-allowed;}
+    .prompt-panel{display:none;flex-direction:column;flex:1;overflow:hidden;padding:12px;gap:8px;}
+    .prompt-panel.visible{display:flex;}
+    .prompt-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;}
+    .prompt-textarea{flex:1;background:var(--navy-mid);border:1px solid var(--border);border-radius:8px;padding:11px 13px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--off);line-height:1.6;resize:none;outline:none;}
+    .prompt-textarea:focus{border-color:var(--blue);}
+    .prompt-actions{display:flex;gap:7px;}
+    .btn-save-prompt{background:var(--blue);border:none;color:var(--white);padding:7px 16px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+    .btn-reset-prompt{background:none;border:1px solid var(--border);color:var(--muted);padding:7px 13px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;}
+    .btn-reset-prompt:hover{border-color:var(--muted);color:var(--white);}
+    .seo-panel{display:none;flex-direction:column;flex:1;overflow-y:auto;padding:12px;gap:8px;}
+    .seo-panel.visible{display:flex;}
+    .seo-section-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.7px;margin-top:6px;padding:0 2px;}
+    .seo-item{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;background:var(--navy-mid);border:1px solid var(--border);border-radius:7px;}
+    .seo-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+    .seo-dot.pass{background:var(--success);}
+    .seo-dot.warn{background:var(--warning);}
+    .seo-dot.fail{background:var(--danger);}
+    .seo-dot.na{background:transparent;}
+    .seo-item-label{font-size:12px;font-weight:600;margin-bottom:2px;}
+    .seo-item-val{font-size:11px;color:var(--muted);line-height:1.4;}
+    .seo-score-bar{background:var(--navy-mid);border:1px solid var(--border);border-radius:9px;padding:12px 14px;display:flex;align-items:center;gap:12px;}
+    .seo-score-num{font-size:28px;font-weight:700;}
+    .seo-score-num.good{color:var(--success);}
+    .seo-score-num.ok{color:var(--warning);}
+    .seo-score-num.bad{color:var(--danger);}
+    .seo-empty{padding:20px;text-align:center;color:var(--muted);font-size:13px;}
+    .editor{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    .editor-toolbar{padding:10px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+    .editor-title{font-size:13px;font-weight:600;color:var(--muted);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .editor-title.active{color:var(--white);}
+    .editor-tabs{display:flex;gap:5px;}
+    .etab{padding:5px 11px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:none;color:var(--muted);}
+    .etab.active{background:var(--navy-light);color:var(--white);border-color:var(--navy-light);}
+    .editor-actions{display:flex;gap:7px;}
+    .btn-dl{background:var(--navy-light);border:1px solid var(--border);color:var(--white);padding:7px 13px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
+    .btn-dl:hover{background:var(--blue);border-color:var(--blue);}
+    .btn-dl:disabled{opacity:0.4;cursor:not-allowed;}
+    .btn-publish{background:var(--success);border:none;color:var(--white);padding:7px 16px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+    .btn-publish:hover{opacity:0.85;}
+    .btn-publish:disabled{opacity:0.4;cursor:not-allowed;}
+    .editor-body{flex:1;overflow-y:auto;}
+    .preview-wrap{padding:28px 36px;max-width:800px;margin:0 auto;}
+    .preview-wrap h1{font-size:26px;font-weight:700;color:var(--white);letter-spacing:-0.5px;margin-bottom:18px;line-height:1.25;}
+    .preview-wrap h2{font-size:19px;font-weight:700;color:var(--white);margin:30px 0 9px;}
+    .preview-wrap h3{font-size:15px;font-weight:600;color:var(--white);margin:18px 0 7px;}
+    .preview-wrap p{font-size:14px;color:var(--off);line-height:1.75;margin-bottom:14px;}
+    .preview-wrap ul,.preview-wrap ol{margin:0 0 14px 18px;}
+    .preview-wrap li{font-size:14px;color:var(--off);line-height:1.7;margin-bottom:5px;}
+    .preview-wrap strong{color:var(--white);}
+    .preview-wrap .tbl-wrap{overflow-x:auto;margin:20px 0;}
+    .preview-wrap table{width:100%;border-collapse:collapse;font-size:13px;}
+    .preview-wrap th{background:var(--blue);color:#fff;padding:10px 14px;text-align:left;font-weight:700;font-size:12px;}
+    .preview-wrap td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--off);}
+    .preview-wrap tr:nth-child(even) td{background:rgba(255,255,255,0.03);}
+    .preview-wrap tr:hover td{background:rgba(59,130,246,0.07);}
+    .preview-cta{background:#fff;border:2px solid var(--blue);border-radius:14px;padding:32px;text-align:center;margin-top:36px;}
+    .preview-cta h2{font-size:20px;color:var(--blue);margin-bottom:8px;font-weight:700;}
+    .preview-cta p{margin-bottom:18px;color:#475569;font-size:14px;}
+    .preview-cta a{display:inline-block;background:var(--blue);color:#fff;padding:12px 26px;border-radius:9px;font-weight:700;text-decoration:none;font-size:14px;}
+    .preview-mid-cta{background:#fff;border:2px solid var(--blue);border-radius:10px;padding:16px 20px;margin:28px 0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+    .preview-mid-cta strong{font-size:14px;font-weight:700;color:var(--blue);display:block;margin-bottom:3px;}
+    .preview-mid-cta span{font-size:12px;color:#475569;}
+    .preview-mid-cta a{display:inline-block;background:var(--blue);color:#fff;padding:8px 16px;border-radius:7px;font-weight:700;text-decoration:none;font-size:12px;white-space:nowrap;}
+    .source-wrap{padding:14px;height:100%;}
+    .source-pre{background:var(--navy-mid);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:monospace;font-size:11px;color:var(--off);line-height:1.6;overflow:auto;height:calc(100% - 28px);white-space:pre-wrap;word-break:break-all;}
+    .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--muted);}
+    .empty-icon{font-size:36px;opacity:0.4;}
+    .empty-state p{font-size:13px;}
+    .gen-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;}
+    .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .gen-label{font-size:13px;color:var(--muted);}
+    .toast{position:fixed;bottom:20px;right:20px;z-index:999;background:var(--navy-mid);border:1px solid var(--border);border-radius:9px;padding:10px 18px;font-size:13px;font-weight:600;opacity:0;transform:translateY(6px);transition:all 0.2s;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateY(0);}
+    .toast.success{border-color:rgba(34,197,94,0.35);color:var(--success);}
+    .toast.error{border-color:rgba(239,68,68,0.35);color:var(--danger);}
+    .toast.info{border-color:rgba(59,130,246,0.35);color:var(--blue-bright);}
+    ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--navy-light);border-radius:4px;}
+    .seo-fix-btn{background:none;border:1px solid rgba(239,68,68,0.4);color:var(--danger);padding:2px 8px;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;cursor:pointer;margin-left:auto;flex-shrink:0;white-space:nowrap;}
+    .seo-fix-btn:hover{background:rgba(239,68,68,0.1);}
+    .seo-fix-btn.fixing{opacity:0.5;cursor:not-allowed;}
+    .sch-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:500;align-items:center;justify-content:center;padding:20px;}
+    .sch-modal.open{display:flex;}
+    .sch-box{background:var(--navy-mid);border:1px solid rgba(59,130,246,0.25);border-radius:14px;padding:28px;width:100%;max-width:380px;}
+    .sch-box h3{font-size:16px;font-weight:700;margin-bottom:6px;}
+    .sch-box p{font-size:13px;color:var(--muted);margin-bottom:18px;}
+    .sch-input{width:100%;background:var(--navy);border:1px solid var(--border);border-radius:7px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--white);outline:none;margin-bottom:12px;}
+    .sch-input:focus{border-color:var(--blue);}
+    .sch-actions{display:flex;gap:8px;}
+    .btn-sch-confirm{background:var(--blue);border:none;color:#fff;padding:9px 20px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;flex:1;}
+    .btn-sch-cancel{background:none;border:1px solid var(--border);color:var(--muted);padding:9px 16px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;}
+    .img-row{padding:10px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .btn-gen-img{background:var(--navy-light);border:1px solid var(--border);color:var(--white);padding:6px 14px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
+    .btn-gen-img:hover{background:var(--blue);border-color:var(--blue);}
+    .btn-gen-img:disabled{opacity:0.4;cursor:not-allowed;}
+    .gen-img-preview{width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--border);display:none;}
+    .img-dl-link{font-size:11px;color:var(--blue-bright);text-decoration:none;display:none;}
+    .reason-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+    .reason-tag{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;}
+    .reason-tag.intent{background:rgba(59,130,246,0.12);color:var(--blue-bright);border:1px solid rgba(59,130,246,0.2);}
+    .reason-tag.comp.low{background:rgba(34,197,94,0.12);color:var(--success);border:1px solid rgba(34,197,94,0.2);}
+    .reason-tag.comp.medium{background:rgba(245,158,11,0.12);color:var(--warning);border:1px solid rgba(245,158,11,0.2);}
+    .reason-tag.comp.high{background:rgba(239,68,68,0.1);color:var(--danger);border:1px solid rgba(239,68,68,0.2);}
+    .reason-tag.score{background:rgba(168,85,247,0.12);color:#c084fc;border:1px solid rgba(168,85,247,0.2);}
+    .reason-tip{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.4;}
+    .sch-badge{font-size:10px;font-weight:700;background:rgba(245,158,11,0.12);color:var(--warning);border:1px solid rgba(245,158,11,0.25);padding:2px 7px;border-radius:4px;}
+    /* published item rewrite badge */
+    .btn-rewrite{background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:var(--blue-bright);padding:5px 11px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;}
+    .btn-rewrite:hover{background:var(--blue);color:#fff;border-color:var(--blue);}
+    .mob-nav{display:none;}
+    .sidebar-handle{display:none;}
+    @media(max-width:768px){
+      html,body{height:100%;overflow:hidden;}
+      header{padding:10px 12px;gap:6px;flex-wrap:nowrap;}
+      .logo{font-size:13px;}
+      .hdr-field{font-size:12px;padding:6px 9px;}
+      .hdr-field.w200,.hdr-field.w150{width:100px;}
+      .btn-sm{padding:6px 10px;font-size:12px;}
+      .tag{font-size:10px;padding:2px 8px;}
+      .app{height:calc(100vh - 46px);flex-direction:row;}
+      .sidebar{position:fixed;bottom:0;left:0;right:0;width:100% !important;height:70vh;z-index:400;background:var(--navy-mid);border-top:1px solid rgba(59,130,246,0.3);border-radius:20px 20px 0 0;transform:translateY(100%);transition:transform 0.28s ease;flex-direction:column;display:flex !important;overflow:hidden;}
+      .sidebar.open{transform:translateY(0) !important;}
+      .sidebar-handle{display:block;width:40px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;margin:12px auto 0;flex-shrink:0;cursor:pointer;}
+      .editor{flex:1;width:100%;overflow:hidden;}
+      .editor-toolbar{padding:8px 10px;gap:4px;flex-wrap:wrap;}
+      .editor-title{font-size:11px;width:100%;order:-1;white-space:normal;line-height:1.3;}
+      .editor-tabs{gap:3px;}
+      .etab{padding:4px 8px;font-size:11px;}
+      .editor-actions{display:flex;gap:4px;width:100%;}
+      .btn-dl,.btn-publish,.btn-sm{flex:1;padding:8px 6px;font-size:11px;text-align:center;min-height:36px;}
+      .editor-body{flex:1;overflow-y:auto;padding-bottom:56px;}
+      .preview-wrap{padding:16px 14px;}
+      .preview-wrap h1{font-size:18px;margin-bottom:12px;}
+      .preview-wrap h2{font-size:16px;margin:22px 0 7px;}
+      .preview-wrap h3{font-size:14px;}
+      .preview-wrap p,.preview-wrap li{font-size:13px;}
+      .source-pre{font-size:10px;}
+      .mob-nav{display:flex;position:fixed;bottom:0;left:0;right:0;height:52px;background:rgba(10,22,40,0.98);border-top:1px solid var(--border);z-index:300;padding:0;margin:0;}
+      .mob-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:9px;font-weight:600;cursor:pointer;padding:4px 0;min-width:0;}
+      .mob-nav-btn.active{color:var(--blue-bright);}
+      .mob-nav-btn svg{width:16px;height:16px;flex-shrink:0;}
+      .sidebar-tabs{display:none;}
+      .topic-search-bar{padding:8px 10px;gap:6px;}
+      .topic-input{font-size:12px;padding:6px 10px;}
+      .btn-fetch{padding:6px 10px;font-size:12px;}
+      .topics-list{padding:6px;overflow-y:auto;flex:1;}
+      .topic-item{padding:10px 11px;margin-bottom:6px;}
+      .topic-item-title{font-size:12px;}
+      .btn-write{padding:5px 11px;font-size:11px;}
+      .seo-score-num{font-size:22px;}
+      .seo-item-label{font-size:11px;}
+      .seo-item-val{font-size:10px;}
+      .seo-fix-btn{font-size:9px;padding:2px 6px;}
+      .sch-box{margin:16px;border-radius:16px;}
+      .empty-state{padding-bottom:60px;}
+      .gen-state{padding-bottom:60px;}
+      .sidebar-overlay{display:block !important;}
+    }
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:390;}
+  </style>
+</head>
+<body>
+<header>
+  <div class="logo">Vortex<span>Labs</span> Blog Generator</div>
+  <div class="hdr-sep"></div>
+  <input type="password" class="hdr-field w200" id="openaiKey" placeholder="OpenAI key (sk-...)" />
+  <input type="password" class="hdr-field w150" id="githubPat" placeholder="GitHub PAT" />
+  <button class="btn-sm" onclick="saveKeys()">Save Keys</button>
+  <span class="tag missing" id="keyStatus">No keys</span>
+  <div class="hdr-sep"></div>
+  <button class="btn-sm" onclick="publishRobotsTxt()" title="Publish robots.txt to GitHub">Publish robots.txt</button>
+</header>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="app">
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-handle" onclick="closeSidebar()"></div>
+    <div class="sidebar-tabs">
+      <button class="stab active" id="tabTopics" onclick="switchTab('topics')">Topics</button>
+      <button class="stab" id="tabPrompt" onclick="switchTab('prompt')">Prompt</button>
+      <button class="stab" id="tabSeo" onclick="switchTab('seo')">SEO Audit</button>
+    </div>
+    <div class="topics-panel" id="topicsPanel">
+      <div class="topic-search-bar">
+        <input type="text" class="topic-input" id="customInput" placeholder="Custom topic (optional)..." />
+        <button class="btn-fetch" id="fetchBtn" onclick="fetchTopics()">Fetch</button>
+        <button class="btn-fetch" id="refreshBtn" onclick="refreshIdeas()" style="background:var(--navy-light);border:1px solid var(--border);" title="Refresh with trend reasoning">&#8635;</button>
+      </div>
+      <div class="seo-type-row" id="seoTypeRow">
+        <button class="seo-type-btn" id="seoTypeBtn-seo" onclick="toggleSeoType('seo')">SEO</button>
+        <button class="seo-type-btn" id="seoTypeBtn-aeo" onclick="toggleSeoType('aeo')">AEO</button>
+        <button class="seo-type-btn" id="seoTypeBtn-geo" onclick="toggleSeoType('geo')">GEO SEO</button>
+        <button class="seo-type-btn" id="seoTypeBtn-aiseo" onclick="toggleSeoType('aiseo')">AI SEO</button>
+      </div>
+      <input type="text" class="topic-input" id="geoLocationInput" placeholder="Country / State / Province / Zipcode..." style="display:none;margin-top:6px;width:100%;" />
+      <div class="topics-list" id="topicsList"></div>
+    </div>
+    <div class="prompt-panel" id="promptPanel">
+      <div class="prompt-label">Writing Rules / System Prompt</div>
+      <textarea class="prompt-textarea" id="systemPrompt"></textarea>
+      <div class="prompt-actions">
+        <button class="btn-save-prompt" onclick="savePrompt()">Save</button>
+        <button class="btn-reset-prompt" onclick="resetPrompt()">Reset</button>
+      </div>
+    </div>
+    <div class="seo-panel" id="seoPanel">
+      <div id="seoContent"><div class="seo-empty">Generate a post to see SEO audit</div></div>
+    </div>
+  </div>
+  <div class="editor">
+    <div class="editor-toolbar">
+      <div class="editor-title" id="editorTitle">Select a topic and click Write</div>
+      <div class="editor-tabs">
+        <button class="etab active" id="etabPreview" onclick="switchEditorTab('preview')">Preview</button>
+        <button class="etab" id="etabSource" onclick="switchEditorTab('source')">HTML</button>
+      </div>
+      <div class="editor-actions">
+        <button class="btn-dl" id="dlBtn" onclick="downloadCurrent()" disabled>Download</button>
+        <button class="btn-sm" id="scheduleBtn" onclick="openSchedule()" disabled style="font-size:12px;padding:6px 12px;">Schedule</button>
+        <button class="btn-publish" id="publishBtn" onclick="publishToGitHub()" disabled>Publish to GitHub</button>
+      </div>
+    </div>
+    <div class="img-row" id="imgRow" style="display:none;">
+      <button class="btn-gen-img" id="genImgBtn" onclick="generateImage()">Generate Image</button>
+      <img class="gen-img-preview" id="genImgPreview" alt="Generated" />
+      <a class="img-dl-link" id="imgDlLink" download="blog-image.png">Download PNG</a>
+      <span style="font-size:11px;color:var(--muted);margin-left:4px;" id="imgNote"></span>
+    </div>
+    <div class="editor-body" id="editorBody">
+      <div class="empty-state"><div class="empty-icon">&#9997;&#65039;</div><p>Pick a topic from the left and click Write</p></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- Schedule Modal -->
+<div class="sch-modal" id="schModal">
+  <div class="sch-box">
+    <h3>Schedule Post</h3>
+    <p id="schModalTitle">Pick date and time to auto-publish.</p>
+    <input type="datetime-local" class="sch-input" id="schDateInput" />
+    <div class="sch-actions">
+      <button class="btn-sch-confirm" onclick="confirmSchedule()">Schedule</button>
+      <button class="btn-sch-cancel" onclick="closeSchedule()">Cancel</button>
+    </div>
+  </div>
+</div>
+<script>
+const LANDING_PAGE="https://vortexlabs.app/meta-dashboard-free-download.html";
+const GH_USER="vaswinraaju-png",GH_REPO="vortex_labs",GH_BRANCH="main",GH_FOLDER="blogs";
+let currentPost=null,currentEditorTab='preview',topics=[];
+const DEFAULT_PROMPT=`You are an expert performance marketing content writer for VortexLabs. The current year is 2026. All content must be written for 2026 with forward-looking context for 2027 where relevant.
+
+STRUCTURE (follow TerraTern-style blog format exactly):
+1. Opening hook: Start with a bold stat, confrontational question, or direct pain point. No filler openers.
+2. Key Highlights: A bullet list of 4-6 things the reader will learn (like a table of contents).
+3. Body: Use H2 questions as section headers (e.g. "What Is X and Why Does It Matter in 2026?", "How Do Performance Marketers Fix X?"). Use H3 for sub-points within sections.
+4. Data tables: Include at least 1-2 comparison or data tables using markdown table format (| Col | Col |).
+5. Expert quote: Include 1 expert quote attributed to "VortexLabs Performance Team" with a specific, tactical, non-generic insight.
+6. Step-by-step section: At least one numbered step-by-step process (How to do X in N steps).
+7. 2026 context section: A section titled "2026 Industry Context" with 3-5 bullet stats or facts with sources cited in parentheses.
+8. Future outlook: One short section on "What Changes in 2027" or "What to Expect Next" with forward predictions.
+9. FAQ section: 5 questions and answers at the end (markdown format: **Q:** / **A:**).
+10. CTA: End with a persuasive call to action referencing the dashboard.
+
+WRITING RULES:
+- 1200 to 1500 words
+- Never use em dashes
+- No phrases like "In today's digital landscape", "In conclusion", "It goes without saying"
+- All years must be 2026 or 2027 -- never write 2025 as a current reference
+- Use specific numbers, percentages, and data points throughout
+- Write H2s as questions starting with What, How, Why, Which, When
+- Naturally include focus keyword in first 100 words, at least 3 H2s, and 5+ times total
+- LSI keywords to weave in: Meta Ads, Facebook advertising, ROAS, CPL, ad spend, media buyer, campaign performance, ad dashboard
+- Tone: Direct, aggressive, written by someone who actually runs campaigns daily and is obsessed with returns
+- Your reader is greedy about paid campaign performance. They want to squeeze maximum ROAS, cut CPL, kill wasted spend, and outperform competitors. Write to that greed. Use numbers in headlines ("Cut CPL by 40%", "2.3x Your ROAS", "Save $800/month"). Make them feel like they are leaving money on the table if they do not read and act.
+- Headlines and H2s must use specific numbers, percentages, or dollar/rupee amounts wherever possible
+- Opening hook must reference a specific loss, gain, or performance stat that hits the reader's greed nerve immediately
+- Every section should have a "what you're losing by not doing this" angle baked in
+- Frameworks (PAS, AIDA, BAB) are invisible structural scaffolding ONLY. Never write or label the stages anywhere in the post. Never use words like "Attention:", "Interest:", "Desire:", "Action:", "Problem:", "Agitate:", "Solution:", "Before:", "After:", "Bridge:" as headings, labels, or callouts. The reader should never know a framework was used.
+- If blog mentions other company/organisation, find the link and redirect them to their website with a utm_source = vortexlabs.app
+
+TACTICAL KNOWLEDGE BASE (draw from this in every post):
+- Bid strategies: Cost cap stabilises CPL but needs 50+ conversions/week to exit learning phase. Bid cap for strict volume control. Highest volume for new campaigns with no data.
+- Advantage+: Outperforms manual targeting for eCommerce at scale but burns budget on broad audiences for lead gen. Best used after 30+ days of pixel data.
+- Creative fatigue: Frequency above 3.5 plus CTR drop of 20%+ in 7 days means replace creative immediately. Hook performance drops first -- watch 3-second video view rate.
+- CPL benchmarks by vertical: eCommerce $8-15, SaaS $40-80, EdTech $15-35, Finance $50-120 (WordStream Industry Benchmarks 2026).
+- Audience overlap: Running 3+ ad sets targeting similar audiences causes internal auction competition, inflating CPL by 15-30%.
+- Budget scaling: Never increase budget more than 20% in 24 hours or you reset the learning phase. Use CBO for accounts above $500/day.
+- ROAS benchmarks: Average Meta Ads ROAS across industries is 2.87x. Top quartile eCommerce accounts hit 4x+. Below 1.5x is a structural problem (WordStream 2026).
+- Creative: First 3 seconds determine 60% of ad performance. UGC-style creatives outperform polished ads by 30% for D2C brands on average in 2026.
+
+CITATION RULES (non-negotiable):
+- Every statistic MUST have a source in parentheses: (Meta Business Insights 2026), (WordStream 2026), (eMarketer Q1 2026), (Databox 2026)
+- Only use stats from research context provided or from the tactical knowledge base above
+- If no real source exists for a claim, reframe as qualitative: "Most media buyers report..." never invent a percentage
+- Approved sources: Meta Business Insights, WordStream, eMarketer, Databox, HubSpot, Sprout Social, Social Media Examiner`;
+
+const SEED=[
+  {slug:"meta-ads-reporting-spreadsheets-waste",title:"Spreadsheet Reporting Is Costing Meta Advertisers 6+ Hours a Week in 2026",framework:"PAS",angle:"Urgency"},
+  {slug:"roas-dropping-meta-ads",title:"Your ROAS Dropped 30% This Month and You Haven't Noticed Yet",framework:"PAS",angle:"Fear"},
+  {slug:"meta-ads-dashboard-freelancers",title:"How Freelance Media Buyers Are Cutting Reporting Time by 80% in 2026",framework:"AIDA",angle:"Trust"},
+  {slug:"client-reporting-meta-ads",title:"How to Build Meta Ads Reports That Get Clients to Increase Budget",framework:"BAB",angle:"Trust"},
+  {slug:"reduce-cpl-meta-ads",title:"5 Fixes That Cut Meta Ads CPL by 40% Without Reducing Budget",framework:"PAS",angle:"Motivation"},
+  {slug:"meta-ads-mistakes-agencies",title:"These 7 Meta Ads Mistakes Are Silently Draining Agency Retainers in 2026",framework:"PAS",angle:"Fear"},
+  {slug:"facebook-ads-small-business",title:"How Small Businesses Are Getting 3x ROAS on Facebook Ads in 2026",framework:"BAB",angle:"Empathy"},
+  {slug:"meta-ads-creative-fatigue",title:"Creative Fatigue Is the #1 Reason Your CPL Spikes -- Here's How to Stop It",framework:"PAS",angle:"Urgency"},
+  {slug:"scale-meta-ads-campaigns",title:"How to Scale Meta Ads from $1K to $10K/Month Without ROAS Collapse",framework:"AIDA",angle:"Motivation"},
+  {slug:"meta-ads-account-audit",title:"The 30-Minute Meta Ads Audit That Found $2,400 in Wasted Spend",framework:"BAB",angle:"Trust"},
+  {slug:"media-buyer-productivity",title:"How Elite Media Buyers Manage 10+ Accounts and Hit KPIs Every Month",framework:"AIDA",angle:"Aspiration"},
+  {slug:"meta-ads-reporting-tools-cost",title:"Stop Paying $50/Month for Tools That Show You Your Own Data",framework:"PAS",angle:"Anger"},
+  {slug:"facebook-ads-metrics-that-matter",title:"The 5 Meta Ads Numbers That Predict ROAS Before You Spend a Rupee",framework:"AIDA",angle:"Trust"},
+  {slug:"meta-ads-founders-report",title:"What Founders Actually Want in a Meta Ads Report (Not What You're Sending)",framework:"BAB",angle:"Trust"},
+  {slug:"ad-spend-wastage-meta",title:"The Average Meta Advertiser Wastes 28% of Their Budget on This in 2026",framework:"PAS",angle:"Fear"},
+  {slug:"meta-ads-weekly-review",title:"This 15-Minute Weekly Meta Ads Ritual Is Saving Marketers $800/Month",framework:"BAB",angle:"Motivation"},
+  {slug:"multi-account-meta-ads",title:"Managing 5+ Meta Ad Accounts? Here's the System That Keeps ROAS Stable",framework:"PAS",angle:"Empathy"},
+  {slug:"performance-marketing-reporting-2026",title:"Meta Ads Reporting in 2026: What Changed, What's Coming in 2027",framework:"AIDA",angle:"Authority"},
+  {slug:"meta-ads-ecommerce-roas",title:"How eCommerce Brands Are Hitting 4x+ ROAS on Meta Ads in 2026",framework:"BAB",angle:"Motivation"},
+  {slug:"meta-ads-ai-automation-2026",title:"AI in Meta Ads 2026: What's Automating, What Still Needs You, and What Pays More",framework:"AIDA",angle:"Authority"},
+  // The 3 weak early posts -- kept in SEED so they always appear for rewriting
+  {slug:"facebook-ads-for-ecommerce",title:"Facebook Ads for Ecommerce: The 2026 Performance Playbook",framework:"PAS",angle:"Motivation"},
+  {slug:"meta-ads-reporting-spreadsheets-waste",title:"Why Meta Ads Reporting in Spreadsheets Is Killing Your Agency Margins in 2026",framework:"PAS",angle:"Fear"},
+  {slug:"ai-bidding-meta-ads",title:"AI Bidding on Meta Ads in 2026: Which Strategy Cuts CPL Without Losing Volume",framework:"AIDA",angle:"Trust"},
+];
+
+window.onload=()=>{
+  const ok=localStorage.getItem('vl_openai'),gk=localStorage.getItem('vl_github');
+  if(ok)document.getElementById('openaiKey').value=ok;
+  if(gk)document.getElementById('githubPat').value=gk;
+  updateKeyStatus();
+  document.getElementById('systemPrompt').value=localStorage.getItem('vl_system_prompt')||DEFAULT_PROMPT;
+  topics=[...SEED];renderTopics();
+  document.getElementById('seoTypeBtn-seo').classList.add('active');
+};
+
+// ── PUBLISHED META PERSISTENCE ───────────────────────────────────────────────
+function getPublished(){try{return new Set(JSON.parse(localStorage.getItem('vl_published')||'[]'));}catch(e){return new Set();}}
+function markPublished(slug){const s=getPublished();s.add(slug);localStorage.setItem('vl_published',JSON.stringify([...s]));renderTopics();toast('Marked as published','success');}
+function unmarkPublished(slug){const s=getPublished();s.delete(slug);localStorage.setItem('vl_published',JSON.stringify([...s]));renderTopics();toast('Unmarked','info');}
+
+// Persist title to published meta so blog index always has it
+function savePublishedMeta(slug, title){
+  try{
+    const meta=JSON.parse(localStorage.getItem('vl_published_meta')||'{}');
+    meta[slug]=title;
+    localStorage.setItem('vl_published_meta',JSON.stringify(meta));
+  }catch(e){}
+}
+function getPublishedMeta(){
+  try{return JSON.parse(localStorage.getItem('vl_published_meta')||'{}');}catch(e){return {};}
+}
+
+function saveKeys(){
+  const ok=document.getElementById('openaiKey').value.trim(),gk=document.getElementById('githubPat').value.trim();
+  if(ok)localStorage.setItem('vl_openai',ok);if(gk)localStorage.setItem('vl_github',gk);
+  updateKeyStatus();toast('Keys saved','success');
+}
+function updateKeyStatus(){
+  const ok=localStorage.getItem('vl_openai'),gk=localStorage.getItem('vl_github');
+  const el=document.getElementById('keyStatus');
+  if(ok&&gk){el.textContent='Keys saved';el.className='tag saved';}
+  else if(ok){el.textContent='PAT missing';el.className='tag missing';}
+  else{el.textContent='No keys';el.className='tag missing';}
+}
+function savePrompt(){localStorage.setItem('vl_system_prompt',document.getElementById('systemPrompt').value);toast('Prompt saved','success');}
+function resetPrompt(){document.getElementById('systemPrompt').value=DEFAULT_PROMPT;localStorage.setItem('vl_system_prompt',DEFAULT_PROMPT);toast('Reset to default','info');}
+
+function switchTab(tab){
+  ['Topics','Prompt','Seo'].forEach(t=>{
+    const k=t.toLowerCase();
+    document.getElementById('tab'+t).classList.toggle('active',k===tab);
+  });
+  document.getElementById('topicsPanel').style.display=tab==='topics'?'flex':'none';
+  const pp=document.getElementById('promptPanel');pp.style.display=tab==='prompt'?'flex':'none';pp.classList.toggle('visible',tab==='prompt');
+  const sp=document.getElementById('seoPanel');sp.style.display=tab==='seo'?'flex':'none';sp.classList.toggle('visible',tab==='seo');
+}
+function switchEditorTab(tab){
+  currentEditorTab=tab;
+  document.getElementById('etabPreview').classList.toggle('active',tab==='preview');
+  document.getElementById('etabSource').classList.toggle('active',tab==='source');
+  if(!currentPost)return;
+  if(tab==='preview'){document.getElementById('editorBody').innerHTML=`<div class="preview-wrap">${buildPreview(currentPost.topic,currentPost.md)}</div>`;}
+  else{document.getElementById('editorBody').innerHTML=`<div class="source-wrap"><pre class="source-pre">${escHtml(currentPost.html)}</pre></div>`;}
+}
+
+async function fetchTopics(){
+  const key=localStorage.getItem('vl_openai');if(!key){toast('Save your OpenAI key first','error');return;}
+  const custom=document.getElementById('customInput').value.trim();
+  const btn=document.getElementById('fetchBtn');btn.disabled=true;btn.textContent='Fetching...';
+  const prompt=custom
+    ?`Generate 8 SEO blog post topic ideas about: "${custom}". Target: performance marketers running Meta/Facebook Ads. Return JSON array only, no markdown. Format: [{"slug":"url-slug","title":"Title","framework":"PAS or AIDA or BAB","angle":"Urgency or Trust or Motivation or Fear or Empathy"}]`
+    :`Generate 20 diverse SEO blog topics for performance marketers running Meta/Facebook Ads. Return JSON array only, no markdown. Format: [{"slug":"url-slug","title":"Title","framework":"PAS or AIDA or BAB","angle":"Urgency or Trust or Motivation or Fear or Empathy"}]`;
+  try{
+    const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'gpt-4o',max_tokens:1500,temperature:0.9,messages:[{role:'system',content:'Return only valid JSON arrays. No markdown.'},{role:'user',content:prompt}]})});
+    const data=await res.json();if(!res.ok)throw new Error(data.error?.message||'API error');
+    const text=data.choices[0].message.content.replace(/```json|```/g,'').trim();
+    topics=JSON.parse(text);renderTopics();toast(`${topics.length} topics fetched`,'success');
+  }catch(e){toast('Fetch failed: '+e.message,'error');}
+  btn.disabled=false;btn.textContent='Fetch';
+}
+
+function renderTopics(){
+  const list=document.getElementById('topicsList');
+  const published=getPublished();
+  const scheduled=getScheduledJobs();
+  if(!topics.length){list.innerHTML=`<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">No topics yet. Click Fetch or ↻ to load ideas.</div>`;return;}
+  list.innerHTML=topics.map((t,i)=>{
+    const isPub=published.has(t.slug);
+    const isSch=!!scheduled[t.slug];
+    const schTime=isSch?new Date(scheduled[t.slug].ts).toLocaleString('en-IN',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+    const compClass=t.competition?t.competition.toLowerCase():'';
+    const hasReason=t.intent||t.relevanceScore||t.whyItWillRank;
+    return `<div class="topic-item${isPub?' published':''}" id="ti-${i}" style="${isPub?'opacity:0.55;':''}">
+      <div class="topic-item-title">${t.title}</div>
+      <div class="topic-item-meta">
+        <span class="fw-tag">${t.framework}</span>
+        <span>${t.angle}</span>
+        ${isPub?'<span style="font-size:10px;font-weight:700;color:var(--success);background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);padding:2px 7px;border-radius:4px;">PUBLISHED</span>':''}
+        ${isSch?`<span class="sch-badge">⏰ ${schTime}</span>`:''}
+      </div>
+      ${hasReason?`<div class="reason-row">
+        ${t.intent?`<span class="reason-tag intent">${t.intent}</span>`:''}
+        ${t.competition?`<span class="reason-tag comp ${compClass}">${t.competition} competition</span>`:''}
+        ${t.relevanceScore?`<span class="reason-tag score">Score: ${t.relevanceScore}/10</span>`:''}
+        ${t.bestTimeToPublish?`<span class="reason-tag intent">${t.bestTimeToPublish}</span>`:''}
+      </div>
+      ${t.whyItWillRank?`<div class="reason-tip">&#128200; ${t.whyItWillRank}</div>`:''}
+      ${t.trendReason?`<div class="reason-tip">&#128293; ${t.trendReason}</div>`:''}
+      `:''}
+      <div class="topic-actions">
+        ${isPub
+          ?`<button class="btn-rewrite" onclick="writeTopic(${i})">Rewrite</button>
+            <button class="btn-write" style="background:var(--navy-light);font-size:11px;" onclick="unmarkPublished('${t.slug}')">Unmark</button>`
+          :`<button class="btn-write" onclick="writeTopic(${i})">Write</button>
+            <button class="btn-write" style="background:var(--navy-light);font-size:11px;" onclick="markPublished('${t.slug}')">Mark Published</button>
+            ${isSch?`<button class="btn-write" style="background:rgba(239,68,68,0.2);font-size:11px;color:var(--danger);" onclick="cancelSchedule('${t.slug}')">Cancel Schedule</button>`:''}`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── SEO TYPE TOGGLES ─────────────────────────────────────────────────────────
+let activeSeoTypes=new Set(['seo']);
+function toggleSeoType(type){
+  if(activeSeoTypes.has(type)){
+    if(activeSeoTypes.size>1)activeSeoTypes.delete(type);
+  }else{
+    activeSeoTypes.add(type);
+  }
+  document.getElementById(`seoTypeBtn-${type}`).classList.toggle('active',activeSeoTypes.has(type));
+  document.getElementById('geoLocationInput').style.display=activeSeoTypes.has('geo')?'block':'none';
+}
+function buildSeoTypeInstructions(){
+  const blocks=[];
+  if(activeSeoTypes.has('aeo')){
+    blocks.push(`AEO (Answer Engine Optimization) RULES:
+- Right after each H2 question heading, give a direct 40-60 word answer in the very next sentence before expanding
+- Use definition-style openers where relevant: "X is..." / "X means..."
+- Write so the first 1-2 sentences under each heading could stand alone as a voice assistant answer`);
+  }
+  if(activeSeoTypes.has('geo')){
+    const loc=document.getElementById('geoLocationInput').value.trim()||'the target region';
+    blocks.push(`GEO SEO RULES:
+- Naturally mention "${loc}" in the title or first 100 words
+- Include one dedicated subsection addressing marketers/businesses specifically in ${loc}
+- Reference region-relevant context (currency, business norms, market conditions) where natural -- do not force it if irrelevant`);
+  }
+  if(activeSeoTypes.has('aiseo')){
+    blocks.push(`AI SEO RULES (optimise for being cited by ChatGPT, Perplexity, Claude, Gemini):
+- Lead with the factual answer before any narrative buildup
+- Use explicit, quotable, standalone factual statements (no pronouns referring back vaguely)
+- Prefer numbered/listicle breakdowns for processes or comparisons
+- Avoid filler sentences that add no new information`);
+  }
+  return blocks.length?'\n\n'+blocks.join('\n\n'):'';
+}
+
+async function writeTopic(idx){
+  const key=localStorage.getItem('vl_openai');if(!key){toast('Save your OpenAI key first','error');return;}
+  const topic=topics[idx];const sysPrompt=document.getElementById('systemPrompt').value;
+  document.querySelectorAll('.topic-item').forEach(el=>el.classList.remove('active'));
+  document.getElementById(`ti-${idx}`)?.classList.add('active');
+  const btn=document.querySelector(`#ti-${idx} .btn-write, #ti-${idx} .btn-rewrite`);
+  if(btn){btn.disabled=true;btn.textContent='Writing...';}
+  document.getElementById('editorTitle').textContent=topic.title;
+  document.getElementById('editorTitle').className='editor-title active';
+  document.getElementById('editorBody').innerHTML=`<div class="gen-state"><div class="spinner"></div><div class="gen-label">Generating SEO metadata...</div></div>`;
+  document.getElementById('dlBtn').disabled=true;document.getElementById('publishBtn').disabled=true;
+
+  let seoMeta={focusKeyword:topic.slug.replace(/-/g,' '),metaTitle:topic.title.slice(0,60),metaDescription:''};
+  try{
+    document.querySelector('.gen-label').textContent='Generating SEO metadata...';
+    const metaRes=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'gpt-4o',max_tokens:300,temperature:0.7,messages:[{role:'system',content:'Return only valid JSON. No markdown.'},{role:'user',content:`Generate SEO metadata for this blog post.\nTitle: "${topic.title}"\nAudience: Performance marketers running Meta/Facebook Ads\nReturn JSON: {"focusKeyword":"2-4 word keyword","metaTitle":"55-60 char SEO title","metaDescription":"150-160 char description with keyword and clear benefit. No em dashes."}`}]})});
+    const metaData=await metaRes.json();
+    const metaText=metaData.choices[0].message.content.replace(/```json|```/g,'').trim();
+    seoMeta=JSON.parse(metaText);
+  }catch(e){/* use defaults */}
+
+  // Step 2: Deep research with web search
+  let researchContext='';
+  try{
+    document.querySelector('.gen-label').textContent='Researching real stats and sources...';
+    const researchPrompt=`You are a performance marketing research analyst. Search the web for REAL, CURRENT statistics and data about this topic: "${topic.title}"
+
+Find and return:
+1. Real CPL/CPA/ROAS benchmarks by industry vertical (with source names and years)
+2. Real Meta Ads platform statistics (with Meta Business Insights or third-party source)
+3. Real performance marketing industry trends for 2026 (with source)
+4. Any recent Meta Ads feature changes or algorithm updates relevant to this topic
+5. Credible studies or reports from: Meta, WordStream, eMarketer, Databox, HubSpot, Sprout Social, Social Media Examiner
+
+Format as a list of bullet points. Each stat MUST include the source in parentheses. Example: "Average eCommerce ROAS on Meta is 2.87x (WordStream Industry Benchmarks 2026)". Only include stats you found via web search. Do not invent numbers.`;
+
+    const researchRes=await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+      body:JSON.stringify({
+        model:'gpt-4o-search-preview',
+        max_tokens:1000,
+        messages:[{role:'user',content:researchPrompt}],
+        web_search_options:{search_context_size:'medium'}
+      })
+    });
+    const researchData=await researchRes.json();
+    if(researchRes.ok&&researchData.choices?.[0]?.message?.content){
+      researchContext=researchData.choices[0].message.content;
+      document.querySelector('.gen-label').textContent='Research complete. Writing post...';
+    }else{
+      document.querySelector('.gen-label').textContent='Research unavailable. Writing with known data...';
+    }
+  }catch(e){
+    document.querySelector('.gen-label').textContent='Writing post...';
+  }
+
+  // Step 3: Write post with real research injected
+  try{
+    const researchBlock=researchContext
+      ?`\n\nREAL RESEARCH DATA (use these stats with exact sources -- do not modify the numbers or sources):\n${researchContext}\n\nCITATION RULES:\n- Every stat in the post MUST have a source in parentheses: (Meta Business Insights 2026), (WordStream 2026), (eMarketer Q1 2026) etc.\n- If you cannot cite a real source for a stat, reframe it as an observation: "Most media buyers report..." instead of "73% of media buyers..."\n- Never invent statistics. Use only the research data provided above or reframe as qualitative observations.`
+      :`\n\nCITATION RULES:\n- Every stat MUST have a named source in parentheses: (Meta Business Insights 2026), (WordStream 2026), (eMarketer 2026), (Databox 2026)\n- If you cannot cite a real source, reframe as qualitative: "Most media buyers report..." not "73% of media buyers..."\n- Never invent statistics.`;
+
+    const userPrompt=`Write a complete SEO blog post. Use the ${topic.framework} framework as INVISIBLE structural scaffolding only -- never label or mention the framework stages anywhere in the post.
+
+Title: "${topic.title}"
+Focus keyword: "${seoMeta.focusKeyword}"
+Conversion goal: ${topic.angle}
+Target reader: Performance marketers, media buyers, agencies, small business owners running Meta/Facebook Ads who are obsessed with maximising ROAS and cutting wasted ad spend
+${researchBlock}${buildSeoTypeInstructions()}
+
+REQUIREMENTS -- follow every single one:
+1. 1200 to 1500 words
+2. Framework is invisible structure only -- no stage labels like Attention/Interest/Problem/Solution/Before/After
+3. Include focus keyword "${seoMeta.focusKeyword}" in first 100 words, at least 3 H2 headings, and 5+ times total
+4. H2s must be questions starting with What/How/Why/Which/When AND must contain specific numbers or percentages where possible
+5. Opening hook must reference a specific CITED stat that hits the reader immediately
+6. Every section must have a "what you are losing by not doing this" angle
+7. Include at least 2 markdown data tables (| Col | Col |)
+8. Include 1 expert quote attributed to "VortexLabs Performance Team" with a specific tactical insight
+9. Include a ## "2026 Industry Context" section with 3-5 CITED bullet stats from the research above
+10. Include a ## "What to Expect in 2027" section with forward predictions
+11. End with exactly 5 FAQ items in format **Q:** question here / **A:** answer here
+12. Final CTA paragraph referencing: ${LANDING_PAGE}
+13. No em dashes anywhere
+14. Body content only, use ## for H2 and ### for H3. NEVER use # (single hash H1) -- the title is already in the page header`;
+
+    const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+      body:JSON.stringify({model:'gpt-4o',max_tokens:4500,temperature:0.8,
+        messages:[{role:'system',content:sysPrompt},{role:'user',content:userPrompt}]})});
+    const data=await res.json();if(!res.ok)throw new Error(data.error?.message||'API error');
+    const md=data.choices[0].message.content;
+    const html=wrapInHTML(topic,md,seoMeta);
+    currentPost={topic,html,md,slug:topic.slug,seoMeta,researchContext};
+    document.getElementById('editorBody').innerHTML=`<div class="preview-wrap">${buildPreview(topic,md)}</div>`;
+    document.getElementById('dlBtn').disabled=false;document.getElementById('publishBtn').disabled=false;document.getElementById('scheduleBtn').disabled=false;
+    if(document.getElementById('imgRow'))document.getElementById('imgRow').style.display='flex';
+    if(document.getElementById('genImgBtn'))document.getElementById('genImgBtn').disabled=false;
+    currentEditorTab='preview';
+    document.getElementById('etabPreview').classList.add('active');document.getElementById('etabSource').classList.remove('active');
+    renderSeoAudit(topic,md,seoMeta,html);
+    toast('Post written with real research','success');
+  }catch(e){
+    document.getElementById('editorBody').innerHTML=`<div class="empty-state"><div class="empty-icon">&#9888;&#65039;</div><p>${e.message}</p></div>`;
+    toast('Write failed: '+e.message,'error');
+  }
+  if(btn){btn.disabled=false;btn.textContent=btn.classList.contains('btn-rewrite')?'Rewrite':'Write';}
+}
+
+function renderSeoAudit(topic,md,seoMeta,html){
+  const wordCount=md.split(/\s+/).length;
+  const keyword=seoMeta.focusKeyword.toLowerCase();
+  const mdLower=md.toLowerCase();
+  const kwCount=(mdLower.match(new RegExp(keyword.replace(/\s+/g,'\\s+'),'g'))||[]).length;
+  const kwIn100=mdLower.slice(0,600).includes(keyword);
+  const h2c=(md.match(/^## /gm)||[]).length,h3c=(md.match(/^### /gm)||[]).length;
+  const titleLen=seoMeta.metaTitle.length,descLen=seoMeta.metaDescription.length;
+  const checks=[
+    {section:'TECHNICAL SEO'},
+    {l:'Canonical URL',p:html.includes('rel="canonical"'),n:html.includes('rel="canonical"')?'Present':'Missing -- regenerate post to fix'},
+    {l:'JSON-LD Schema',p:html.includes('application/ld+json'),n:html.includes('application/ld+json')?'BlogPosting schema present':'Missing -- regenerate post'},
+    {l:'Open Graph Tags',p:html.includes('og:title'),n:html.includes('og:title')?'og:title, og:description, og:url set':'Missing -- regenerate post'},
+    {l:'Twitter Card',p:html.includes('twitter:card'),n:html.includes('twitter:card')?'summary_large_image set':'Missing -- regenerate post'},
+    {l:'Robots Meta',p:html.includes('name="robots"'),n:html.includes('name="robots"')?'index, follow set':'Missing -- regenerate post'},
+    {l:'Mobile Viewport',p:true,n:'Responsive layout baked in'},
+    {l:'No Render-Blocking Scripts',p:true,n:'Inline CSS, deferred fonts'},
+    {section:'ON-PAGE SEO'},
+    {l:'Meta Title Length',p:titleLen>=50&&titleLen<=60,w:titleLen>=40&&titleLen<50,
+      n:titleLen<50?`${titleLen} chars -- too short. Add ${50-titleLen} to ${60-titleLen} more chars including keyword`:titleLen>60?`${titleLen} chars -- too long. Cut ${titleLen-60} chars`:`${titleLen} chars -- ideal range`},
+    {l:'Meta Description Length',p:descLen>=150&&descLen<=160,w:descLen>=130&&descLen<150,
+      n:descLen<130?`${descLen} chars -- too short. Add ${150-descLen}+ chars with a benefit statement`:descLen>160?`${descLen} chars -- too long by ${descLen-160} chars. Trim last sentence`:descLen<150?`${descLen} chars -- close. Add ${150-descLen} more chars`:`${descLen} chars -- ideal range`},
+    {l:'Keyword in Meta Title',p:seoMeta.metaTitle.toLowerCase().includes(keyword),
+      n:seoMeta.metaTitle.toLowerCase().includes(keyword)?'Present':`Missing -- add "${seoMeta.focusKeyword}" to the meta title`},
+    {l:'Keyword in Meta Description',p:seoMeta.metaDescription.toLowerCase().includes(keyword),
+      n:seoMeta.metaDescription.toLowerCase().includes(keyword)?'Present':`Missing -- include "${seoMeta.focusKeyword}" in first sentence of description`},
+    {l:'Keyword in First 100 Words',p:kwIn100,
+      n:kwIn100?'Present in opening':`Missing -- rewrite opening to include "${seoMeta.focusKeyword}" within first 2 sentences`},
+    {l:'Keyword Density',p:kwCount>=5,w:kwCount>=3,
+      n:kwCount<3?`Only ${kwCount} use(s) -- too low. Aim for 5+. Add to H2s, intro, and conclusion`:kwCount<5?`${kwCount} uses -- add 2 more in H2 headings or body`:`${kwCount} uses -- good`},
+    {l:'H2 Count',p:h2c>=4,w:h2c>=3,
+      n:h2c<3?`Only ${h2c} H2s -- add ${4-h2c} more. Use question format: "How to..." or "What Is..."`:h2c===3?`${h2c} H2s -- add 1 more to reach 4+`:`${h2c} H2s -- ideal`},
+    {l:'H3 Count',p:h3c>=3,w:h3c>=2,
+      n:h3c<2?`Only ${h3c} H3s -- add sub-sections under H2s to improve scannability`:h3c===2?`${h3c} H3s -- add 1 more for better structure`:`${h3c} H3s -- good`},
+    {l:'Word Count',p:wordCount>=1200,w:wordCount>=900,
+      n:wordCount<900?`${wordCount} words -- too thin. Add 2026 context section, FAQ, or expert quote to reach 1200+`:wordCount<1200?`${wordCount} words -- a bit short. Add a FAQ or Industry Context section`:`${wordCount} words -- good`},
+    {l:'2026 Year References',p:md.includes('2026'),w:false,
+      n:md.includes('2026')?'2026 references found -- good':'No 2026 references -- regenerate with updated system prompt'},
+    {l:'Data Tables Present',p:md.includes('|'),w:false,
+      n:md.includes('|')?'Markdown tables detected -- good':'No tables -- add at least 1 comparison table for better dwell time'},
+    {l:'FAQ Section',p:md.toLowerCase().includes('faq')||md.includes('**Q:'),w:false,
+      n:(md.toLowerCase().includes('faq')||md.includes('**Q:'))?'FAQ section detected':'Missing FAQ -- add 5 Q&As to capture featured snippets'},
+    {l:'Internal Link to Landing Page',p:html.includes(LANDING_PAGE),n:html.includes(LANDING_PAGE)?'CTA link present':'Missing -- regenerate post'},
+    {l:'No Em Dashes',p:!md.includes('\u2014'),n:md.includes('\u2014')?'Em dashes found -- search and replace with comma or rewrite':'Clean'},
+    {l:'LSI Keywords (ROAS + CPL)',p:mdLower.includes('roas')&&mdLower.includes('cpl'),
+      n:(mdLower.includes('roas')&&mdLower.includes('cpl'))?'ROAS and CPL both present':!mdLower.includes('roas')?'Missing "ROAS" -- add to at least 2 paragraphs':'Missing "CPL" -- add to at least 1 paragraph'},
+  ];
+  let score=0,max=0;
+  checks.forEach(c=>{if(!c.section){max+=5;if(c.p)score+=5;else if(c.w)score+=2;}});
+  const pct=Math.round((score/max)*100);
+  const sc=pct>=80?'good':pct>=60?'ok':'bad';
+  const sl=pct>=80?'Strong':pct>=60?'Needs improvement':'Poor';
+  document.getElementById('seoContent').innerHTML=`
+    <div class="seo-score-bar"><div class="seo-score-num ${sc}">${pct}</div><div><div style="font-size:13px;font-weight:700;color:var(--white)">${sl}</div><div style="font-size:11px;color:var(--muted)">SEO Score / 100</div></div></div>
+    <div style="font-size:11px;color:var(--muted);padding:0 2px;margin-bottom:8px">Focus keyword: <strong style="color:var(--white)">${seoMeta.focusKeyword}</strong></div>
+    ${pct<100?`<button onclick="optimisePost()" style="width:100%;background:var(--blue);border:none;color:#fff;padding:9px 0;border-radius:8px;font-family:DM Sans,sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:10px;" id="optimiseBtn">Auto-Optimise Failed Checks</button>`:''}
+    ${checks.map((c,ci)=>c.section
+      ?`<div class="seo-section-title">${c.section}</div>`
+      :`<div class="seo-item">
+          <div class="seo-dot ${c.p?'pass':c.w?'warn':'fail'}"></div>
+          <div style="flex:1;">
+            <div class="seo-item-label">${c.l}</div>
+            <div class="seo-item-val">${c.n}</div>
+          </div>
+          ${!c.p?`<button class="seo-fix-btn" id="fix-btn-${ci}" onclick="fixMetric('${c.l}: ${c.n.replace(/'/g,'')}','fix-btn-${ci}')">Fix</button>`:''}
+        </div>`
+    ).join('')}`;
+}
+
+function buildPreview(topic,md){
+  const date=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  return `<p style="font-size:11px;color:var(--muted);margin-bottom:6px">${topic.framework} &nbsp;&middot;&nbsp; ${topic.angle} &nbsp;&middot;&nbsp; ${date}</p><h1 style="margin-top:14px">${topic.title}</h1>${markdownToHTML(md)}<div class="preview-cta"><h2>Stop Flying Blind on Your Meta Ads.</h2><p>One clean dashboard for every metric that matters. Built by a performance marketer, for performance marketers.</p><a href="${LANDING_PAGE}" target="_blank">Get the Free Dashboard</a></div>`;
+}
+
+function wrapInHTML(topic,md,seoMeta){
+  const date=new Date().toISOString();
+  const dateR=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const SC='<'+'script';
+  const EC='<'+'/script>';
+  const jsonLd=JSON.stringify({"@context":"https://schema.org","@type":"BlogPosting","headline":topic.title,"description":seoMeta.metaDescription.replace(/"/g,"'"),"keywords":seoMeta.focusKeyword+", meta ads, facebook advertising, performance marketing, ROAS, CPL","datePublished":date,"publisher":{"@type":"Organization","name":"VortexLabs","url":"https://vortexlabs.app"},"url":"https://vortexlabs.app/blogs/"+topic.slug+".html"});
+  const parts=[
+    '<!DOCTYPE html>',
+    '<html lang="en">',
+    '<head>',
+    '<meta charset="UTF-8"/>',
+    '<meta name="viewport" content="width=device-width,initial-scale=1.0"/>',
+    '<title>'+seoMeta.metaTitle+'</title>',
+    '<meta name="description" content="'+seoMeta.metaDescription+'"/>',
+    '<meta name="robots" content="index, follow"/>',
+    '<link rel="canonical" href="https://vortexlabs.app/blogs/'+topic.slug+'.html"/>',
+    '<meta property="og:title" content="'+seoMeta.metaTitle+'"/>',
+    '<meta property="og:description" content="'+seoMeta.metaDescription+'"/>',
+    '<meta property="og:type" content="article"/>',
+    '<meta property="og:url" content="https://vortexlabs.app/blogs/'+topic.slug+'.html"/>',
+    '<meta name="twitter:card" content="summary_large_image"/>',
+    '<meta name="twitter:title" content="'+seoMeta.metaTitle+'"/>',
+    '<meta name="twitter:description" content="'+seoMeta.metaDescription+'"/>',
+    SC+' type="application/ld+json">'+jsonLd+EC,
+    '<!-- Google tag (gtag.js) -->',
+    SC+' async src="https://www.googletagmanager.com/gtag/js?id=G-3ET2SV2XP5">'+EC,
+    SC+'>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-3ET2SV2XP5");'+EC,
+    '<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>',
+    '<style>:root{--navy:#0a1628;--navy-mid:#112040;--blue:#2563eb;--blue-bright:#3b82f6;--white:#fff;--off:#d4dff5;--muted:#8aa0c4;--border:rgba(255,255,255,0.08);--success:#22c55e;}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:\'DM Sans\',sans-serif;background:var(--navy);color:var(--off);line-height:1.75;}nav{padding:15px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(10,22,40,0.97);position:sticky;top:0;z-index:100;}.nav-logo{font-size:14px;font-weight:700;color:var(--white);text-decoration:none;}.nav-logo span{color:var(--blue-bright);}.nav-btn{background:var(--blue);color:var(--white);border:none;padding:8px 18px;border-radius:8px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;}.hero{padding:52px 24px 28px;max-width:760px;margin:0 auto;}.meta{font-size:12px;color:var(--muted);margin-bottom:12px;}.meta span{color:var(--blue-bright);font-weight:600;}h1{font-size:clamp(22px,4vw,36px);font-weight:700;letter-spacing:-0.8px;line-height:1.2;color:var(--white);}.body{max-width:760px;margin:0 auto;padding:28px 24px 60px;}.body h2{font-size:20px;font-weight:700;color:var(--white);margin:32px 0 10px;}.body h3{font-size:16px;font-weight:600;color:var(--white);margin:20px 0 7px;}.body p{margin-bottom:16px;font-size:16px;}.body ul,.body ol{margin:0 0 16px 20px;}.body li{margin-bottom:7px;font-size:16px;}.body strong{color:var(--white);font-weight:600;}.cta-block{background:#fff;border:2px solid var(--blue);border-radius:16px;padding:38px 30px;text-align:center;margin-top:44px;}.cta-block h2{font-size:22px;font-weight:700;color:var(--blue);margin-bottom:9px;}.cta-block p{font-size:15px;color:#334155;margin-bottom:22px;}.cta-btn{display:inline-block;background:var(--blue);color:#fff;padding:13px 28px;border-radius:10px;font-family:\'DM Sans\',sans-serif;font-size:15px;font-weight:700;text-decoration:none;}.free-badge{display:inline-block;background:rgba(37,99,235,0.1);border:1px solid rgba(37,99,235,0.3);color:var(--blue);font-size:12px;font-weight:700;padding:3px 12px;border-radius:100px;margin-bottom:13px;}.mid-cta{background:#fff;border:2px solid var(--blue);border-radius:12px;padding:20px 24px;margin:32px 0;}.mid-cta-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}.mid-cta-text{display:flex;flex-direction:column;gap:4px;}.mid-cta-text strong{font-size:15px;font-weight:700;color:var(--blue);}.mid-cta-text span{font-size:13px;color:#475569;}.mid-cta-btn{display:inline-block;background:var(--blue);color:#fff;padding:10px 20px;border-radius:8px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;}footer{border-top:1px solid var(--border);padding:22px;text-align:center;font-size:12px;color:var(--muted);}footer a{color:var(--blue-bright);text-decoration:none;}.tbl-wrap{overflow-x:auto;margin:24px 0;}.tbl-wrap table{width:100%;border-collapse:collapse;font-size:14px;}.tbl-wrap th{background:var(--blue);color:#fff;padding:11px 16px;text-align:left;font-weight:700;font-size:13px;letter-spacing:0.2px;}.tbl-wrap td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--off);}.tbl-wrap tr:nth-child(even) td{background:rgba(255,255,255,0.03);}.tbl-wrap tr:hover td{background:rgba(59,130,246,0.07);}@media(max-width:600px){.hero,.body{padding-left:18px;padding-right:18px;}.tbl-wrap{margin:16px -18px;border-radius:0;}}</style>',
+    '</head>',
+    '<body>',
+    '<nav><a href="https://vortexlabs.app" class="nav-logo">Vortex<span>Labs</span></a><a href="'+LANDING_PAGE+'" class="nav-btn">Get the Dashboard</a></nav>',
+    '<div class="hero"><div class="meta"><span>VortexLabs Blog</span> &nbsp;&middot;&nbsp; '+dateR+' &nbsp;&middot;&nbsp; Performance Marketing</div><h1>'+topic.title+'</h1></div>',
+    '<div class="body">',
+    markdownToHTML(md),
+    '<div class="cta-block"><div class="free-badge">Free Access</div><h2>Stop Flying Blind on Your Meta Ads.</h2><p>One clean dashboard for every metric that matters. No expensive tools. No tab-switching. Built by a performance marketer, for performance marketers.</p><a href="'+LANDING_PAGE+'" class="cta-btn">Get the Free Dashboard</a></div>',
+    '</div>',
+    '<footer><p>Part of <a href="https://vortexlabs.app">VortexLabs</a> &nbsp;&middot;&nbsp; Performance Marketing Insights</p></footer>',
+    '</body>',
+    '</html>'
+  ];
+  return parts.join('\n');
+}
+
+function markdownToHTML(md){
+  const MID_CTA=`<div class="mid-cta"><div class="mid-cta-inner"><div class="mid-cta-text"><strong>Want to track all this in one view?</strong><span>The free Meta Ads Dashboard gives you ROAS, CPL, spend and campaign performance at a glance. No $50/month tools. No tab-switching.</span></div><a href="${LANDING_PAGE}" class="mid-cta-btn" target="_blank">Get Free Dashboard</a></div></div>`;
+  function parseTables(text){
+    return text.replace(/((^\|.+\|\s*\n)(^\|[-| :]+\|\s*\n)(^\|.+\|\s*\n?)+)/gm,tableBlock=>{
+      const rows=tableBlock.trim().split('\n').filter(r=>r.trim());
+      const isSeperator=r=>/^\|[-| :]+\|$/.test(r.trim());
+      let html='<div class="tbl-wrap"><table>';
+      let inHead=true;
+      rows.forEach(row=>{
+        if(isSeperator(row)){inHead=false;return;}
+        const cells=row.trim().replace(/^\|/,'').replace(/\|$/,'').split('|').map(c=>c.trim());
+        if(inHead){
+          html+='<thead><tr>'+cells.map(c=>`<th>${c}</th>`).join('')+'</tr></thead><tbody>';
+          inHead=false;
+        }else{
+          html+='<tr>'+cells.map(c=>`<td>${c}</td>`).join('')+'</tr>';
+        }
+      });
+      html+='</tbody></table></div>';
+      return html;
+    });
+  }
+  const TABLE_RE=/((?:^\|.+\|\s*\n){3,})/gm;
+  const segments=[];
+  let last=0,m;
+  const src=md+'\n';
+  while((m=TABLE_RE.exec(src))!==null){
+    if(m.index>last)segments.push({type:'text',content:src.slice(last,m.index)});
+    segments.push({type:'table',content:m[0]});
+    last=m.index+m[0].length;
+  }
+  if(last<src.length)segments.push({type:'text',content:src.slice(last)});
+  function processText(text){
+    return text
+      .replace(/^# .+$/gm,'')
+      .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+      .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g,'<em>$1</em>')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" style="color:var(--blue-bright);text-decoration:underline;">$1</a>')
+      .replace(/^- (.+)$/gm,'<li>$1</li>')
+      .replace(/(<li>.*<\/li>\n?)+/g,x=>`<ul>${x}</ul>`)
+      .split('\n')
+      .map(line=>{
+        line=line.trim();if(!line)return '';
+        if(/^<(h[23]|ul|li|table|thead|tbody|tr|th|td|div)/.test(line))return line;
+        return `<p>${line}</p>`;
+      }).filter(Boolean).join('\n');
+  }
+  const processed=segments.map(s=>{
+    if(s.type==='table')return parseTables(s.content);
+    return processText(s.content);
+  }).join('\n');
+  const lines=processed.split('\n');
+  let h2count=0;const out=[];
+  for(const line of lines){
+    out.push(line);
+    if(line.startsWith('<h2>')){h2count++;if(h2count===3)out.push(MID_CTA);}
+  }
+  return out.join('\n');
+}
+
+async function optimisePost(){
+  const key=localStorage.getItem('vl_openai');if(!key){toast('Save your OpenAI key first','error');return;}
+  if(!currentPost){toast('No post loaded','error');return;}
+  const btn=document.getElementById('optimiseBtn');
+  if(btn){btn.disabled=true;btn.textContent='Optimising...';}
+  const sysPrompt=document.getElementById('systemPrompt').value;
+  const md=currentPost.md,seoMeta=currentPost.seoMeta,html=currentPost.html;
+  const mdLower=md.toLowerCase();
+  const wordCount=md.split(/\s+/).length;
+  const keyword=seoMeta.focusKeyword.toLowerCase();
+  const kwCount=(mdLower.match(new RegExp(keyword.replace(/\s+/g,'\\s+'),'g'))||[]).length;
+  const h2c=(md.match(/^## /gm)||[]).length;
+  const h3c=(md.match(/^### /gm)||[]).length;
+  const issues=[];
+  if(wordCount<1200)issues.push(`Word count is only ${wordCount} -- expand to 1200-1500 words by adding a "2026 Industry Context" section with 3-5 stats, a FAQ section with 5 Q&As, and a "What to Expect in 2027" section`);
+  if(h2c<4)issues.push(`Only ${h2c} H2 headings -- add ${4-h2c} more question-format H2 sections (start with What/How/Why/Which/When)`);
+  if(h3c<3)issues.push(`Only ${h3c} H3 headings -- add sub-sections under existing H2s`);
+  if(kwCount<5)issues.push(`Keyword "${seoMeta.focusKeyword}" appears only ${kwCount} times -- add 5 more natural mentions in body paragraphs and H2 headings`);
+  if(!mdLower.slice(0,600).includes(keyword))issues.push(`Keyword "${seoMeta.focusKeyword}" not in first 100 words -- rewrite opening paragraph to include it`);
+  if(!md.includes('|'))issues.push('No data tables -- add at least 1 comparison table in markdown format (| Col | Col |)');
+  if(!md.toLowerCase().includes('faq')&&!md.includes('**Q:'))issues.push('No FAQ section -- add 5 FAQ items at the end in format **Q:** / **A:**');
+  if(!md.includes('2026'))issues.push('No 2026 year references -- add current year context throughout');
+  if(md.includes('—'))issues.push('Em dashes found -- replace all — with commas or rewrite those sentences');
+  if(!mdLower.includes('roas'))issues.push('Missing "ROAS" -- add at least 2 mentions');
+  if(!mdLower.includes('cpl'))issues.push('Missing "CPL" -- add at least 1 mention');
+  if(!issues.length){toast('Already fully optimised','success');if(btn){btn.disabled=false;btn.textContent='Auto-Optimise Failed Checks';}return;}
+  toast(`Fixing ${issues.length} issue(s)...`,'info');
+  const optimisePrompt=`You are a senior SEO editor. Your job is to rewrite the blog post below and fix EVERY issue listed. Do not skip any issue. Do not summarise. Return the full improved post.
+
+POST TITLE: "${currentPost.topic.title}"
+FOCUS KEYWORD: "${seoMeta.focusKeyword}"
+
+YOU MUST FIX ALL OF THESE -- one by one, in order:
+${issues.map((is,i)=>`ISSUE ${i+1}: ${is}`).join('\n')}
+
+ORIGINAL POST (rewrite and expand this):
+${md}
+
+STRICT OUTPUT RULES:
+1. Return ONLY the full improved blog post body -- no preamble, no explanation
+2. Use ## for H2 headings and ### for H3 headings
+3. H2 headings must contain specific numbers or percentages where possible
+4. Never use em dashes -- use commas or rewrite the sentence
+5. Never label framework stages (no Attention/Interest/Problem/Solution/Before/After)
+6. All year references must be 2026 or 2027
+7. Reader is a performance marketer obsessed with ROAS and cutting wasted ad spend -- write to that greed
+8. Every section should make the reader feel they are losing money by not acting
+9. Keep all good content from the original -- only add/fix, do not remove working sections`;
+  try{
+    const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+      body:JSON.stringify({model:'gpt-4o',max_tokens:4500,temperature:0.7,
+        messages:[{role:'system',content:sysPrompt},{role:'user',content:optimisePrompt}]})});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error?.message||'API error');
+    const newMd=data.choices[0].message.content;
+    const newHtml=wrapInHTML(currentPost.topic,newMd,seoMeta);
+    currentPost={...currentPost,md:newMd,html:newHtml};
+    if(currentEditorTab==='preview'){
+      document.getElementById('editorBody').innerHTML=`<div class="preview-wrap">${buildPreview(currentPost.topic,newMd)}</div>`;
+    }else{
+      document.getElementById('editorBody').innerHTML=`<div class="source-wrap"><pre class="source-pre">${escHtml(newHtml)}</pre></div>`;
+    }
+    renderSeoAudit(currentPost.topic,newMd,seoMeta,newHtml);
+    switchTab('seo');
+    toast('Optimised! SEO score updated','success');
+  }catch(e){toast('Optimise failed: '+e.message,'error');}
+  if(btn){btn.disabled=false;btn.textContent='Auto-Optimise Failed Checks';}
+}
+
+function downloadCurrent(){
+  if(!currentPost)return;
+  const blob=new Blob([currentPost.html],{type:'text/html'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${currentPost.slug}.html`;a.click();
+}
+
+async function publishToGitHub(silent=false){
+  const pat=localStorage.getItem('vl_github');if(!pat){toast('Save your GitHub PAT first','error');return;}
+  if(!currentPost)return;
+  const btn=document.getElementById('publishBtn');if(!silent){btn.disabled=true;btn.textContent='Publishing...';}
+  const GH_HEADERS={'Authorization':`Bearer ${pat}`,'Accept':'application/vnd.github+json','Content-Type':'application/json'};
+  try{
+    // 1. Save title to persistent meta BEFORE publishing
+    savePublishedMeta(currentPost.slug, currentPost.topic.title);
+
+    // 2. Publish blog post
+    btn.textContent='Publishing post...';
+    const postPath=`${GH_FOLDER}/${currentPost.slug}.html`;
+    const postUrl=`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${postPath}`;
+    const postContent=btoa(unescape(encodeURIComponent(currentPost.html)));
+    let postSha=null;
+    const postCheck=await fetch(postUrl,{headers:GH_HEADERS});
+    if(postCheck.ok){const ex=await postCheck.json();postSha=ex.sha;}
+    const postRes=await fetch(postUrl,{method:'PUT',headers:GH_HEADERS,body:JSON.stringify({message:`Add blog: ${currentPost.topic.title}`,content:postContent,branch:GH_BRANCH,...(postSha?{sha:postSha}:{})})});
+    if(!postRes.ok){const err=await postRes.json();throw new Error(err.message||'Post publish failed');}
+
+    // 3. Update sitemap.xml -- includes homepage + blog index
+    btn.textContent='Updating sitemap...';
+    const sitemapPath='sitemap.xml';
+    const sitemapUrl=`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${sitemapPath}`;
+    const newPostUrl=`https://vortexlabs.app/blogs/${currentPost.slug}.html`;
+    const today=new Date().toISOString().split('T')[0];
+    let sitemapSha=null;
+    let existingUrls=[];
+    const sitemapCheck=await fetch(sitemapUrl,{headers:GH_HEADERS});
+    if(sitemapCheck.ok){
+      const sitemapData=await sitemapCheck.json();
+      sitemapSha=sitemapData.sha;
+      const decoded=decodeURIComponent(escape(atob(sitemapData.content.replace(/\n/g,''))));
+      const matches=decoded.match(/<loc>(.*?)<\/loc>/g)||[];
+      existingUrls=matches.map(m=>m.replace(/<\/?loc>/g,''));
+    }
+
+    // Ensure these canonical URLs are always in the sitemap
+    const homepageUrl='https://vortexlabs.app/';
+    const landingUrl='https://vortexlabs.app/meta-dashboard-free-download.html';
+    const blogIndexUrl='https://vortexlabs.app/blogs/';
+
+    // Remove old www/http variants if present, then add canonical set
+    const cleanUrls=existingUrls.filter(u=>
+      !u.startsWith('http://') &&
+      !u.includes('www.vortexlabs') &&
+      u!==homepageUrl && u!==landingUrl && u!==blogIndexUrl
+    );
+
+    // Build final URL list: homepage first, landing, blog index, then all posts
+    const finalUrls=[homepageUrl, landingUrl, blogIndexUrl, ...cleanUrls];
+    if(!finalUrls.includes(newPostUrl))finalUrls.push(newPostUrl);
+
+    const sitemapXml=`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${finalUrls.map(u=>{
+  let cf='monthly',pr='0.7';
+  if(u===homepageUrl){cf='weekly';pr='1.0';}
+  else if(u===landingUrl){cf='weekly';pr='1.0';}
+  else if(u===blogIndexUrl){cf='daily';pr='0.9';}
+  else if(u.includes('/blogs/')){cf='monthly';pr='0.8';}
+  return `  <url>
+    <loc>${u}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${cf}</changefreq>
+    <priority>${pr}</priority>
+  </url>`;
+}).join('\n')}
+</urlset>`;
+
+    const sitemapContent=btoa(unescape(encodeURIComponent(sitemapXml)));
+    const sitemapRes=await fetch(sitemapUrl,{method:'PUT',headers:GH_HEADERS,body:JSON.stringify({message:`Update sitemap: add ${currentPost.slug}`,content:sitemapContent,branch:GH_BRANCH,...(sitemapSha?{sha:sitemapSha}:{})})});
+    if(!sitemapRes.ok){const err=await sitemapRes.json();throw new Error('Sitemap update failed: '+err.message);}
+
+    // 4. Rebuild blog index
+    btn.textContent='Updating blog index...';
+    await rebuildBlogIndex(GH_HEADERS,finalUrls,today);
+
+    // 5. Ping Google
+    btn.textContent='Pinging Google...';
+    try{await fetch(`https://www.google.com/ping?sitemap=https://vortexlabs.app/sitemap.xml`,{mode:'no-cors'});}catch(e){}
+
+    const liveUrl=`https://vortexlabs.app/blogs/${currentPost.slug}.html`;
+    const ps=getPublished();ps.add(currentPost.slug);localStorage.setItem('vl_published',JSON.stringify([...ps]));
+    renderTopics();
+    document.getElementById('editorTitle').innerHTML=`${currentPost.topic.title} &nbsp;<a href="${liveUrl}" target="_blank" style="font-size:11px;color:var(--success);font-weight:700;text-decoration:none;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);padding:2px 8px;border-radius:4px;">View Live</a>`;
+    toast(`Published! Sitemap + Blog index + Google pinged`,'success');
+  }catch(e){toast('Error: '+e.message,'error');}
+  if(!silent){btn.disabled=false;btn.textContent='Publish to GitHub';}
+}
+
+// ── ROBOTS.TXT PUBLISHER ────────────────────────────────────────────────────
+async function publishRobotsTxt(){
+  const pat=localStorage.getItem('vl_github');
+  if(!pat){toast('Save your GitHub PAT first','error');return;}
+  const GH_HEADERS={'Authorization':`Bearer ${pat}`,'Accept':'application/vnd.github+json','Content-Type':'application/json'};
+  const robotsContent=`User-agent: *
+Allow: /
+
+Sitemap: https://vortexlabs.app/sitemap.xml`;
+  const path='robots.txt';
+  const url=`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${path}`;
+  let sha=null;
+  try{
+    const check=await fetch(url,{headers:GH_HEADERS});
+    if(check.ok){const ex=await check.json();sha=ex.sha;}
+    const content=btoa(unescape(encodeURIComponent(robotsContent)));
+    const res=await fetch(url,{method:'PUT',headers:GH_HEADERS,body:JSON.stringify({
+      message:'Add robots.txt with sitemap reference',
+      content,
+      branch:GH_BRANCH,
+      ...(sha?{sha}:{})
+    })});
+    if(!res.ok){const err=await res.json();throw new Error(err.message);}
+    toast('robots.txt published to GitHub!','success');
+  }catch(e){toast('robots.txt failed: '+e.message,'error');}
+}
+
+// ── BLOG INDEX BUILDER ───────────────────────────────────────────────────────
+async function rebuildBlogIndex(GH_HEADERS,allUrls,today){
+  const blogUrls=allUrls.filter(u=>u.includes('/blogs/')&&u.endsWith('.html'));
+  // Use persistent meta for titles -- never loses titles even if localStorage cleared
+  const slugTitleMap={...getPublishedMeta()};
+  topics.forEach(t=>{slugTitleMap[t.slug]=t.title;});
+  if(currentPost){slugTitleMap[currentPost.slug]=currentPost.topic.title;}
+
+  const SC='<'+'script';
+  const EC='<'+'/script>';
+  const postCards=blogUrls.map(url=>{
+    const slug=url.split('/').pop().replace('.html','');
+    const title=slugTitleMap[slug]||slug.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+    return{slug,title,url};
+  }).reverse();
+
+  const indexHtml=[
+    '<!DOCTYPE html>',
+    '<html lang="en">',
+    '<head>',
+    '<meta charset="UTF-8"/>',
+    '<meta name="viewport" content="width=device-width,initial-scale=1.0"/>',
+    '<title>Performance Marketing Blog | VortexLabs</title>',
+    '<meta name="description" content="Expert guides on Meta Ads, ROAS optimisation, CPL reduction, and campaign performance for media buyers and agencies. Updated 2026."/>',
+    '<meta name="robots" content="index, follow"/>',
+    '<link rel="canonical" href="https://vortexlabs.app/blogs/"/>',
+    '<meta property="og:title" content="Performance Marketing Blog | VortexLabs"/>',
+    '<meta property="og:description" content="Expert Meta Ads guides for performance marketers, media buyers and agencies."/>',
+    '<meta property="og:type" content="website"/>',
+    '<meta property="og:url" content="https://vortexlabs.app/blogs/"/>',
+    SC+' type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"VortexLabs Performance Marketing Blog","url":"https://vortexlabs.app/blogs/","description":"Expert Meta Ads guides for performance marketers and media buyers.","publisher":{"@type":"Organization","name":"VortexLabs","url":"https://vortexlabs.app"}}'+EC,
+    '<!-- Google tag (gtag.js) -->',
+    SC+' async src="https://www.googletagmanager.com/gtag/js?id=G-3ET2SV2XP5">'+EC,
+    SC+'>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-3ET2SV2XP5");'+EC,
+    '<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>',
+    '<style>',
+    ':root{--navy:#0a1628;--navy-mid:#112040;--blue:#2563eb;--blue-bright:#3b82f6;--white:#fff;--off:#d4dff5;--muted:#8aa0c4;--border:rgba(255,255,255,0.08);--success:#22c55e;}',
+    '*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}',
+    'body{font-family:"DM Sans",sans-serif;background:var(--navy);color:var(--off);line-height:1.75;}',
+    'nav{padding:15px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(10,22,40,0.97);position:sticky;top:0;z-index:100;}',
+    '.nav-logo{font-size:14px;font-weight:700;color:var(--white);text-decoration:none;}',
+    '.nav-logo span{color:var(--blue-bright);}',
+    '.nav-btn{background:var(--blue);color:var(--white);border:none;padding:8px 18px;border-radius:8px;font-family:"DM Sans",sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;}',
+    '.hero{padding:56px 24px 40px;max-width:900px;margin:0 auto;text-align:center;}',
+    '.hero-badge{display:inline-block;background:rgba(37,99,235,0.12);border:1px solid rgba(59,130,246,0.25);color:var(--blue-bright);font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;padding:4px 14px;border-radius:100px;margin-bottom:20px;}',
+    'h1{font-size:clamp(26px,5vw,44px);font-weight:700;letter-spacing:-0.8px;color:var(--white);margin-bottom:14px;line-height:1.15;}',
+    '.hero-sub{font-size:16px;color:var(--muted);max-width:520px;margin:0 auto;}',
+    '.grid{max-width:900px;margin:0 auto;padding:0 24px 80px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;}',
+    '.card{background:var(--navy-mid);border:1px solid var(--border);border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:10px;transition:border-color 0.15s,transform 0.15s;text-decoration:none;}',
+    '.card:hover{border-color:var(--blue);transform:translateY(-2px);}',
+    '.card-num{font-size:11px;font-weight:700;color:var(--muted);}',
+    '.card-title{font-size:14px;font-weight:700;color:var(--white);line-height:1.4;flex:1;}',
+    '.card-cta{font-size:12px;font-weight:700;color:var(--blue-bright);}',
+    '.empty{text-align:center;padding:60px 24px;color:var(--muted);font-size:14px;}',
+    'footer{border-top:1px solid var(--border);padding:24px;text-align:center;font-size:12px;color:var(--muted);}',
+    'footer a{color:var(--blue-bright);text-decoration:none;}',
+    '@media(max-width:600px){.hero{padding:40px 20px 28px;}.grid{padding:0 16px 60px;gap:14px;}}',
+    '</style>',
+    '</head>',
+    '<body>',
+    '<nav>',
+    '<a href="https://vortexlabs.app" class="nav-logo">Vortex<span>Labs</span></a>',
+    '<a href="https://vortexlabs.app/meta-dashboard-free-download.html" class="nav-btn">Get Free Dashboard</a>',
+    '</nav>',
+    '<div class="hero">',
+    '<div class="hero-badge">Performance Marketing Blog</div>',
+    '<h1>Guides That Make Your Meta Ads Actually Work</h1>',
+    '<p class="hero-sub">Tactical breakdowns on ROAS, CPL, creative strategy, and campaign performance. No fluff. Written for people who actually run ads.</p>',
+    '</div>',
+    postCards.length>0
+      ?'<div class="grid">'+
+        postCards.map((p,i)=>
+          `<a href="${p.url}" class="card">`+
+          `<div class="card-num">#${String(postCards.length-i).padStart(2,'0')}</div>`+
+          `<div class="card-title">${p.title}</div>`+
+          `<div class="card-cta">Read article &rarr;</div>`+
+          `</a>`
+        ).join('')+
+        '</div>'
+      :'<div class="empty">No posts yet. Check back soon.</div>',
+    '<footer><p>Part of <a href="https://vortexlabs.app">VortexLabs</a> &nbsp;&middot;&nbsp; Performance Marketing Insights</p></footer>',
+    '</body>',
+    '</html>'
+  ].join('\n');
+
+  const indexPath='blogs/index.html';
+  const indexUrl=`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${indexPath}`;
+  const indexContent=btoa(unescape(encodeURIComponent(indexHtml)));
+  let indexSha=null;
+  const indexCheck=await fetch(indexUrl,{headers:GH_HEADERS});
+  if(indexCheck.ok){const ex=await indexCheck.json();indexSha=ex.sha;}
+  await fetch(indexUrl,{
+    method:'PUT',headers:GH_HEADERS,
+    body:JSON.stringify({
+      message:`Rebuild blog index (${postCards.length} posts)`,
+      content:indexContent,
+      branch:GH_BRANCH,
+      ...(indexSha?{sha:indexSha}:{})
+    })
+  });
+}
+
+// ── PER-METRIC FIX ───────────────────────────────────────────────────────────
+async function fixMetric(issueText,btnId){
+  const key=localStorage.getItem('vl_openai');
+  if(!key){toast('Save your OpenAI key first','error');return;}
+  if(!currentPost){toast('No post loaded','error');return;}
+  const btn=document.getElementById(btnId);
+  if(btn){btn.disabled=true;btn.textContent='Fixing...';btn.className='seo-fix-btn fixing';}
+  const sysPrompt=document.getElementById('systemPrompt').value;
+  const fixPrompt=`You are editing a blog post to fix ONE specific SEO issue.
+
+POST TITLE: "${currentPost.topic.title}"
+FOCUS KEYWORD: "${currentPost.seoMeta.focusKeyword}"
+
+ISSUE TO FIX (fix ONLY this, nothing else):
+${issueText}
+
+CURRENT POST CONTENT:
+${currentPost.md}
+
+RULES:
+- Fix the issue above and nothing else
+- Keep all other content identical
+- Never use em dashes
+- All years 2026 or 2027
+- No framework stage labels
+- Return ONLY the full updated post body using ## for H2 and ### for H3`;
+  try{
+    const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+      body:JSON.stringify({model:'gpt-4o',max_tokens:4500,temperature:0.5,
+        messages:[{role:'system',content:sysPrompt},{role:'user',content:fixPrompt}]})});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error?.message||'API error');
+    const newMd=data.choices[0].message.content;
+    const newHtml=wrapInHTML(currentPost.topic,newMd,currentPost.seoMeta);
+    currentPost={...currentPost,md:newMd,html:newHtml};
+    if(currentEditorTab==='preview'){
+      document.getElementById('editorBody').innerHTML=`<div class="preview-wrap">${buildPreview(currentPost.topic,newMd)}</div>`;
+    }
+    renderSeoAudit(currentPost.topic,newMd,currentPost.seoMeta,newHtml);
+    switchTab('seo');
+    toast('Fixed! SEO score updated','success');
+  }catch(e){toast('Fix failed: '+e.message,'error');}
+  if(btn){btn.disabled=false;btn.textContent='Fix';btn.className='seo-fix-btn';}
+}
+
+// ── SCHEDULE ──────────────────────────────────────────────────────────────────
+let scheduleTarget=null;
+function openSchedule(){
+  if(!currentPost){toast('Write a post first','error');return;}
+  scheduleTarget=currentPost.slug;
+  document.getElementById('schModalTitle').textContent=`Schedule: ${currentPost.topic.title.slice(0,50)}...`;
+  const now=new Date();now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
+  document.getElementById('schDateInput').value=now.toISOString().slice(0,16);
+  document.getElementById('schModal').classList.add('open');
+}
+function closeSchedule(){document.getElementById('schModal').classList.remove('open');}
+function confirmSchedule(){
+  const val=document.getElementById('schDateInput').value;
+  if(!val){toast('Pick a date/time','error');return;}
+  const ts=new Date(val).getTime();
+  if(ts<=Date.now()){toast('Pick a future time','error');return;}
+  const jobs=getScheduledJobs();
+  jobs[scheduleTarget]={ts,slug:currentPost.slug,topic:currentPost.topic,html:currentPost.html,seoMeta:currentPost.seoMeta,md:currentPost.md};
+  localStorage.setItem('vl_scheduled',JSON.stringify(jobs));
+  closeSchedule();
+  renderTopics();
+  toast(`Scheduled for ${new Date(ts).toLocaleString()}`,'success');
+}
+function getScheduledJobs(){try{return JSON.parse(localStorage.getItem('vl_scheduled')||'{}')}catch(e){return {};}}
+function cancelSchedule(slug){const j=getScheduledJobs();delete j[slug];localStorage.setItem('vl_scheduled',JSON.stringify(j));renderTopics();toast('Schedule cancelled','info');}
+
+setInterval(async()=>{
+  const jobs=getScheduledJobs();
+  const now=Date.now();
+  for(const slug of Object.keys(jobs)){
+    const job=jobs[slug];
+    if(job.ts<=now){
+      const pat=localStorage.getItem('vl_github');
+      if(!pat)continue;
+      const saved=currentPost;
+      currentPost={slug:job.slug,topic:job.topic,html:job.html,seoMeta:job.seoMeta,md:job.md};
+      await publishToGitHub(true);
+      currentPost=saved;
+      delete jobs[slug];
+      localStorage.setItem('vl_scheduled',JSON.stringify(jobs));
+      renderTopics();
+      toast(`Auto-published: ${job.slug}`,'success');
+    }
+  }
+},60000);
+
+// ── REFRESH IDEAS ─────────────────────────────────────────────────────────────
+async function refreshIdeas(){
+  const key=localStorage.getItem('vl_openai');
+  if(!key){toast('Save your OpenAI key first','error');return;}
+  const btn=document.getElementById('refreshBtn');
+  btn.disabled=true;btn.textContent='...';
+  const prompt=`You are a senior performance marketing SEO strategist in June 2026.
+
+Generate 15 high-value blog topic ideas for a Meta Ads Dashboard tool targeting performance marketers, media buyers, and agencies. Focus on topics that would rank well in mid-2026 based on:
+- Current Meta Ads platform changes (Advantage+, AI bidding, new ad formats)
+- Pain points media buyers are actively searching for solutions to
+- Topics with commercial intent (people looking to buy or improve tools)
+- Trending performance marketing challenges in 2026
+
+For each topic return detailed reasoning. Return JSON array only, no markdown:
+[{
+  "slug": "url-friendly-slug",
+  "title": "Title with specific number or % where possible",
+  "framework": "PAS or AIDA or BAB",
+  "angle": "Urgency or Trust or Motivation or Fear or Empathy",
+  "intent": "informational or commercial or transactional",
+  "competition": "low or medium or high",
+  "relevanceScore": 8,
+  "whyItWillRank": "One sentence reason",
+  "bestTimeToPublish": "e.g. Evergreen or Q3 2026",
+  "trendReason": "One sentence on why this is trending now"
+}]`;
+  try{
+    const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+      body:JSON.stringify({model:'gpt-4o',max_tokens:3000,temperature:0.9,
+        messages:[{role:'system',content:'Return only valid JSON arrays. No markdown. No preamble.'},
+                  {role:'user',content:prompt}]})});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error?.message||'API error');
+    const text=data.choices[0].message.content.replace(/```json|```/g,'').trim();
+    topics=JSON.parse(text);
+    renderTopics();
+    toast(`${topics.length} fresh ideas with reasoning`,'success');
+  }catch(e){toast('Refresh failed: '+e.message,'error');}
+  btn.disabled=false;btn.textContent='↻';
+}
+
+function escHtml(str){return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function toast(msg,type='info'){const el=document.getElementById('toast');el.textContent=msg;el.className=`toast show ${type}`;setTimeout(()=>{el.className='toast';},3000);}
+
+// ── MOBILE NAV ────────────────────────────────────────────────────────────────
+function isMobile(){return window.innerWidth<=768;}
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  const ov=document.getElementById('sidebarOverlay');
+  if(ov)ov.style.display='block';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  const ov=document.getElementById('sidebarOverlay');
+  if(ov)ov.style.display='none';
+}
+function mobNav(tab){
+  ['editor','topics','prompt','seo'].forEach(t=>{
+    const b=document.getElementById('mbn-'+t);
+    if(b)b.classList.toggle('active',t===tab);
+  });
+  if(tab==='editor'){closeSidebar();return;}
+  openSidebar();
+  switchTab(tab==='topics'?'topics':tab==='prompt'?'prompt':'seo');
+}
+document.addEventListener('click',e=>{
+  if(!isMobile())return;
+  const sb=document.getElementById('sidebar');
+  if(sb&&sb.classList.contains('open')&&!sb.contains(e.target)&&!e.target.closest('.mob-nav')){
+    closeSidebar();
+  }
+});
+(()=>{
+  let startY=0;
+  document.addEventListener('touchstart',e=>{startY=e.touches[0].clientY;},{passive:true});
+  document.addEventListener('touchend',e=>{
+    const diff=e.changedTouches[0].clientY-startY;
+    if(diff>60&&isMobile()){closeSidebar();}
+  },{passive:true});
+})();
+</script>
+<!-- Mobile Bottom Nav -->
+<nav class="mob-nav" id="mobNav">
+  <button class="mob-nav-btn active" id="mbn-editor" onclick="mobNav('editor')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>
+    Editor
+  </button>
+  <button class="mob-nav-btn" id="mbn-topics" onclick="mobNav('topics')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+    Topics
+  </button>
+  <button class="mob-nav-btn" id="mbn-prompt" onclick="mobNav('prompt')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+    Prompt
+  </button>
+  <button class="mob-nav-btn" id="mbn-seo" onclick="mobNav('seo')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    SEO
+  </button>
+</nav>
+</body>
+</html>
