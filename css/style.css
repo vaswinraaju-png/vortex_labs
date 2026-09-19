@@ -98,6 +98,15 @@ footer a:hover{color:var(--accent);}
 .download-box a{display:inline-block;margin-top:12px;background:var(--navy);color:#fff;font-weight:700;padding:12px 26px;border-radius:999px;font-size:14px;}
 .success-icon{width:56px;height:56px;border-radius:50%;background:#e8f9ee;color:var(--success);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 18px;}
 
+.hero-shot,.feature-shot{cursor:zoom-in;}
+
+/* ── LIGHTBOX ── */
+.lightbox{position:fixed;inset:0;background:rgba(10,14,23,.92);display:none;align-items:center;justify-content:center;z-index:1000;padding:40px;cursor:zoom-out;}
+.lightbox.open{display:flex;}
+.lightbox img{max-width:100%;max-height:100%;width:auto;height:auto;border-radius:10px;box-shadow:0 30px 90px rgba(0,0,0,.5);cursor:default;}
+.lightbox-close{position:absolute;top:24px;right:32px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;width:40px;height:40px;border-radius:50%;font-size:16px;cursor:pointer;}
+.lightbox-close:hover{background:rgba(255,255,255,.2);}
+
 @media(max-width:768px){
   .hero h1{font-size:34px;}
   .hero p{font-size:16px;}

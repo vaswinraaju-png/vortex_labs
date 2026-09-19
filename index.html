@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ads Dashboard — One dashboard for every campaign</title>
+<title>Ads Dashboard, One dashboard for every campaign</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -17,7 +17,7 @@
 
 <section class="hero">
   <div class="container">
-    <div class="hero-badge">Built for performance marketers</div>
+    <div class="hero-badge">Built by Performance Marketer for CEO's and CMO's</div>
     <h1>All your ad campaigns, <span>in one dashboard</span></h1>
     <p>Stop tabbing between Ads Manager, Meta Business Suite, and spreadsheets. See spend, leads, and creative performance in one clean view, updated realtime.</p>
     <p style="font-size:15px;color:var(--muted);max-width:560px;margin:0 auto 36px;">Built for CEOs, CMOs and Performance Marketing Managers, just to check everything in a simple click.</p>
@@ -25,8 +25,9 @@
       <a class="btn-primary" href="checkout.html">Buy Now</a>
       <a class="btn-secondary" href="#features">See how it works</a>
     </div>
-    <div class="hero-shot">
+    <div class="hero-shot" onclick="openLightbox('assets/screenshot-overview.png')">
       <img src="assets/screenshot-overview.png" alt="Ads Dashboard overview screen">
+      <div class="zoom-icon">⤢</div>
     </div>
   </div>
 </section>
@@ -40,36 +41,38 @@
     <div class="section-head">
       <div class="section-eyebrow">Everything you need</div>
       <h2>Built for the way marketers actually work</h2>
-      <p>Real campaign data, real creative previews, and targets you set yourself — no bloated agency software.</p>
+      <p>Real campaign data, real creative previews, and targets you set yourself. No bloated agency software.</p>
     </div>
 
     <div class="feature-block">
       <div class="feature-copy">
         <h3>Live campaign breakdown</h3>
-        <p>Every adset, every metric, sorted the way you already think about it — spend, impressions, clicks, CTR, leads and cost per lead, side by side.</p>
+        <p>Every adset, every metric, sorted the way you already think about it: spend, impressions, clicks, CTR, leads and cost per lead, side by side.</p>
         <ul class="feature-list">
           <li>Real-time data pulled straight from Meta</li>
           <li>Filter by campaign, adset, or individual ad</li>
           <li>Delivery status at a glance</li>
         </ul>
       </div>
-      <div class="feature-shot">
+      <div class="feature-shot" onclick="openLightbox('assets/screenshot-table.png')">
         <img src="assets/screenshot-table.png" alt="Campaign breakdown table">
+        <div class="zoom-icon">⤢</div>
       </div>
     </div>
 
     <div class="feature-block">
       <div class="feature-copy">
         <h3>See every creative, not just the numbers</h3>
-        <p>Click into any ad and see the actual creative next to its performance — headline, copy, spend, leads, CTR — so you know exactly what's working.</p>
+        <p>Click into any ad and see the actual creative next to its performance: headline, copy, spend, leads, CTR, so you know exactly what's working.</p>
         <ul class="feature-list">
           <li>Full-resolution creative previews</li>
           <li>Primary text, description, and ad name in one view</li>
           <li>Performance metrics attached to every creative</li>
         </ul>
       </div>
-      <div class="feature-shot">
+      <div class="feature-shot" onclick="openLightbox('assets/screenshot-creative.png')">
         <img src="assets/screenshot-creative.png" alt="Creative preview with performance metrics">
+        <div class="zoom-icon">⤢</div>
       </div>
     </div>
   </div>
@@ -86,10 +89,10 @@
       <div class="pricing-amount"><span style="text-decoration:line-through;color:var(--muted);font-size:24px;font-weight:600;">$500</span> $19 <span>one-time</span></div>
       <p class="pricing-sub">Own it forever. No subscriptions.</p>
       <ul class="pricing-list">
-        <li>Complete dashboard — Overview, Creatives, Social</li>
+        <li>Complete dashboard: Overview, Creatives, Social</li>
         <li>Works with your own Meta access token, directly in your browser</li>
         <li>No backend, no hosting fees required</li>
-        <li>Fully white-label — your logo, your colors</li>
+        <li>Fully white-label: your logo, your colors</li>
         <li>Lifetime updates</li>
       </ul>
       <a class="btn-primary" href="checkout.html">Buy Now</a>
@@ -110,5 +113,23 @@
   </div>
 </footer>
 
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox(event)">✕</button>
+  <img id="lightbox-img" src="" alt="Expanded screenshot">
+</div>
+
+<script>
+function openLightbox(src){
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox(e){
+  if(e) e.stopPropagation();
+  document.getElementById('lightbox').classList.remove('open');
+}
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') closeLightbox();
+});
+</script>
 </body>
 </html>
