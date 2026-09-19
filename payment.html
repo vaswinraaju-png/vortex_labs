@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Payment — Ads Dashboard</title>
+<title>Payment, Ads Dashboard</title>
 <link rel="stylesheet" href="css/style.css">
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 </head>
 <body>
 
@@ -16,7 +17,9 @@
       <div class="flow-step"></div>
     </div>
     <h2>Payment</h2>
-    <p class="sub">Step 2 of 3</p>
+    <p class="sub">Step 2 of 3, secured by Cashfree</p>
+
+    <div id="payment-error" class="flow-error"></div>
 
     <div class="flow-summary">
       <div class="flow-summary-row"><span>Name</span><span id="pay-name">—</span></div>
@@ -24,16 +27,10 @@
       <div class="flow-summary-row total"><span>Amount due</span><span id="pay-amount">—</span></div>
     </div>
 
-    <!--
-      TODO: this is a placeholder payment step.
-      Replace the button below with your real payment gateway's
-      checkout button/widget (Razorpay, Stripe, PayPal, etc).
-      See js/checkout.js for integration notes and examples.
-    -->
-    <form onsubmit="submitPaymentStub(event)">
-      <button type="submit" class="btn-primary" id="pay-btn" style="width:100%;">Pay $19</button>
+    <form onsubmit="submitPayment(event)">
+      <button type="submit" class="btn-primary" id="pay-btn" style="width:100%;">Pay ₹499</button>
       <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:14px;">
-        Payment gateway not yet connected — this is a placeholder step.
+        You'll be redirected to Cashfree's secure checkout.
       </p>
     </form>
   </div>

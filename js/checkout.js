@@ -1,10 +1,14 @@
 // ─────────────────────────────────────────────────────────────
-// CHECKOUT FLOW — client-side only. No backend exists yet.
-// Order details are passed between checkout.html -> payment.html
-// -> success.html via sessionStorage (per-tab, cleared on close).
+// CHECKOUT FLOW — real Cashfree integration.
+// Order creation happens server-side via /api/create-order
+// (uses your Secret Key, never exposed to the browser).
+// Order details are passed between pages via sessionStorage
+// (per-tab, cleared on close) for display purposes only — the
+// actual paid/unpaid truth is re-verified server-side on
+// success.html via /api/order-status.
 // ─────────────────────────────────────────────────────────────
 const ORDER_KEY = 'ads_dashboard_order';
-const PRICE = 19; // USD
+const PRICE = 499; // INR
 
 function saveOrder(data){
   const existing = getOrder() || {};
@@ -47,52 +51,95 @@ function initPaymentPage(){
   if(!order){ window.location.href = 'checkout.html'; return; }
   document.getElementById('pay-name').textContent = order.name;
   document.getElementById('pay-email').textContent = order.email;
-  document.getElementById('pay-amount').textContent = '$' + order.amount;
+  document.getElementById('pay-amount').textContent = '₹' + order.amount;
 }
 
-// ─────────────────────────────────────────────────────────────
-// TODO: replace this stub with your real payment gateway.
-//
-// Example (Razorpay):
-//   const rzp = new Razorpay({
-//     key: 'YOUR_KEY_ID',
-//     amount: order.amount * 100,
-//     currency: 'INR',
-//     name: 'Ads Dashboard',
-//     prefill: { name: order.name, email: order.email, contact: order.phone },
-//     handler: function(response){
-//       saveOrder({ paymentId: response.razorpay_payment_id, paid: true });
-//       window.location.href = 'success.html';
-//     }
-//   });
-//   rzp.open();
-//
-// Example (Stripe Checkout): redirect to a Checkout Session URL
-// created by your backend, then handle the success redirect back
-// to success.html?session_id=... and verify server-side.
-//
-// This stub simply marks the order paid and moves on, so the flow
-// is testable end-to-end before a real gateway is wired in.
-// ─────────────────────────────────────────────────────────────
-function submitPaymentStub(e){
+// Creates the order server-side, then opens Cashfree's hosted
+// checkout using their JS SDK (loaded via <script> in payment.html).
+async function submitPayment(e){
   e.preventDefault();
   const btn = document.getElementById('pay-btn');
+  const errEl = document.getElementById('payment-error');
+  errEl.style.display = 'none';
   btn.textContent = 'Processing...';
   btn.disabled = true;
-  setTimeout(()=>{
-    saveOrder({ paid: true, paymentId: 'STUB-' + Date.now() });
-    window.location.href = 'success.html';
-  }, 900);
+
+  const order = getOrder();
+  if(!order){ window.location.href = 'checkout.html'; return; }
+
+  try{
+    const res = await fetch('/api/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: order.name,
+        email: order.email,
+        phone: order.phone,
+        amount: order.amount
+      })
+    });
+    const data = await res.json();
+
+    if(!res.ok){
+      throw new Error(data.error || 'Failed to create order');
+    }
+
+    saveOrder({ cfOrderId: data.orderId });
+
+    // Cashfree JS SDK — loaded via <script src="https://sdk.cashfree.com/js/v3/cashfree.js"> in payment.html
+    const cashfree = Cashfree({ mode: 'production' });
+    cashfree.checkout({
+      paymentSessionId: data.paymentSessionId,
+      redirectTarget: '_self'
+    });
+    // On success, Cashfree redirects the browser to the return_url
+    // configured server-side (success.html?order_id=...).
+  }catch(err){
+    errEl.textContent = 'Payment could not be started: ' + err.message;
+    errEl.style.display = 'block';
+    btn.textContent = 'Pay ₹' + (order.amount || PRICE);
+    btn.disabled = false;
+  }
 }
 
 // ── success.html ──
-function initSuccessPage(){
+// Re-verifies payment status server-side rather than trusting the
+// redirect alone — the order_id comes back in the URL from Cashfree.
+async function initSuccessPage(){
+  const params = new URLSearchParams(window.location.search);
+  const orderId = params.get('order_id');
   const order = getOrder();
-  if(!order || !order.paid){ window.location.href = 'checkout.html'; return; }
-  document.getElementById('success-name').textContent = order.name;
-  document.getElementById('success-email').textContent = order.email;
-  document.getElementById('success-order-id').textContent = order.paymentId || '—';
-  // TODO: replace with your real download link / delivery mechanism
-  // (e.g. a signed URL from your backend, or an emailed license key).
-  document.getElementById('download-link').href = '#';
+
+  if(!orderId){
+    document.getElementById('success-pending').style.display = 'none';
+    document.getElementById('success-error').style.display = 'block';
+    return;
+  }
+
+  try{
+    const res = await fetch('/api/order-status?order_id=' + encodeURIComponent(orderId));
+    const data = await res.json();
+
+    if(!res.ok || data.status !== 'PAID'){
+      document.getElementById('success-pending').style.display = 'none';
+      document.getElementById('success-error').style.display = 'block';
+      document.getElementById('success-error-detail').textContent =
+        'Order status: ' + (data.status || 'unknown') + '. If you completed payment, this may take a moment to update, or contact support with your order ID.';
+      return;
+    }
+
+    saveOrder({ paid: true, cfOrderId: orderId });
+    document.getElementById('success-pending').style.display = 'none';
+    document.getElementById('success-content').style.display = 'block';
+    document.getElementById('success-name').textContent = data.customerName || order?.name || '—';
+    document.getElementById('success-email').textContent = data.customerEmail || order?.email || '—';
+    document.getElementById('success-order-id').textContent = orderId;
+    // TODO: replace with your real download link / delivery mechanism
+    // (e.g. a signed URL from your backend, or an emailed license key).
+    document.getElementById('download-link').href = '#';
+  }catch(err){
+    document.getElementById('success-pending').style.display = 'none';
+    document.getElementById('success-error').style.display = 'block';
+    document.getElementById('success-error-detail').textContent = 'Error checking order status: ' + err.message;
+  }
 }
