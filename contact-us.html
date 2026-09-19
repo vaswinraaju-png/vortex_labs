@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us — Ads Dashboard</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .legal{max-width:760px;margin:0 auto;padding:64px 24px 96px;}
+  .legal h1{font-size:32px;font-weight:800;margin-bottom:8px;}
+  .legal .updated{color:var(--muted);font-size:13px;margin-bottom:36px;}
+  .legal h2{font-size:19px;font-weight:700;margin:32px 0 12px;}
+  .legal p, .legal li{color:var(--text);font-size:15px;margin-bottom:12px;}
+  .contact-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;margin-bottom:32px;}
+  .contact-row{display:flex;gap:14px;margin-bottom:16px;}
+  .contact-row:last-child{margin-bottom:0;}
+  .contact-label{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;min-width:140px;}
+  .contact-value{font-size:15px;color:var(--text);}
+  .contact-form{margin-top:12px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;}
+  .field input,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;outline:none;transition:border-color .15s;font-family:inherit;}
+  .field input:focus,.field textarea:focus{border-color:var(--accent);}
+  .field textarea{min-height:120px;resize:vertical;}
+  .form-ok{background:#e8f9ee;border:1px solid #b7e8c9;color:#1a7a3d;border-radius:8px;padding:12px 14px;font-size:13px;margin-bottom:16px;display:none;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="index.html">Ads Dashboard</a>
+    <a class="nav-cta" href="checkout.html">Get Started</a>
+  </div>
+</nav>
+
+<div class="legal">
+  <h1>Contact Us</h1>
+  <p style="color:var(--muted);margin-bottom:28px;">We're happy to help with any questions before or after your purchase.</p>
+
+  <div class="contact-card">
+    <div class="contact-row">
+      <div class="contact-label">Business Name</div>
+      <div class="contact-value">eTrade India (Aswin Raaju, Proprietor)</div>
+    </div>
+    <div class="contact-row">
+      <div class="contact-label">Email</div>
+      <div class="contact-value"><a href="mailto:admin@vortexlabs.app">admin@vortexlabs.app</a></div>
+    </div>
+    <div class="contact-row">
+      <div class="contact-label">Phone / WhatsApp</div>
+      <div class="contact-value"><a href="tel:+917094956963">+91 70949 56963</a></div>
+    </div>
+    <div class="contact-row">
+      <div class="contact-label">Operating Address</div>
+      <div class="contact-value">4, Sengunthar Street, Orleanpet, Puducherry, Puducherry, 605005, India</div>
+    </div>
+  </div>
+
+  <h2>Send us a message</h2>
+  <div id="form-ok" class="form-ok">Thanks, we'll get back to you shortly.</div>
+  <form class="contact-form" onsubmit="submitContactForm(event)">
+    <div class="field">
+      <label for="c-name">Name</label>
+      <input type="text" id="c-name" placeholder="Your name" required>
+    </div>
+    <div class="field">
+      <label for="c-email">Email</label>
+      <input type="email" id="c-email" placeholder="you@company.com" required>
+    </div>
+    <div class="field">
+      <label for="c-message">Message</label>
+      <textarea id="c-message" placeholder="How can we help?" required></textarea>
+    </div>
+    <button type="submit" class="btn-primary">Submit</button>
+  </form>
+</div>
+
+<footer>
+  <div class="container">
+    <div style="display:flex;flex-direction:column;gap:14px;align-items:center;">
+      <div style="display:flex;gap:24px;flex-wrap:wrap;justify-content:center;font-size:13px;font-weight:600;">
+        <a href="contact-us.html">Contact Us</a>
+        <a href="privacy-policy.html">Privacy Policy</a>
+        <a href="terms-of-service.html">Terms of Service</a>
+        <a href="refund-policy.html">Refund Policy</a>
+      </div>
+      <div>© 2026 Ads Dashboard. All rights reserved.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// TODO: this currently just shows a success message client-side.
+// Wire this up to an email service (e.g. Formspree, EmailJS) or
+// your own backend endpoint to actually receive these messages.
+function submitContactForm(e){
+  e.preventDefault();
+  document.getElementById('form-ok').style.display = 'block';
+  e.target.reset();
+}
+</script>
+
+</body>
+</html>
