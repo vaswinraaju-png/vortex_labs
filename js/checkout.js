@@ -4,7 +4,7 @@
 // -> success.html via sessionStorage (per-tab, cleared on close).
 // ─────────────────────────────────────────────────────────────
 const ORDER_KEY = 'ads_dashboard_order';
-const PRICE = 4999;
+const PRICE = 19; // USD
 
 function saveOrder(data){
   const existing = getOrder() || {};
@@ -47,7 +47,7 @@ function initPaymentPage(){
   if(!order){ window.location.href = 'checkout.html'; return; }
   document.getElementById('pay-name').textContent = order.name;
   document.getElementById('pay-email').textContent = order.email;
-  document.getElementById('pay-amount').textContent = '₹' + order.amount.toLocaleString('en-IN');
+  document.getElementById('pay-amount').textContent = '$' + order.amount;
 }
 
 // ─────────────────────────────────────────────────────────────
