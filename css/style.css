@@ -50,9 +50,8 @@ img{max-width:100%;display:block;}
 .section-head h2{font-size:36px;font-weight:800;letter-spacing:-.02em;margin-bottom:14px;}
 .section-head p{color:var(--muted);font-size:16px;}
 
-.feature-block{display:grid;grid-template-columns:1fr;gap:28px;margin-bottom:110px;}
-.feature-copy{max-width:640px;}
-.feature-block:nth-child(even) .feature-copy{order:0;}
+.feature-block{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;margin-bottom:110px;}
+.feature-copy{max-width:none;}
 .feature-block:nth-child(even) .feature-copy{order:2;}
 .feature-copy h3{font-size:28px;font-weight:800;letter-spacing:-.02em;margin-bottom:14px;}
 .feature-copy p{color:var(--muted);font-size:16px;margin-bottom:20px;}
