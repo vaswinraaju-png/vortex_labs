@@ -25,8 +25,9 @@
       <a class="btn-primary" href="checkout.html">Buy Now</a>
       <a class="btn-secondary" href="#features">See how it works</a>
     </div>
-    <div class="hero-shot">
+    <div class="hero-shot" onclick="openLightbox('assets/screenshot-overview.png')">
       <img src="assets/screenshot-overview.png" alt="Ads Dashboard overview screen">
+      <div class="zoom-icon">⤢</div>
     </div>
   </div>
 </section>
@@ -53,8 +54,9 @@
           <li>Delivery status at a glance</li>
         </ul>
       </div>
-      <div class="feature-shot">
+      <div class="feature-shot" onclick="openLightbox('assets/screenshot-table.png')">
         <img src="assets/screenshot-table.png" alt="Campaign breakdown table">
+        <div class="zoom-icon">⤢</div>
       </div>
     </div>
 
@@ -68,8 +70,9 @@
           <li>Performance metrics attached to every creative</li>
         </ul>
       </div>
-      <div class="feature-shot">
+      <div class="feature-shot" onclick="openLightbox('assets/screenshot-creative.png')">
         <img src="assets/screenshot-creative.png" alt="Creative preview with performance metrics">
+        <div class="zoom-icon">⤢</div>
       </div>
     </div>
   </div>
@@ -110,5 +113,20 @@
   </div>
 </footer>
 
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox(event)">✕</button>
+  <img id="lightbox-img" src="" alt="Expanded screenshot">
+</div>
+
+<script>
+function openLightbox(src){
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox(e){
+  if(e) e.stopPropagation();
+  document.getElementById('lightbox').classList.remove('open');
+}
+</script>
 </body>
 </html>
