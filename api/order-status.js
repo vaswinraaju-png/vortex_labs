@@ -6,8 +6,13 @@
 // Requires the same environment variables as create-order.js:
 //   CASHFREE_APP_ID
 //   CASHFREE_SECRET_KEY
+//
+// Must use the SAME CASHFREE_MODE as create-order.js, or order
+// lookups will fail (sandbox orders don't exist in production).
 // ─────────────────────────────────────────────────────────────
-const CASHFREE_BASE_URL = 'https://api.cashfree.com/pg';
+const CASHFREE_BASE_URL = process.env.CASHFREE_MODE === 'sandbox'
+  ? 'https://sandbox.cashfree.com/pg'
+  : 'https://api.cashfree.com/pg';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {

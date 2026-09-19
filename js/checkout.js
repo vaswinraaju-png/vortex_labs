@@ -87,7 +87,7 @@ async function submitPayment(e){
     saveOrder({ cfOrderId: data.orderId });
 
     // Cashfree JS SDK — loaded via <script src="https://sdk.cashfree.com/js/v3/cashfree.js"> in payment.html
-    const cashfree = Cashfree({ mode: 'production' });
+    const cashfree = Cashfree({ mode: data.mode || 'production' });
     cashfree.checkout({
       paymentSessionId: data.paymentSessionId,
       redirectTarget: '_self'

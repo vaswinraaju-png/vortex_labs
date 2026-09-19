@@ -5,10 +5,15 @@
 //   CASHFREE_APP_ID
 //   CASHFREE_SECRET_KEY
 //
-// Production API base — change to https://sandbox.cashfree.com/pg
-// if you ever need to test against Cashfree's sandbox instead.
+// MODE TOGGLE: set CASHFREE_MODE=sandbox in Vercel env vars to
+// test against Cashfree's sandbox (use your Sandbox App ID/Secret,
+// found via "Switch to Test" in the Cashfree dashboard). Leave
+// unset or set to "production" for live transactions. Sandbox and
+// production use different keys, don't mix them.
 // ─────────────────────────────────────────────────────────────
-const CASHFREE_BASE_URL = 'https://api.cashfree.com/pg';
+const CASHFREE_BASE_URL = process.env.CASHFREE_MODE === 'sandbox'
+  ? 'https://sandbox.cashfree.com/pg'
+  : 'https://api.cashfree.com/pg';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -79,7 +84,8 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       orderId: data.order_id,
-      paymentSessionId: data.payment_session_id
+      paymentSessionId: data.payment_session_id,
+      mode: process.env.CASHFREE_MODE === 'sandbox' ? 'sandbox' : 'production'
     });
   } catch (err) {
     return res.status(500).json({ error: 'Server error creating order: ' + err.message });

@@ -40,7 +40,22 @@ In your Vercel project, go to **Settings, Environment Variables** and add:
 
 **Redeploy after adding these** so Vercel picks them up. Your keys are never exposed to the browser; only the two serverless functions in `api/` read them.
 
-This is wired to Cashfree's **Production** API (`https://api.cashfree.com/pg`). If you ever need to test without real charges, change `CASHFREE_BASE_URL` at the top of both `api/create-order.js` and `api/order-status.js` to `https://sandbox.cashfree.com/pg` and use your sandbox credentials instead.
+This is wired to Cashfree's **Production** API (`https://api.cashfree.com/pg`) by default.
+
+### Testing in Sandbox mode
+
+Your production Cashfree account is likely still pending KYC/VCIP approval, in which case live transactions will fail with an error like "transactions are not enabled for your payment gateway account". You can still test the full checkout flow end-to-end using Cashfree's **Sandbox** environment while waiting for approval:
+
+1. In the Cashfree dashboard, click **"Switch to Test"** (top left) to get your separate **Sandbox App ID and Secret Key** — these are different from your production keys.
+2. In Vercel, add or update these environment variables:
+   - `CASHFREE_APP_ID` and `CASHFREE_SECRET_KEY` — your **sandbox** keys (temporarily, while testing)
+   - `CASHFREE_MODE` = `sandbox`
+3. Redeploy.
+4. On the hosted checkout page, use one of Cashfree's [test card/UPI details](https://www.cashfree.com/docs/payments/online/resources/sandbox-environment) to simulate a payment (no real money moves).
+
+**To switch back to production** once VCIP clears: set `CASHFREE_APP_ID`/`CASHFREE_SECRET_KEY` back to your production keys, and either remove `CASHFREE_MODE` or set it to `production`. Redeploy.
+
+Sandbox and production orders are completely separate. An order created in one mode cannot be looked up in the other.
 
 ### Currency
 
