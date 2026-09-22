@@ -85,6 +85,15 @@ function submitCheckout(e){
         contents: [{ id: "ads-dashboard", name: "Ads Dashboard", content_type: "product", quantity: 1 }]
       });
     }
+    if(window.fbq){
+      fbq('track', 'InitiateCheckout', {
+        value: PRICE,
+        currency: 'INR',
+        content_ids: ['ads-dashboard'],
+        content_type: 'product',
+        contents: [{ id: 'ads-dashboard', quantity: 1 }]
+      });
+    }
     window.location.href = 'payment.html';
   });
 }
@@ -186,6 +195,17 @@ async function initSuccessPage(){
         currency: "INR",
         contents: [{ id: "ads-dashboard", name: "Ads Dashboard", content_type: "product", quantity: 1 }]
       }, { event_id: orderId });
+    }
+
+    // Fire Meta Pixel purchase conversion event, same trigger point.
+    if (window.fbq) {
+      fbq('track', 'Purchase', {
+        value: data.amount || order?.amount || PRICE,
+        currency: 'INR',
+        content_ids: ['ads-dashboard'],
+        content_type: 'product',
+        contents: [{ id: 'ads-dashboard', quantity: 1 }]
+      }, { eventID: orderId });
     }
 
     document.getElementById('success-pending').style.display = 'none';
