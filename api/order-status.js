@@ -14,6 +14,8 @@ const CASHFREE_BASE_URL = process.env.CASHFREE_MODE === 'sandbox'
   ? 'https://sandbox.cashfree.com/pg'
   : 'https://api.cashfree.com/pg';
 
+import { updateOrderStatus } from './_supabase.js';
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -45,6 +47,16 @@ export default async function handler(req, res) {
 
     if (!cfRes.ok) {
       return res.status(cfRes.status).json({ error: data.message || 'Failed to fetch order status', details: data });
+    }
+
+    // Sync the durable record with Cashfree's authoritative status.
+    // "PAID" maps to our "paid"; everything else maps to "failed" once
+    // Cashfree reports a terminal non-paid state (EXPIRED, etc). Active/
+    // pending states just leave the row as "pending" for now.
+    if (data.order_status === 'PAID') {
+      await updateOrderStatus(data.order_id, { status: 'paid' });
+    } else if (data.order_status === 'EXPIRED' || data.order_status === 'TERMINATED') {
+      await updateOrderStatus(data.order_id, { status: 'failed' });
     }
 
     return res.status(200).json({

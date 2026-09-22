@@ -65,7 +65,43 @@ Orders are created in **INR** (₹499, compare-at ₹2,999).
 `success.html` shows a "Download" button pointing to a placeholder (`#`). Update the `download-link` href in `initSuccessPage()` (`js/checkout.js`) to point at wherever the paid dashboard package is actually hosted (signed URL, private repo invite, etc.).
 
 ## Order data
-Buyer info is held in `sessionStorage` (key `ads_dashboard_order`) purely for display across the flow. The actual source of truth for whether an order is paid is always the server-side check in `api/order-status.js`, never the client state.
+
+Buyer info is held in `sessionStorage` (key `ads_dashboard_order`) purely for display across the flow, cleared when the tab closes.
+
+**Every order is also saved durably to Supabase** — this is the actual record of who bought what and whether they paid.
+
+### Supabase setup
+
+1. Create a project at [supabase.com](https://supabase.com) (free tier is fine).
+2. In the Supabase SQL editor, run:
+   ```sql
+   create table orders (
+     id uuid primary key default gen_random_uuid(),
+     cf_order_id text unique not null,
+     name text not null,
+     email text not null,
+     phone text not null,
+     amount numeric not null,
+     status text not null default 'pending', -- 'pending' | 'paid' | 'failed'
+     created_at timestamptz not null default now(),
+     updated_at timestamptz not null default now()
+   );
+   create index orders_cf_order_id_idx on orders (cf_order_id);
+   ```
+3. In Supabase, go to **Project Settings, API** and copy:
+   - **Project URL**
+   - **service_role key** (NOT the `anon`/public key — the service_role key bypasses row-level security and must only ever be used server-side)
+4. In Vercel, add environment variables:
+   - `SUPABASE_URL` = your Project URL
+   - `SUPABASE_SERVICE_ROLE_KEY` = your service_role key
+5. Redeploy.
+
+### How it's used
+
+- `api/create-order.js` inserts a row with `status: 'pending'` right after the Cashfree order is created.
+- `api/order-status.js` updates that row to `status: 'paid'` once Cashfree confirms payment (or `'failed'` if the order expires/terminates without payment).
+- If Supabase env vars are missing or a write fails, the payment flow is **never blocked** — it just logs a warning and continues. Order tracking is additive, not a dependency of checkout working.
+- View/query your orders any time in the Supabase table editor, or via its REST/SQL interface.
 
 ## Deploying
-Requires Vercel (or another platform supporting serverless functions) because of the two functions in `api/`. A purely static host (GitHub Pages, Netlify without functions) will not be able to run the payment flow, though the rest of the site works fine.
+Requires Vercel (or another platform supporting serverless functions) because of the functions in `api/`. A purely static host (GitHub Pages, Netlify without functions) will not be able to run the payment flow or order tracking, though the rest of the site works fine.
