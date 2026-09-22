@@ -10,6 +10,39 @@
 const ORDER_KEY = 'ads_dashboard_order';
 const PRICE = 499; // INR
 
+// ── ChatGPT Ads advanced matching helpers ──
+async function sha256Hex(str){
+  const enc = new TextEncoder().encode(str);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+function normalizeEmail(email){ return email.trim().toLowerCase(); }
+function normalizePhone(phone){
+  let digits = String(phone).replace(/[\s().-]/g,'').replace(/^\+/,'').replace(/^0+/,'');
+  return digits;
+}
+function normalizeName(name){ return name.toLowerCase().replace(/[\s!"#$%&'()*+,\-./:;<=>?@[\]^_`{|}~]/g,''); }
+
+// Re-inits the pixel with hashed buyer info once we have it, so later
+// events (checkout_started onward) get advanced matching. Safe to call
+// more than once; only one pixel is initialized on these pages.
+async function identifyBuyer(name, email, phone){
+  try{
+    const [emailHash, phoneHash, nameHash] = await Promise.all([
+      email ? sha256Hex(normalizeEmail(email)) : null,
+      phone ? sha256Hex(normalizePhone(phone)) : null,
+      name ? sha256Hex(normalizeName(name)) : null
+    ]);
+    const user = {};
+    if(emailHash) user.email_sha256 = emailHash;
+    if(phoneHash) user.phone_number_sha256 = phoneHash;
+    if(nameHash) user.first_name_sha256 = nameHash;
+    if(window.oaiq && Object.keys(user).length){
+      oaiq('init', { pixelId: '4dJ5M9GtMmeF5kE4wxxd7w', user });
+    }
+  }catch(e){ /* advanced matching is best-effort, never block the flow */ }
+}
+
 function saveOrder(data){
   const existing = getOrder() || {};
   sessionStorage.setItem(ORDER_KEY, JSON.stringify({...existing, ...data}));
@@ -42,7 +75,18 @@ function submitCheckout(e){
   errEl.style.display = 'none';
 
   saveOrder({ name, email, phone, amount: PRICE, createdAt: Date.now() });
-  window.location.href = 'payment.html';
+
+  identifyBuyer(name, email, phone).then(() => {
+    if(window.oaiq){
+      oaiq("measure", "checkout_started", {
+        type: "contents",
+        amount: PRICE,
+        currency: "INR",
+        contents: [{ id: "ads-dashboard", name: "Ads Dashboard", content_type: "product", quantity: 1 }]
+      });
+    }
+    window.location.href = 'payment.html';
+  });
 }
 
 // ── payment.html ──
@@ -52,6 +96,7 @@ function initPaymentPage(){
   document.getElementById('pay-name').textContent = order.name;
   document.getElementById('pay-email').textContent = order.email;
   document.getElementById('pay-amount').textContent = '₹' + order.amount;
+  identifyBuyer(order.name, order.email, order.phone);
 }
 
 // Creates the order server-side, then opens Cashfree's hosted
@@ -110,6 +155,8 @@ async function initSuccessPage(){
   const orderId = params.get('order_id');
   const order = getOrder();
 
+  if(order) identifyBuyer(order.name, order.email, order.phone);
+
   if(!orderId){
     document.getElementById('success-pending').style.display = 'none';
     document.getElementById('success-error').style.display = 'block';
@@ -129,6 +176,18 @@ async function initSuccessPage(){
     }
 
     saveOrder({ paid: true, cfOrderId: orderId });
+
+    // Fire ChatGPT Ads purchase conversion event, once, using the order
+    // id as event_id for dedup safety if server-side tracking is added later.
+    if (window.oaiq) {
+      oaiq("measure", "order_created", {
+        type: "contents",
+        amount: data.amount || order?.amount || PRICE,
+        currency: "INR",
+        contents: [{ id: "ads-dashboard", name: "Ads Dashboard", content_type: "product", quantity: 1 }]
+      }, { event_id: orderId });
+    }
+
     document.getElementById('success-pending').style.display = 'none';
     document.getElementById('success-content').style.display = 'block';
     document.getElementById('success-name').textContent = data.customerName || order?.name || '—';
