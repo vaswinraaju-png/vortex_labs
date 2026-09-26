@@ -2,49 +2,76 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Payment</title>
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version="2.0";
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,"script",
+"https://connect.facebook.net/en_US/fbevents.js");
+fbq("init", "1383894423390682");
+fbq("track", "PageView");
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1383894423390682&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+<script>
+  (function (w, d, s, u) {
+    if (w.oaiq) return;
+    var q = function () { q.q.push(arguments); };
+    q.q = [];
+    w.oaiq = q;
+    var js = d.createElement(s);
+    js.async = true;
+    js.src = u;
+    var f = d.getElementsByTagName(s)[0];
+    f.parentNode.insertBefore(js, f);
+  })(window, document, "script", "https://bzrcdn.openai.com/sdk/oaiq.min.js");
+  oaiq("init", { pixelId: "4dJ5M9GtMmeF5kE4wxxd7w" });
+  oaiq("measure", "page_viewed", {
+    type: "contents",
+    contents: [{ id: "payment", name: "Payment", content_type: "page" }]
+  });
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment, Ads Dashboard</title>
+<link rel="stylesheet" href="css/style.css">
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
-<script>
-(async function(){
-  const data = JSON.parse(sessionStorage.getItem('checkoutData') || '{}');
-  if (!data.name) { location.href = '/checkout.html'; return; }
 
-  const res = await fetch('/api/create-order', {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(data)
-  });
-  const order = await res.json();
-  if (order.error) { alert(order.error); location.href = '/checkout.html'; return; }
+<div class="flow-wrap">
+  <div class="flow-card">
+    <div class="flow-steps">
+      <div class="flow-step active"></div>
+      <div class="flow-step active"></div>
+      <div class="flow-step"></div>
+    </div>
+    <h2>Payment</h2>
+    <p class="sub">Step 2 of 3, secured by Razorpay</p>
 
-  const rzp = new Razorpay({
-    key: order.keyId,
-    amount: order.amount * 100,
-    currency: 'INR',
-    name: 'Ads Dashboard',
-    description: 'Ads Dashboard - One-time purchase',
-    order_id: order.orderId,
-    prefill: { name: data.name, email: data.email, contact: data.phone },
-    handler: async function(response){
-      const verify = await fetch('/api/order-status', {
-        method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-          ...response, name: data.name, email: data.email, phone: data.phone, amount: order.amount
-        })
-      });
-      const result = await verify.json();
-      if (result.verified) {
-        sessionStorage.setItem('orderComplete', '1');
-        location.href = '/success.html';
-      } else {
-        alert('Payment verification failed. Contact support.');
-      }
-    },
-    modal: { ondismiss: function(){ location.href = '/checkout.html'; } }
-  });
-  rzp.open();
-})();
-</script>
+    <div id="payment-error" class="flow-error"></div>
+
+    <div class="flow-summary">
+      <div class="flow-summary-row"><span>Name</span><span id="pay-name">—</span></div>
+      <div class="flow-summary-row"><span>Email</span><span id="pay-email">—</span></div>
+      <div class="flow-summary-row total"><span>Amount due</span><span id="pay-amount">—</span></div>
+    </div>
+
+    <form onsubmit="submitPayment(event)">
+      <button type="submit" class="btn-primary" id="pay-btn" style="width:100%;">Pay ₹499</button>
+      <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:14px;">
+        You'll be redirected to Razorpay's secure checkout.
+      </p>
+    </form>
+  </div>
+</div>
+
+<script src="js/checkout.js"></script>
+<script>initPaymentPage();</script>
 </body>
 </html>

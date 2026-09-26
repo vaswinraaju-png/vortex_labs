@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-// CHECKOUT FLOW — real Cashfree integration.
+// CHECKOUT FLOW — real Razorpay integration.
 // Order creation happens server-side via /api/create-order
 // (uses your Secret Key, never exposed to the browser).
 // Order details are passed between pages via sessionStorage
@@ -76,7 +76,6 @@ function submitCheckout(e){
   const coupon = document.getElementById('coupon')?.value.trim() || '';
 
   saveOrder({ name, email, phone, coupon, amount: PRICE, createdAt: Date.now() });
-  sessionStorage.setItem('checkoutData', JSON.stringify({ name, email, phone, coupon }));
 
   identifyBuyer(name, email, phone).then(() => {
     if(window.oaiq){
@@ -110,10 +109,10 @@ function initPaymentPage(){
   identifyBuyer(order.name, order.email, order.phone);
 }
 
-// Creates the order server-side, then opens Cashfree's hosted
+// Creates the order server-side, then opens Razorpay's hosted
 // checkout using their JS SDK (loaded via <script> in payment.html).
 async function submitPayment(e){
-  e.preventDefault();
+  if(e) e.preventDefault();
   const btn = document.getElementById('pay-btn');
   const errEl = document.getElementById('payment-error');
   errEl.style.display = 'none';
@@ -131,7 +130,7 @@ async function submitPayment(e){
         name: order.name,
         email: order.email,
         phone: order.phone,
-        amount: order.amount
+        coupon: order.coupon || ''
       })
     });
     const data = await res.json();
@@ -140,16 +139,60 @@ async function submitPayment(e){
       throw new Error(data.error || 'Failed to create order');
     }
 
-    saveOrder({ cfOrderId: data.orderId });
+    saveOrder({ rzpOrderId: data.orderId, amount: data.amount });
 
-    // Cashfree JS SDK — loaded via <script src="https://sdk.cashfree.com/js/v3/cashfree.js"> in payment.html
-    const cashfree = Cashfree({ mode: data.mode || 'production' });
-    cashfree.checkout({
-      paymentSessionId: data.paymentSessionId,
-      redirectTarget: '_self'
+    // Razorpay Checkout JS SDK — loaded via
+    // <script src="https://checkout.razorpay.com/v1/checkout.js"> in payment.html
+    const rzp = new Razorpay({
+      key: data.keyId,
+      amount: data.amount * 100,
+      currency: 'INR',
+      name: 'Ads Dashboard',
+      description: 'Ads Dashboard, One-time purchase',
+      order_id: data.orderId,
+      prefill: { name: order.name, email: order.email, contact: order.phone },
+      handler: async function(response){
+        try{
+          const verify = await fetch('/api/order-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              name: order.name, email: order.email, phone: order.phone,
+              amount: data.amount
+            })
+          });
+          const result = await verify.json();
+          if(result.verified){
+            saveOrder({
+              paid: true,
+              rzpPaymentId: response.razorpay_payment_id,
+              rzpOrderId: response.razorpay_order_id
+            });
+            window.location.href = 'success.html?order_id=' + encodeURIComponent(response.razorpay_order_id) + '&payment_id=' + encodeURIComponent(response.razorpay_payment_id);
+          }else{
+            errEl.textContent = 'Payment verification failed. Contact support with payment ID ' + response.razorpay_payment_id + '.';
+            errEl.style.display = 'block';
+            btn.textContent = 'Pay ₹' + (order.amount || PRICE);
+            btn.disabled = false;
+          }
+        }catch(err){
+          errEl.textContent = 'Could not verify payment: ' + err.message;
+          errEl.style.display = 'block';
+          btn.textContent = 'Pay ₹' + (order.amount || PRICE);
+          btn.disabled = false;
+        }
+      },
+      modal: {
+        ondismiss: function(){
+          btn.textContent = 'Pay ₹' + (order.amount || PRICE);
+          btn.disabled = false;
+        }
+      }
     });
-    // On success, Cashfree redirects the browser to the return_url
-    // configured server-side (success.html?order_id=...).
+    rzp.open();
   }catch(err){
     errEl.textContent = 'Payment could not be started: ' + err.message;
     errEl.style.display = 'block';
@@ -159,68 +202,64 @@ async function submitPayment(e){
 }
 
 // ── success.html ──
-// Re-verifies payment status server-side rather than trusting the
-// redirect alone — the order_id comes back in the URL from Cashfree.
+// Re-verifies payment status from our own saved order state (already
+// confirmed server-side by /api/order-status during the handler above)
+// rather than trusting the redirect alone.
 async function initSuccessPage(){
   const params = new URLSearchParams(window.location.search);
   const orderId = params.get('order_id');
+  const paymentId = params.get('payment_id');
   const order = getOrder();
 
   if(order) identifyBuyer(order.name, order.email, order.phone);
 
-  if(!orderId){
+  if(!orderId || !order || !order.paid){
     document.getElementById('success-pending').style.display = 'none';
     document.getElementById('success-error').style.display = 'block';
+    document.getElementById('success-error-detail').textContent =
+      'We could not confirm this order. If you completed payment, contact support with your payment ID.';
     return;
   }
 
-  try{
-    const res = await fetch('/api/order-status?order_id=' + encodeURIComponent(orderId));
-    const data = await res.json();
+  // Fire ChatGPT Ads purchase conversion event, once, using the order
+  // id as event_id for dedup safety if server-side tracking is added later.
+  if (window.oaiq) {
+    oaiq("measure", "order_created", {
+      type: "contents",
+      amount: order.amount || PRICE,
+      currency: "INR",
+      contents: [{ id: "ads-dashboard", name: "Ads Dashboard", content_type: "product", quantity: 1 }]
+    }, { event_id: orderId });
+  }
 
-    if(!res.ok || data.status !== 'PAID'){
-      document.getElementById('success-pending').style.display = 'none';
-      document.getElementById('success-error').style.display = 'block';
-      document.getElementById('success-error-detail').textContent =
-        'Order status: ' + (data.status || 'unknown') + '. If you completed payment, this may take a moment to update, or contact support with your order ID.';
-      return;
-    }
+  // Fire Meta Pixel purchase conversion event, same trigger point.
+  if (window.fbq) {
+    fbq('track', 'Purchase', {
+      value: order.amount || PRICE,
+      currency: 'INR',
+      content_ids: ['ads-dashboard'],
+      content_type: 'product',
+      contents: [{ id: 'ads-dashboard', quantity: 1 }]
+    }, { eventID: orderId });
+  }
 
-    saveOrder({ paid: true, cfOrderId: orderId });
+  document.getElementById('success-pending').style.display = 'none';
+  document.getElementById('success-content').style.display = 'block';
+  document.getElementById('success-name').textContent = order.name || '—';
+  document.getElementById('success-email').textContent = order.email || '—';
+  document.getElementById('success-order-id').textContent = paymentId || orderId;
 
-    // Fire ChatGPT Ads purchase conversion event, once, using the order
-    // id as event_id for dedup safety if server-side tracking is added later.
-    if (window.oaiq) {
-      oaiq("measure", "order_created", {
-        type: "contents",
-        amount: data.amount || order?.amount || PRICE,
-        currency: "INR",
-        contents: [{ id: "ads-dashboard", name: "Ads Dashboard", content_type: "product", quantity: 1 }]
-      }, { event_id: orderId });
-    }
+  // ─────────────────────────────────────────────────────────────
+  // TODO: replace this URL with your real Supabase Storage / S3
+  // download link for the Ads Dashboard .zip file.
+  // ─────────────────────────────────────────────────────────────
+  const DOWNLOAD_URL = 'REPLACE_WITH_YOUR_STORAGE_ZIP_URL';
+  const dl = document.getElementById('download-link');
+  dl.href = DOWNLOAD_URL;
+  dl.setAttribute('download', 'ads-dashboard.zip');
 
-    // Fire Meta Pixel purchase conversion event, same trigger point.
-    if (window.fbq) {
-      fbq('track', 'Purchase', {
-        value: data.amount || order?.amount || PRICE,
-        currency: 'INR',
-        content_ids: ['ads-dashboard'],
-        content_type: 'product',
-        contents: [{ id: 'ads-dashboard', quantity: 1 }]
-      }, { eventID: orderId });
-    }
-
-    document.getElementById('success-pending').style.display = 'none';
-    document.getElementById('success-content').style.display = 'block';
-    document.getElementById('success-name').textContent = data.customerName || order?.name || '—';
-    document.getElementById('success-email').textContent = data.customerEmail || order?.email || '—';
-    document.getElementById('success-order-id').textContent = orderId;
-    // TODO: replace with your real download link / delivery mechanism
-    // (e.g. a signed URL from your backend, or an emailed license key).
-    document.getElementById('download-link').href = '#';
-  }catch(err){
-    document.getElementById('success-pending').style.display = 'none';
-    document.getElementById('success-error').style.display = 'block';
-    document.getElementById('success-error-detail').textContent = 'Error checking order status: ' + err.message;
+  // Auto-trigger the download once, then also leave the button clickable.
+  if(DOWNLOAD_URL !== 'REPLACE_WITH_YOUR_STORAGE_ZIP_URL'){
+    setTimeout(() => { dl.click(); }, 600);
   }
 }
