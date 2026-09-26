@@ -1,72 +1,58 @@
-// ─────────────────────────────────────────────────────────────
-// Vercel Serverless Function — checks a Cashfree order's payment
-// status. Called by success.html after the customer returns from
-// Cashfree's hosted checkout, so we never trust the redirect alone.
-//
-// Requires the same environment variables as create-order.js:
-//   CASHFREE_APP_ID
-//   CASHFREE_SECRET_KEY
-//
-// Must use the SAME CASHFREE_MODE as create-order.js, or order
-// lookups will fail (sandbox orders don't exist in production).
-// ─────────────────────────────────────────────────────────────
-const CASHFREE_BASE_URL = process.env.CASHFREE_MODE === 'sandbox'
-  ? 'https://sandbox.cashfree.com/pg'
-  : 'https://api.cashfree.com/pg';
-
-import { updateOrderStatus } from './_supabase.js';
+// Verifies Razorpay payment signature server-side, logs the order to
+// Supabase, and sends an email notification via Resend. This is the
+// single source of truth for "did this order actually get paid".
+import crypto from 'crypto';
 
 export default async function handler(req, res) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, name, email, phone, amount } = req.body || {};
+  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+    return res.status(400).json({ error: 'Missing payment verification fields' });
   }
 
-  const appId = process.env.CASHFREE_APP_ID;
-  const secretKey = process.env.CASHFREE_SECRET_KEY;
+  const expected = crypto
+    .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+    .update(razorpay_order_id + '|' + razorpay_payment_id)
+    .digest('hex');
 
-  if (!appId || !secretKey) {
-    return res.status(500).json({ error: 'Cashfree credentials not configured.' });
+  if (expected !== razorpay_signature) {
+    return res.status(400).json({ error: 'Payment verification failed' });
   }
 
-  const { order_id } = req.query;
-  if (!order_id) {
-    return res.status(400).json({ error: 'Missing order_id' });
-  }
-
+  // Log to Supabase (best-effort, never blocks the success response)
   try {
-    const cfRes = await fetch(`${CASHFREE_BASE_URL}/orders/${encodeURIComponent(order_id)}`, {
-      method: 'GET',
+    await fetch(`${process.env.SUPABASE_URL}/rest/v1/orders`, {
+      method: 'POST',
       headers: {
-        'x-api-version': '2023-08-01',
-        'x-client-id': appId,
-        'x-client-secret': secretKey
-      }
+        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
+        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify([{
+        razorpay_order_id, razorpay_payment_id,
+        name, email, phone, product: 'Ads Dashboard', amount, status: 'paid'
+      }])
     });
+  } catch (e) { /* non-blocking */ }
 
-    const data = await cfRes.json();
-
-    if (!cfRes.ok) {
-      return res.status(cfRes.status).json({ error: data.message || 'Failed to fetch order status', details: data });
-    }
-
-    // Sync the durable record with Cashfree's authoritative status.
-    // "PAID" maps to our "paid"; everything else maps to "failed" once
-    // Cashfree reports a terminal non-paid state (EXPIRED, etc). Active/
-    // pending states just leave the row as "pending" for now.
-    if (data.order_status === 'PAID') {
-      await updateOrderStatus(data.order_id, { status: 'paid' });
-    } else if (data.order_status === 'EXPIRED' || data.order_status === 'TERMINATED') {
-      await updateOrderStatus(data.order_id, { status: 'failed' });
-    }
-
-    return res.status(200).json({
-      orderId: data.order_id,
-      status: data.order_status, // e.g. "PAID", "ACTIVE", "EXPIRED"
-      amount: data.order_amount,
-      customerEmail: data.customer_details?.customer_email,
-      customerName: data.customer_details?.customer_name
+  // Email notification via Resend (best-effort)
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'orders@vortexlabs.app',
+        to: 'v.aswinraaju@gmail.com',
+        subject: `New order: Ads Dashboard - ₹${amount}`,
+        html: `<p><b>Name:</b> ${name}</p><p><b>Email:</b> ${email}</p><p><b>Phone:</b> ${phone}</p><p><b>Amount:</b> ₹${amount}</p><p><b>Payment ID:</b> ${razorpay_payment_id}</p>`
+      })
     });
-  } catch (err) {
-    return res.status(500).json({ error: 'Server error fetching order: ' + err.message });
-  }
+  } catch (e) { /* non-blocking */ }
+
+  return res.status(200).json({ verified: true });
 }

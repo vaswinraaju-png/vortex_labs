@@ -73,8 +73,10 @@ function submitCheckout(e){
     return;
   }
   errEl.style.display = 'none';
+  const coupon = document.getElementById('coupon')?.value.trim() || '';
 
-  saveOrder({ name, email, phone, amount: PRICE, createdAt: Date.now() });
+  saveOrder({ name, email, phone, coupon, amount: PRICE, createdAt: Date.now() });
+  sessionStorage.setItem('checkoutData', JSON.stringify({ name, email, phone, coupon }));
 
   identifyBuyer(name, email, phone).then(() => {
     if(window.oaiq){

@@ -1,5 +1,8 @@
 {
   "name": "vortex-labs-ads-dashboard",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "razorpay": "^2.9.4"
+  }
 }
