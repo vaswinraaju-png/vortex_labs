@@ -4,7 +4,7 @@
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const BUCKET = "products";
-const FILE_PATH = "ads-dashboard.zip"; // must match the exact path in the private bucket
+const FILE_PATH = "meta-ads-dashboard-main v2.zip"; // must match the exact path in the private bucket
 const EXPIRES_IN_SECONDS = 600; // 10 minutes
 
 module.exports = async function handler(req, res) {
