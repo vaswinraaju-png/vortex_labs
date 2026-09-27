@@ -21,6 +21,7 @@ function submitCheckout(e){
   const name = document.getElementById('buyer-name').value.trim();
   const email = document.getElementById('buyer-email').value.trim();
   const phone = document.getElementById('buyer-phone').value.trim();
+  const coupon = document.getElementById('coupon')?.value.trim() || '';
   const errEl = document.getElementById('checkout-error');
 
   if(!name || !email || !phone){
@@ -36,7 +37,7 @@ function submitCheckout(e){
   }
   errEl.style.display = 'none';
 
-  saveOrder({ name, email, phone, amount: PRICE, createdAt: Date.now() });
+  saveOrder({ name, email, phone, coupon, amount: PRICE, createdAt: Date.now() });
   window.location.href = 'payment.html';
 }
 
@@ -80,7 +81,7 @@ async function submitPayment(e){
     const res = await fetch('/api/create-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: order.name, email: order.email, phone: order.phone })
+      body: JSON.stringify({ name: order.name, email: order.email, phone: order.phone, coupon: order.coupon || '' })
     });
     const data = await res.json();
 
@@ -106,7 +107,9 @@ async function submitPayment(e){
             body: JSON.stringify({
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature
+              razorpay_signature: response.razorpay_signature,
+              name: order.name, email: order.email, phone: order.phone,
+              amount: order.amount
             })
           });
           const result = await verify.json();

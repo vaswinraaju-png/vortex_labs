@@ -30,7 +30,15 @@ The flow:
 5. Those are sent to `/api/verify-payment`, which **verifies the signature server-side** (HMAC SHA256), so a client-side response is never trusted alone.
 6. On verified success, the browser redirects to `success.html` showing confirmation.
 
-**Not yet included:** order logging (Supabase) and email notifications (Resend) were intentionally left out of this pass, to be added back later.
+**Now included:** email notifications via Resend on every verified payment. Order logging (Supabase) is still not included.
+
+### Coupons
+
+Coupon codes are defined in `api/create-order.js`:
+```js
+const COUPONS = { 'ASHHHHKSJDHCNIS99DISC': 0.99 }; // 99% off, for testing
+```
+Add more as `{ 'CODE': discountFraction }`. Applied server-side, never trust a client-supplied amount.
 
 ### Required setup: environment variables
 
@@ -40,12 +48,13 @@ In Vercel, go to **Settings, Environment Variables** and add:
 |---|---|
 | `RAZORPAY_KEY_ID` | Your Razorpay Key ID (e.g. `rzp_live_...`) |
 | `RAZORPAY_SECRET` | Your Razorpay Key Secret |
+| `RESEND_API_KEY` | Your Resend API key |
 
-Redeploy after adding these. The secret is never exposed to the browser, only the two serverless functions in `api/` read it.
+Redeploy after adding these. Keys are never exposed to the browser, only the two serverless functions in `api/` read them.
 
-### Currency
+### Email notifications (Resend)
 
-₹499, INR, no coupon logic in this pass.
+On every verified payment, an email is sent to `v.aswinraaju@gmail.com` (set in `api/verify-payment.js`) with the order details. Update the `NOTIFY_EMAIL` constant and the `from` address (must be a domain verified in your Resend account) as needed. If `RESEND_API_KEY` is missing or the send fails, the payment flow is **never blocked**, it just logs a warning and continues.
 
 ## Pixel tracking
 

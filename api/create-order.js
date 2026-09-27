@@ -9,6 +9,7 @@
 // REST API, so this needs no build step or dependencies.
 // ─────────────────────────────────────────────────────────────
 const BASE_PRICE = 499; // INR
+const COUPONS = { 'ASHHHHKSJDHCNIS99DISC': 0.99 }; // test coupon: 99% off
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -24,13 +25,16 @@ export default async function handler(req, res) {
     });
   }
 
-  const { name, email, phone } = req.body || {};
+  const { name, email, phone, coupon } = req.body || {};
 
   if (!name || !email || !phone) {
     return res.status(400).json({ error: 'Missing required fields: name, email, phone' });
   }
 
-  const amount = BASE_PRICE; // no coupon logic for now
+  let amount = BASE_PRICE;
+  if (coupon && COUPONS[coupon]) {
+    amount = Math.max(1, Math.round(BASE_PRICE * (1 - COUPONS[coupon])));
+  }
 
   const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
 
@@ -45,7 +49,7 @@ export default async function handler(req, res) {
         amount: amount * 100, // paise
         currency: 'INR',
         payment_capture: 1, // auto-capture
-        notes: { product: 'Ads Dashboard', name, email, phone }
+        notes: { product: 'Ads Dashboard', name, email, phone, coupon: coupon || '' }
       })
     });
 
