@@ -93,7 +93,8 @@ function submitCheckout(e){
   }
   errEl.style.display = 'none';
 
-  saveOrder({ name, email, phone, coupon, amount: PRICE, createdAt: Date.now() });
+  const finalAmount = _validatedCoupon ? _validatedCoupon.discountedAmount : PRICE;
+  saveOrder({ name, email, phone, coupon: _validatedCoupon ? coupon : '', amount: finalAmount, createdAt: Date.now() });
   window.location.href = 'payment.html';
 }
 
