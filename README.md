@@ -1,36 +1,56 @@
-# Ads Dashboard, Landing Page
+# Ads Dashboard, Landing Page & Checkout
 
-A fully static marketing site for the Ads Dashboard product. No backend, no payment processing, no server-side code of any kind.
+Marketing landing page with a Razorpay payment integration for the Ads Dashboard product.
 
 ## Structure
 ```
-index.html            — landing page (hero, feature sections, pricing)
-checkout.html           — static details form (does not submit anywhere)
-payment.html              — static placeholder ("checkout not available")
-success.html                — static placeholder
-contact-us.html                — contact page (business details, static form)
-privacy-policy.html              — placeholder legal page
-terms-of-service.html              — placeholder legal page
-refund-policy.html                   — placeholder legal page
-css/style.css                          — site styling
-js/checkout.js                           — inert placeholder (form UX only, no backend calls)
-assets/                                    — product screenshots used on the landing page
+index.html          — landing page
+checkout.html         — Step 1: collects buyer name/email/phone
+payment.html            — Step 2: real Razorpay hosted checkout
+success.html              — Step 3: shows payment confirmation
+contact-us.html              — Contact page
+privacy-policy.html            — placeholder legal page
+terms-of-service.html            — placeholder legal page
+refund-policy.html                 — placeholder legal page
+css/style.css                        — site styling
+js/checkout.js                         — flow logic (order state, Razorpay integration)
+api/create-order.js                      — Vercel serverless function: creates a Razorpay order
+api/verify-payment.js                      — Vercel serverless function: verifies payment signature
+assets/                                      — product screenshots
 ```
 
-## What this is (and isn't)
+## Payment integration (Razorpay)
 
-This is a pure static site: HTML, CSS, and client-side JS only. There is:
-- No payment gateway integration (Razorpay, Cashfree, or otherwise)
-- No database (no Supabase, no order storage)
-- No email sending
-- No serverless functions of any kind
+The flow:
 
-The `checkout.html` → `payment.html` → `success.html` flow exists as static pages for the site structure, but does not process anything, the checkout form shows an inline "not available" message on submit rather than calling any backend.
+1. `checkout.html` collects buyer details, stores them in `sessionStorage`.
+2. `payment.html` calls `/api/create-order`, which creates the order server-side (auto-capture enabled) and returns an order ID.
+3. Razorpay's Checkout.js SDK (loaded dynamically) opens their hosted payment popup, prefilled with the buyer's details.
+4. On completion, Razorpay's `handler` callback fires client-side with `razorpay_order_id`, `razorpay_payment_id`, and `razorpay_signature`.
+5. Those are sent to `/api/verify-payment`, which **verifies the signature server-side** (HMAC SHA256), so a client-side response is never trusted alone.
+6. On verified success, the browser redirects to `success.html` showing confirmation.
+
+**Not yet included:** order logging (Supabase) and email notifications (Resend) were intentionally left out of this pass, to be added back later.
+
+### Required setup: environment variables
+
+In Vercel, go to **Settings, Environment Variables** and add:
+
+| Name | Value |
+|---|---|
+| `RAZORPAY_KEY_ID` | Your Razorpay Key ID (e.g. `rzp_live_...`) |
+| `RAZORPAY_SECRET` | Your Razorpay Key Secret |
+
+Redeploy after adding these. The secret is never exposed to the browser, only the two serverless functions in `api/` read it.
+
+### Currency
+
+₹499, INR, no coupon logic in this pass.
 
 ## Pixel tracking
 
-The ChatGPT Ads Measurement Pixel and Meta Pixel are both installed on every page and fire `PageView` / `page_viewed` automatically. These are pure client-side pings, no backend involved, and remain functional even with everything else stripped out.
+The ChatGPT Ads Measurement Pixel and Meta Pixel are installed on every page and fire `page_viewed` / `PageView` automatically. These are pure client-side pings, unaffected by the payment backend.
 
 ## Deploying
 
-Fully static, deploy to Vercel, Netlify, GitHub Pages, or any static host. No build step, no environment variables, no serverless function support required.
+Requires Vercel (or another platform supporting serverless functions) because of the two functions in `api/`. A purely static host will not be able to run the payment flow, though the rest of the site works fine.
