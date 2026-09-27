@@ -4,12 +4,14 @@
 // Requires these environment variables set in Vercel:
 //   RAZORPAY_KEY_ID
 //   RAZORPAY_SECRET
+//   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (for coupons + order logging)
 //
 // No Razorpay SDK/npm package used — plain fetch against their
 // REST API, so this needs no build step or dependencies.
 // ─────────────────────────────────────────────────────────────
+import { getCoupon, insertOrder } from './_supabase.js';
+
 const BASE_PRICE = 499; // INR
-const COUPONS = { 'ASHHHHKSJDHCNIS99DISC': 0.99 }; // test coupon: 99% off
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -32,8 +34,18 @@ export default async function handler(req, res) {
   }
 
   let amount = BASE_PRICE;
-  if (coupon && COUPONS[coupon]) {
-    amount = Math.max(1, Math.round(BASE_PRICE * (1 - COUPONS[coupon])));
+  let appliedCoupon = null;
+
+  if (coupon) {
+    const row = await getCoupon(coupon);
+    if (row) {
+      const notExpired = !row.expiry || new Date(row.expiry) > new Date();
+      const hasUses = row.uses_left == null || row.uses_left > 0;
+      if (notExpired && hasUses) {
+        amount = Math.max(1, Math.round(BASE_PRICE * (1 - row.discount_percent / 100)));
+        appliedCoupon = row;
+      }
+    }
   }
 
   const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
@@ -62,10 +74,14 @@ export default async function handler(req, res) {
       });
     }
 
+    // Log the order as pending — never blocks the payment flow if this fails.
+    await insertOrder({ orderId: data.id, name, email, phone, amount, status: 'pending' });
+
     return res.status(200).json({
       orderId: data.id,
       amount,
-      keyId
+      keyId,
+      couponApplied: !!appliedCoupon
     });
   } catch (err) {
     return res.status(500).json({ error: 'Server error creating order: ' + err.message });

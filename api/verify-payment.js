@@ -7,6 +7,7 @@
 //           RESEND_API_KEY (for order notification email)
 // ─────────────────────────────────────────────────────────────
 import crypto from 'crypto';
+import { getCoupon, decrementCoupon, updateOrder } from './_supabase.js';
 
 const NOTIFY_EMAIL = 'v.aswinraaju@gmail.com';
 
@@ -20,7 +21,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Razorpay credentials not configured.' });
   }
 
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, name, email, phone, amount } = req.body || {};
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, name, email, phone, amount, coupon } = req.body || {};
 
   if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -33,6 +34,15 @@ export default async function handler(req, res) {
 
   if (expected !== razorpay_signature) {
     return res.status(400).json({ verified: false, error: 'Invalid payment signature' });
+  }
+
+  // Mark the order as paid and record the payment ID — best-effort.
+  await updateOrder(razorpay_order_id, { payment_id: razorpay_payment_id, status: 'paid' });
+
+  // Decrement the coupon's uses_left, if one was applied.
+  if (coupon) {
+    const row = await getCoupon(coupon);
+    if (row) await decrementCoupon(coupon, row.uses_left);
   }
 
   // Send order notification email — best-effort, never blocks the

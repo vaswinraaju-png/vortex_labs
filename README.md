@@ -30,15 +30,59 @@ The flow:
 5. Those are sent to `/api/verify-payment`, which **verifies the signature server-side** (HMAC SHA256), so a client-side response is never trusted alone.
 6. On verified success, the browser redirects to `success.html` showing confirmation.
 
-**Now included:** email notifications via Resend on every verified payment. Order logging (Supabase) is still not included.
+**Now included:** email notifications via Resend on every verified payment, and order/coupon logging via Supabase.
+
+### Supabase setup
+
+1. Create a project at [supabase.com](https://supabase.com) (free tier is fine).
+2. In the Supabase SQL editor, run:
+   ```sql
+   create table orders (
+     id uuid primary key default gen_random_uuid(),
+     order_id text unique not null,
+     payment_id text,
+     customer_name text not null,
+     customer_email text not null,
+     customer_phone text not null,
+     product_name text not null default 'Ads Dashboard',
+     product_id text not null default 'ads-dashboard',
+     amount numeric not null,
+     status text not null default 'pending', -- 'pending' | 'paid' | 'failed'
+     delivered boolean not null default false,
+     created_at timestamptz not null default now()
+   );
+   create index orders_order_id_idx on orders (order_id);
+
+   create table coupons (
+     id uuid primary key default gen_random_uuid(),
+     code text unique not null,
+     discount_percent numeric not null, -- e.g. 99 for 99% off
+     uses_left integer, -- null = unlimited
+     expiry timestamptz, -- null = never expires
+     created_at timestamptz not null default now()
+   );
+
+   -- seed the test coupon
+   insert into coupons (code, discount_percent, uses_left, expiry)
+   values ('ASHHHHKSJDHCNIS99DISC', 99, null, null);
+   ```
+3. In Supabase, go to **Project Settings, API** and copy the **Project URL** and **service_role key** (never the anon key).
+4. Add both to Vercel as `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`, then redeploy.
+
+### How order/coupon data flows
+
+- `api/create-order.js` looks up the coupon (if any) in the `coupons` table, checks `expiry` and `uses_left`, applies the discount, then inserts a `pending` row into `orders`.
+- `api/verify-payment.js` updates that row to `status: 'paid'` and sets `payment_id` once the signature is verified, and decrements the coupon's `uses_left` if one was used.
+- `delivered` stays `false` by default. Mark it `true` yourself in Supabase's table editor once you've sent the buyer their download.
+- All Supabase calls are best-effort, if misconfigured or a request fails, the payment flow itself is never blocked.
 
 ### Coupons
 
-Coupon codes are defined in `api/create-order.js`:
-```js
-const COUPONS = { 'ASHHHHKSJDHCNIS99DISC': 0.99 }; // 99% off, for testing
+Coupons now live entirely in the Supabase `coupons` table, not in code. Add new codes by inserting rows:
+```sql
+insert into coupons (code, discount_percent, uses_left, expiry)
+values ('YOURCODE', 20, 50, '2026-12-31');
 ```
-Add more as `{ 'CODE': discountFraction }`. Applied server-side, never trust a client-supplied amount.
 
 ### Required setup: environment variables
 
@@ -49,6 +93,8 @@ In Vercel, go to **Settings, Environment Variables** and add:
 | `RAZORPAY_KEY_ID` | Your Razorpay Key ID (e.g. `rzp_live_...`) |
 | `RAZORPAY_SECRET` | Your Razorpay Key Secret |
 | `RESEND_API_KEY` | Your Resend API key |
+| `SUPABASE_URL` | Your Supabase project URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | Your Supabase service_role key |
 
 Redeploy after adding these. Keys are never exposed to the browser, only the two serverless functions in `api/` read them.
 

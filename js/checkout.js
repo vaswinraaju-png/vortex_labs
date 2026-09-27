@@ -109,7 +109,7 @@ async function submitPayment(e){
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
               name: order.name, email: order.email, phone: order.phone,
-              amount: order.amount
+              amount: order.amount, coupon: order.coupon || ''
             })
           });
           const result = await verify.json();
