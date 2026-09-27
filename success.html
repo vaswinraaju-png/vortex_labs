@@ -75,9 +75,16 @@ src="https://www.facebook.com/tr?id=1383894423390682&ev=PageView&noscript=1"
         <div class="flow-summary-row"><span>Payment ID</span><span id="success-order-id">—</span></div>
       </div>
 
-      <p style="text-align:center;font-size:12px;color:var(--muted);">
-        We'll be in touch shortly with your download link.
-      </p>
+      <div id="download-pending" style="text-align:center;font-size:12px;color:var(--muted);margin-top:14px;">
+        Preparing your download link...
+      </div>
+      <div id="download-ready" style="display:none;text-align:center;margin-top:14px;">
+        <a id="download-btn" href="#" class="flow-btn" style="display:inline-block;">Download Ads Dashboard</a>
+        <p style="font-size:11px;color:var(--muted);margin-top:6px;">Link expires in 10 minutes.</p>
+      </div>
+      <div id="download-error" style="display:none;text-align:center;font-size:12px;color:var(--danger,#c0392b);margin-top:14px;">
+        Could not generate your download link. Contact <a href="mailto:admin@vortexlabs.app">admin@vortexlabs.app</a> with your payment ID above.
+      </div>
     </div>
   </div>
 </div>

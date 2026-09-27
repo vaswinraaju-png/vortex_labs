@@ -228,6 +228,44 @@ async function submitPayment(e){
 }
 
 // ── success.html ──
+async function fetchDownloadLink(orderId){
+  const pendingEl = document.getElementById('download-pending');
+  const readyEl = document.getElementById('download-ready');
+  const errorEl = document.getElementById('download-error');
+
+  if(!orderId){
+    pendingEl.style.display = 'none';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  try{
+    const res = await fetch('/api/get-download', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order_id: orderId })
+    });
+    const data = await res.json();
+
+    if(!res.ok || !data.url){
+      throw new Error(data.error || 'No URL returned');
+    }
+
+    pendingEl.style.display = 'none';
+    readyEl.style.display = 'block';
+    const btn = document.getElementById('download-btn');
+    btn.href = data.url;
+    btn.setAttribute('download', 'ads-dashboard.zip');
+
+    // auto-trigger once, so the user doesn't have to click
+    btn.click();
+  }catch(err){
+    pendingEl.style.display = 'none';
+    errorEl.style.display = 'block';
+    console.error('Download link error:', err);
+  }
+}
+
 function initSuccessPage(){
   const params = new URLSearchParams(window.location.search);
   const paymentId = params.get('payment_id');
@@ -246,4 +284,6 @@ function initSuccessPage(){
   document.getElementById('success-name').textContent = order.name || '—';
   document.getElementById('success-email').textContent = order.email || '—';
   document.getElementById('success-order-id').textContent = paymentId;
+
+  fetchDownloadLink(order.rzpOrderId);
 }
