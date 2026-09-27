@@ -52,6 +52,10 @@ async function applyCoupon(){
       document.getElementById('summary-discount-row').style.display = 'flex';
       document.getElementById('summary-discount').textContent = '-₹' + (data.baseAmount - data.discountedAmount);
       document.getElementById('summary-total').textContent = '₹' + data.discountedAmount;
+
+      input.disabled = true;
+      btn.style.display = 'none';
+      document.getElementById('remove-coupon-btn').style.display = 'inline-block';
     }else{
       _validatedCoupon = null;
       msgEl.textContent = data.error || 'Invalid coupon code';
@@ -70,6 +74,22 @@ async function applyCoupon(){
     btn.textContent = 'Apply';
     btn.disabled = false;
   }
+}
+
+function removeCoupon(){
+  _validatedCoupon = null;
+  const input = document.getElementById('coupon');
+  const msgEl = document.getElementById('coupon-msg');
+
+  input.value = '';
+  input.disabled = false;
+  document.getElementById('apply-coupon-btn').style.display = 'inline-block';
+  document.getElementById('remove-coupon-btn').style.display = 'none';
+  msgEl.style.display = 'none';
+
+  document.getElementById('summary-base').textContent = '₹' + PRICE;
+  document.getElementById('summary-discount-row').style.display = 'none';
+  document.getElementById('summary-total').textContent = '₹' + PRICE;
 }
 
 function submitCheckout(e){
@@ -105,6 +125,7 @@ function initPaymentPage(){
   document.getElementById('pay-name').textContent = order.name;
   document.getElementById('pay-email').textContent = order.email;
   document.getElementById('pay-amount').textContent = '₹' + order.amount;
+  document.getElementById('pay-btn').textContent = 'Pay ₹' + order.amount;
 }
 
 // Loads Razorpay's Checkout.js SDK dynamically, only when needed.
