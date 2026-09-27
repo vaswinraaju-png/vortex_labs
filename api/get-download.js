@@ -7,7 +7,7 @@ const BUCKET = "products";
 const FILE_PATH = "meta-ads-dashboard-main v2.zip"; // must match the exact path in the private bucket
 const EXPIRES_IN_SECONDS = 600; // 10 minutes
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
