@@ -76,11 +76,16 @@ src="https://www.facebook.com/tr?id=1383894423390682&ev=PageView&noscript=1"
       </div>
       <div class="field">
         <label for="coupon">Coupon Code (optional)</label>
-        <input type="text" id="coupon" placeholder="Enter coupon">
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="coupon" placeholder="Enter coupon" style="flex:1;">
+          <button type="button" id="apply-coupon-btn" class="btn-secondary" onclick="applyCoupon()">Apply</button>
+        </div>
+        <div id="coupon-msg" style="font-size:12px;margin-top:6px;display:none;"></div>
       </div>
       <div class="flow-summary">
-        <div class="flow-summary-row"><span>Ads Dashboard, Full License</span><span>₹499</span></div>
-        <div class="flow-summary-row total"><span>Total</span><span>₹499</span></div>
+        <div class="flow-summary-row"><span>Ads Dashboard, Full License</span><span id="summary-base">₹499</span></div>
+        <div class="flow-summary-row" id="summary-discount-row" style="display:none;color:var(--success, #1a7a3d);"><span>Discount</span><span id="summary-discount">—</span></div>
+        <div class="flow-summary-row total"><span>Total</span><span id="summary-total">₹499</span></div>
       </div>
 
       <button type="submit" class="btn-primary" style="width:100%;">Continue to Payment</button>

@@ -16,6 +16,62 @@ function getOrder(){
 }
 
 // ── checkout.html ──
+let _validatedCoupon = null; // { code, discountedAmount } once applied successfully
+
+async function applyCoupon(){
+  const input = document.getElementById('coupon');
+  const btn = document.getElementById('apply-coupon-btn');
+  const msgEl = document.getElementById('coupon-msg');
+  const code = input.value.trim();
+
+  if(!code){
+    msgEl.textContent = 'Enter a coupon code first.';
+    msgEl.style.color = 'var(--muted, #6b6b6b)';
+    msgEl.style.display = 'block';
+    return;
+  }
+
+  btn.textContent = 'Checking...';
+  btn.disabled = true;
+
+  try{
+    const res = await fetch('/api/validate-coupon', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ coupon: code })
+    });
+    const data = await res.json();
+
+    if(data.valid){
+      _validatedCoupon = { code, discountedAmount: data.discountedAmount };
+      msgEl.textContent = `Coupon applied ✓ ${data.discountPercent}% off`;
+      msgEl.style.color = 'var(--success, #1a7a3d)';
+      msgEl.style.display = 'block';
+
+      document.getElementById('summary-base').textContent = '₹' + data.baseAmount;
+      document.getElementById('summary-discount-row').style.display = 'flex';
+      document.getElementById('summary-discount').textContent = '-₹' + (data.baseAmount - data.discountedAmount);
+      document.getElementById('summary-total').textContent = '₹' + data.discountedAmount;
+    }else{
+      _validatedCoupon = null;
+      msgEl.textContent = data.error || 'Invalid coupon code';
+      msgEl.style.color = 'var(--danger, #c0392b)';
+      msgEl.style.display = 'block';
+
+      document.getElementById('summary-base').textContent = '₹' + PRICE;
+      document.getElementById('summary-discount-row').style.display = 'none';
+      document.getElementById('summary-total').textContent = '₹' + PRICE;
+    }
+  }catch(err){
+    msgEl.textContent = 'Could not check coupon: ' + err.message;
+    msgEl.style.color = 'var(--danger, #c0392b)';
+    msgEl.style.display = 'block';
+  }finally{
+    btn.textContent = 'Apply';
+    btn.disabled = false;
+  }
+}
+
 function submitCheckout(e){
   e.preventDefault();
   const name = document.getElementById('buyer-name').value.trim();
